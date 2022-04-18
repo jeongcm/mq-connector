@@ -33,25 +33,86 @@ async function connectQueue() {
         channel.consume(RABBITMQ_SERVER_QUEUE_RESOURCE, (msg) => {
             TotalMsg = JSON.parse(msg.content.toString());
             result = TotalMsg.result;
+            itemLength = result.items.length;
 
-            serviceName = result.items[0].metadata.name 
-            serviceNamespace = result.items[0].metadata.namepsace; 
-            serviceInstance = result.items[0].spec.clusterIP + result.items[0].spec.ports.port;
-            serviceType = "SV";
-            serviceStatus = result.items[0].status;
+            var query = {};
+            var mergedQuery = {};
+            var API_MSG = {};
 
+            if (TotalMsg.status == 4) {
+                switch (TotalMsg.template_uuid) {
+                    case "00000000000000000000000000000020":  //20, for K8s services
+                        for (var i=0; i<itemLength; i++)
+                        {
+                            // get port number from port array and assign to resultPort variable.
+                            resultPortsLength = result.items[i].spec.ports.length
+                            for (var j=0; j<resultPortsLength; j++)
+                            {
+                                if (result.items[i].spec.ports[j].key = 'port')
+                                { 
+                                    resultPort = result.items[i].spec.ports[j].port;
+                                }
+                            }
+                            
+                            query['cluster_uuid'] = TotalMsg.cluster_uuid ;  
+                            query['resource_Name'] = result.items[i].metadata.name ;
+                            query['resource_Labels'] = result.items[i].metadata.labels ;
+                            query['resource_Annotations'] = result.items[i].metadata.annotations ;
+                            query['resource_Namespace'] = result.items[i].metadata.namespace; 
+                            query['resource_Instance'] = result.items[i].spec.clusterIP + ":" + resultPort;
+                            query['resource_Status'] = result.items[i].status;
+                            query['resource_Type'] = "SV";
+                            query['resource_Level1'] = "K8";
+                            query['resource_Level2'] = "NS";
+                            query['resource_Level3'] = "SV";
+                            query['resource_Level_Type'] = "KS";
+                            query['resource_Rbac'] = "true";
+                            query['resource_Anomaly_Monitor'] = "true";
+                            query['resource_Active'] = "true";
+                            query['resource_Status_Updated_At'] = new Date();
 
-            //resultItems = result.items;
-            //console.log(resultItems); 
+                            if (i==0) {
+                                mergedQuery = '{"service":[' + JSON.stringify(query);
+                                
+                            }
+                            else if (i==(itemLength-1)) {
+                                mergedQuery = mergedQuery + "," + JSON.stringify(query) + "]}";
+                                API_MSG =JSON.parse(mergedQuery);
+                                console.log(API_MSG);
+                            }
+                            else {
+                                mergedQuery = mergedQuery +  "," + JSON.stringify(query);
+                            }
+                        }
+                 
+                    break;
 
-            //if (result.status = 4) {
-            //    API_MSG = {"cluster_uuid": result.cluster_uuid,
-            //              "result": result.result, 
-            //             };
-            //    callAPI(API_SERVER_RESOURCE_URL+":"+API_SERVER_RESOURCE_PORT, API_MSG );
-            //}
-            channel.ack(msg);
-            console.log("Data sent : ",RABBITMQ_SERVER_QUEUE_RESOURCE);
+                    case "00000000000000000000000000000010":  //10, for K8s nodes
+
+                    break;
+
+                    case "00000000000000000000000000000004":  //04, for K8s namespaces
+
+                    break;
+
+                    case "00000000000000000000000000000002":  //02, for K8s pods
+
+                    break;
+
+                    default:        
+                } //end of switch        
+
+                //callAPI(API_SERVER_RESOURCE_URL+":"+API_SERVER_RESOURCE_PORT, API_MSG );
+                channel.ack(msg);
+                console.log("Data sent : ",RABBITMQ_SERVER_QUEUE_RESOURCE);
+        
+            }
+            else {
+                channel.ack(msg);
+                console.log("Message ignored");
+
+            }      
+
         })
 
         channel.consume(RABBITMQ_SERVER_QUEUE_ALERT, (msg) => {
