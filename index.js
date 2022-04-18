@@ -31,15 +31,27 @@ async function connectQueue() {
         await channel.assertQueue(RABBITMQ_SERVER_QUEUE_METRIC);
 
         channel.consume(RABBITMQ_SERVER_QUEUE_RESOURCE, (msg) => {
-            result = JSON.parse(msg.content.toString());
-            if (result.status = 4) {
-                API_MSG = {"cluster_uuid": result.cluster_uuid,
-                          "result": result.result, 
-                         };
-                callAPI(API_SERVER_RESOURCE_URL+":"+API_SERVER_RESOURCE_PORT, API_MSG );
-            }
-            channel.ack(data);
-            console.log("Data sent : ",RABBITMQ_SERVER_QUEUE_RESOURCE, API_MSG);
+            TotalMsg = JSON.parse(msg.content.toString());
+            result = TotalMsg.result;
+
+            serviceName = result.items[0].metadata.name 
+            serviceNamespace = result.items[0].metadata.namepsace; 
+            serviceInstance = result.items[0].spec.clusterIP + result.items[0].spec.ports.port;
+            serviceType = "SV";
+            serviceStatus = result.items[0].status;
+
+
+            //resultItems = result.items;
+            //console.log(resultItems); 
+
+            //if (result.status = 4) {
+            //    API_MSG = {"cluster_uuid": result.cluster_uuid,
+            //              "result": result.result, 
+            //             };
+            //    callAPI(API_SERVER_RESOURCE_URL+":"+API_SERVER_RESOURCE_PORT, API_MSG );
+            //}
+            channel.ack(msg);
+            console.log("Data sent : ",RABBITMQ_SERVER_QUEUE_RESOURCE);
         })
 
         channel.consume(RABBITMQ_SERVER_QUEUE_ALERT, (msg) => {
@@ -60,7 +72,7 @@ async function connectQueue() {
             if (result.status = 4) {
                 API_MSG = {"cluster_uuid": result.cluster_uuid,
                           "result": result.result, 
-                         };
+                          };
                 callAPI(API_SERVER_METRIC_URL+":"+API_SERVER_METRIC_PORT, API_MSG );
             }
             channel.ack(data);
