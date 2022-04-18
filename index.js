@@ -13,6 +13,7 @@ const RABBITMQ_SERVER_QUEUE_ALERT = process.env.RABBITMQ_SERVER_QUEUE_ALERT || "
 const RABBITMQ_SERVER_QUEUE_METRIC = process.env.RABBITMQ_SERVER_QUEUE_METRIC || "lari_metric";
 
 const amqp = require("amqplib");
+const axios = require('axios');
 var channel, connection;
 const connect_string = RABBITMQ_SERVER_URL + ":" + RABBITMQ_SERVER_PORT;
 
@@ -20,6 +21,7 @@ connectQueue() // call connectQueue function
 async function connectQueue() {
     try {
 
+        var result = "";  
         connection = await amqp.connect(connect_string);
         channel = await connection.createChannel();
 
@@ -28,19 +30,42 @@ async function connectQueue() {
         await channel.assertQueue(RABBITMQ_SERVER_QUEUE_ALERT);
         await channel.assertQueue(RABBITMQ_SERVER_QUEUE_METRIC);
 
-        channel.consume(RABBITMQ_SERVER_QUEUE_RESOURCE, data => {
-            console.log("Data received : ",RABBITMQ_SERVER_QUEUE_RESOURCE, `${Buffer.from(data.content)}` );
+        channel.consume(RABBITMQ_SERVER_QUEUE_RESOURCE, (msg) => {
+            result = JSON.parse(msg.content.toString());
+            if (result.status = 4) {
+                API_MSG = {"cluster_uuid": result.cluster_uuid,
+                          "result": result.result, 
+                         };
+                callAPI(API_SERVER_RESOURCE_URL+":"+API_SERVER_RESOURCE_PORT, API_MSG );
+            }
             channel.ack(data);
+            console.log("Data sent : ",RABBITMQ_SERVER_QUEUE_RESOURCE, API_MSG);
         })
 
-        channel.consume(RABBITMQ_SERVER_QUEUE_ALERT, data => {
-            console.log("Data received : ",RABBITMQ_SERVER_QUEUE_ALERT, `${Buffer.from(data.content)}` );
+        channel.consume(RABBITMQ_SERVER_QUEUE_ALERT, (msg) => {
+            result = JSON.parse(msg.content.toString());
+            if (result.status = 4) {
+                API_MSG = {"cluster_uuid": result.cluster_uuid,
+                          "result": result.result, 
+                         };
+                callAPI(API_SERVER_ALERT_URL+":"+API_SERVER_ALERT_PORT, API_MSG );
+            }
             channel.ack(data);
+            console.log("Data sent : ",RABBITMQ_SERVER_QUEUE_ALERT, API_MSG);
+            
         })
 
-        channel.consume(RABBITMQ_SERVER_QUEUE_METRIC, data => {
-            console.log("Data received : ",RABBITMQ_SERVER_QUEUE_METRIC, `${Buffer.from(data.content)}` );
+        channel.consume(RABBITMQ_SERVER_QUEUE_METRIC, (msg) => {
+            result = JSON.parse(msg.content.toString());
+            if (result.status = 4) {
+                API_MSG = {"cluster_uuid": result.cluster_uuid,
+                          "result": result.result, 
+                         };
+                callAPI(API_SERVER_METRIC_URL+":"+API_SERVER_METRIC_PORT, API_MSG );
+            }
             channel.ack(data);
+            console.log("Data sent : ",RABBITMQ_SERVER_QUEUE_METRIC, API_MSG );
+
         })
 
     } catch (error) {
@@ -48,6 +73,20 @@ async function connectQueue() {
     }
 }
 
+async function callAPI(apiURL, apiMsg) {
+   
+    await axios.post(apiURL,apiMsg)
+    .then
+    (
+      (response) => {
+        const status = response.data.status;
+        console.log("api called", status);
+      },
+      (error) => {
+        console.log("error due to unexpoected error: ", error);
+      })
+
+}
 
 
 app.listen(MQCOMMM_PORT, () => console.log("Server running at port " + MQCOMMM_PORT));
