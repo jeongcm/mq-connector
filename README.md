@@ -31,4 +31,6 @@ NODE_EXPORTER_PORT=9090
 
 To execute the service, 
 
-**node index.js**
+**npm run dev**
+
+
