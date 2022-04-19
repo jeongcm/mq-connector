@@ -174,11 +174,48 @@ async function connectQueue() {
                     break;
 
                     case "00000000000000000000000000000002":  //02, for K8s pods
+                    for (var i=0; i<itemLength; i++)
+                    {
+
+                        query['cluster_uuid'] = TotalMsg.cluster_uuid ;  
+                        query['resource_Name'] = result.items[i].metadata.name ;
+                        query['resource_Labels'] = result.items[i].metadata.labels ;
+                        query['resource_Annotations'] = result.items[i].metadata.annotations ;
+                        query['resource_Namespace'] = result.items[i].metadata.namespace; 
+                        query['resource_Instance'] = result.items[i].status.podIP;
+                        query['resource_Pod_Phase'] = result.items[i].status.phase;
+                        query['resource_Status'] = result.items[i].status;
+                        query['resource_Type'] = "PD";
+                        query['resource_Level1'] = "K8";
+                        query['resource_Level2'] = "ND";
+                        query['resource_Level3'] = "PD";
+                        query['resource_Level_Type'] = "KN";
+                        query['resource_Rbac'] = "false";
+                        query['resource_Anomaly_Monitor'] = "false";
+                        query['resource_Active'] = "true";
+                        query['resource_Status_Updated_At'] = new Date();
+
+                        if (i==0) {
+                            mergedQuery = '{"pod":[' + JSON.stringify(query);
+                            
+                        }
+                        else if (i==(itemLength-1)) {
+                            mergedQuery = mergedQuery + "," + JSON.stringify(query) + "]}";
+                            API_MSG =JSON.parse(mergedQuery);
+                            console.log(API_MSG);
+                        }
+                        else {
+                            mergedQuery = mergedQuery +  "," + JSON.stringify(query);
+                        }
+                    }
 
                     break;
 
                     case "00000000000000000000000000001002":  //1002, for K8s deployment
 
+
+
+                    
                     break;
 
                     case "00000000000000000000000000001004":  //1004, for K8s statefulset
