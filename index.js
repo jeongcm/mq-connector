@@ -13,13 +13,27 @@ const RABBITMQ_SERVER_QUEUE_ALERT = process.env.RABBITMQ_SERVER_QUEUE_ALERT || "
 const RABBITMQ_SERVER_QUEUE_METRIC = process.env.RABBITMQ_SERVER_QUEUE_METRIC || "lari_metric";
 const NODE_EXPORTER_PORT = process.env.NODE_EXPORTER_PORT || 9090;
 
+const API_SERVER_RESOURCE_URL = process.env.API_SERVER_RESOURCE_URL || "http://localhost"
+const API_SERVER_RESOURCE_PORT = process.env.API_SERVER_RESOURCE_PORT || "5001"
+const API_NAME_RESOURCE_POST = process.env.API_NAME_RESOURCE_POST || "/resourceMass"
+const API_SERVER_METRIC_URL = process.env.API_SERVER_METRIC_URL || "http://localhost"
+const API_SERVER_METRIC_PORT = process.env.API_SERVER_METRIC_PORT || "5001"
+const API_NAME_METRIC_POST = process.env.API_NAME_METRIC_POST || "/metricMass"
+const API_SERVER_ALERT_URL = process.env.API_SERVER_ALERT_URL || "http://localhost"
+const API_SERVER_ALERT_PORT = process.env.API_SERVER_ALERT_PORT || "5001"
+const API_NAME_ALERT_POST = process.env.API_NAME_ALERT_POST || "/alertMass"
+
 
 const amqp = require("amqplib");
 const axios = require('axios');
 var channel, connection;
 const connect_string = RABBITMQ_SERVER_URL + ":" + RABBITMQ_SERVER_PORT;
+const API_RESOURCE_URL = API_SERVER_RESOURCE_URL+":"+API_SERVER_RESOURCE_PORT + API_NAME_RESOURCE_POST;
+const API_METRIC_URL = API_SERVER_METRIC_URL+":"+API_SERVER_METRIC_PORT + API_NAME_METRIC_POST;
+const API_ALERT_URL = API_SERVER_ALERT_URL+":"+API_SERVER_ALERT_PORT + API_NAME_ALERT_POST;
 
 connectQueue() // call connectQueue function
+
 async function connectQueue() {
     try {
 
@@ -70,9 +84,9 @@ async function connectQueue() {
                             query['resource_Level2'] = "NS";
                             query['resource_Level3'] = "SV";
                             query['resource_Level_Type'] = "KS";
-                            query['resource_Rbac'] = "true";
-                            query['resource_Anomaly_Monitor'] = "true";
-                            query['resource_Active'] = "true";
+                            query['resource_Rbac'] = true;
+                            query['resource_Anomaly_Monitor'] = true;
+                            query['resource_Active'] = true;
                             query['resource_Status_Updated_At'] = new Date();
 
                             if (itemLength==1) {
@@ -125,9 +139,9 @@ async function connectQueue() {
                         query['resource_Level1'] = "K8";
                         query['resource_Level2'] = "ND";
                         query['resource_Level_Type'] = "KN";
-                        query['resource_Rbac'] = "true";
-                        query['resource_Anomaly_Monitor'] = "true";
-                        query['resource_Active'] = "true";
+                        query['resource_Rbac'] = true;
+                        query['resource_Anomaly_Monitor'] = true;
+                        query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
                         if (itemLength==1) {
@@ -171,9 +185,9 @@ async function connectQueue() {
                         query['resource_Level2'] = "NS";
                         //query['resource_Level3'] = "SV";
                         query['resource_Level_Type'] = "KS";
-                        query['resource_Rbac'] = "false";
-                        query['resource_Anomaly_Monitor'] = "false";
-                        query['resource_Active'] = "true";
+                        query['resource_Rbac'] = false;
+                        query['resource_Anomaly_Monitor'] = false;
+                        query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
                         if (itemLength==1) {
@@ -221,9 +235,9 @@ async function connectQueue() {
                         query['resource_Level2'] = "ND"; //Node
                         query['resource_Level3'] = "PD"; //Pod
                         query['resource_Level_Type'] = "KN";  //K8s-Nodes-Pods
-                        query['resource_Rbac'] = "false";
-                        query['resource_Anomaly_Monitor'] = "false";
-                        query['resource_Active'] = "true";
+                        query['resource_Rbac'] = false;
+                        query['resource_Anomaly_Monitor'] = false;
+                        query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
                         if (itemLength==1) {
@@ -269,9 +283,9 @@ async function connectQueue() {
                         query['resource_Level2'] = "NS"; //Namespace
                         query['resource_Level3'] = "DP"; //Deployment
                         query['resource_Level_Type'] = "KS";  //K8s-Namespaces-Services
-                        query['resource_Rbac'] = "false";
-                        query['resource_Anomaly_Monitor'] = "false";
-                        query['resource_Active'] = "true";
+                        query['resource_Rbac'] = false;
+                        query['resource_Anomaly_Monitor'] = false;
+                        query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
                         if (itemLength==1) {
@@ -311,8 +325,8 @@ async function connectQueue() {
                         query['resource_Labels'] = result.items[i].metadata.labels ; //object
                         query['resource_Annotations'] = result.items[i].metadata.annotations ; //object
                         query['resource_Namespace'] = result.items[i].metadata.namespace; 
-                        query['resource_Replicas'] = result.items[i].spec.replicas; 
-                        query['resource_Volume_Claim_Templates'] = result.items[i].spec.volumeClaimTemplates; //array
+                        query['resource_Sts_Replicas'] = result.items[i].spec.replicas; 
+                        query['resource_Sts_Volume_Claim_Templates'] = result.items[i].spec.volumeClaimTemplates; //array
                         query['resource_Match_Labels'] = result.items[i].spec.selector.matchLabels;
                         query['resource_Status'] = result.items[i].status; //object
                         query['resource_Type'] = "SS";    //Statefulset
@@ -320,9 +334,9 @@ async function connectQueue() {
                         query['resource_Level2'] = "NS"; //Namespace
                         query['resource_Level3'] = "SS"; //Deployment
                         query['resource_Level_Type'] = "KS";  //K8s-Namespaces-Services
-                        query['resource_Rbac'] = "false";
-                        query['resource_Anomaly_Monitor'] = "false";
-                        query['resource_Active'] = "true";
+                        query['resource_Rbac'] = false;
+                        query['resource_Anomaly_Monitor'] = false;
+                        query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
                         if (itemLength==1) {
@@ -368,9 +382,9 @@ async function connectQueue() {
                         query['resource_Level2'] = "NS"; //Namespace
                         query['resource_Level3'] = "DS"; //Deployment
                         query['resource_Level_Type'] = "KS";  //K8s-Namespaces-Services
-                        query['resource_Rbac'] = "false";
-                        query['resource_Anomaly_Monitor'] = "false";
-                        query['resource_Active'] = "true";
+                        query['resource_Rbac'] = false;
+                        query['resource_Anomaly_Monitor'] = false;
+                        query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
                         if (itemLength==1) {
@@ -419,9 +433,9 @@ async function connectQueue() {
                         query['resource_Level2'] = "NS"; //Namespace
                         query['resource_Level3'] = "RS"; //Replicaset
                         query['resource_Level_Type'] = "KS";  //K8s-Namespaces-Services
-                        query['resource_Rbac'] = "false";
-                        query['resource_Anomaly_Monitor'] = "false";
-                        query['resource_Active'] = "true";
+                        query['resource_Rbac'] = false;
+                        query['resource_Anomaly_Monitor'] = false;
+                        query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
                         if (itemLength==1) {
@@ -462,18 +476,18 @@ async function connectQueue() {
                         query['resource_Annotations'] = result.items[i].metadata.annotations ; //object
                         query['resource_Namespace'] = result.items[i].metadata.namespace;
                         query['resource_Pvc_Storage'] = result.items[i].spec.resources; //object
-                        query['resource_Pvc_volumeName'] = result.items[i].spec.volumeName;
-                        query['resource_Pvc_storageClassName'] = result.items[i].spec.storageClassName;
-                        query['resource_Pvc_volumeMode'] = result.items[i].spec.volumeMode;
+                        query['resource_Pvc_Volume_Name'] = result.items[i].spec.volumeName;
+                        query['resource_Pvc_Storage_Class_Name'] = result.items[i].spec.storageClassName;
+                        query['resource_Pvc_Volume_Mode'] = result.items[i].spec.volumeMode;
                         query['resource_Status'] = result.items[i].status; //object
                         query['resource_Type'] = "PC";    //Persistent Volume Claim
                         query['resource_Level1'] = "K8"; //k8s
                         query['resource_Level2'] = "NS"; //Namespace
                         query['resource_Level3'] = "PC"; //Persistent Volume Claim
                         query['resource_Level_Type'] = "KS";  //K8s-Namespaces-Services
-                        query['resource_Rbac'] = "false";
-                        query['resource_Anomaly_Monitor'] = "false";
-                        query['resource_Active'] = "true";
+                        query['resource_Rbac'] = false;
+                        query['resource_Anomaly_Monitor'] = false;
+                        query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
                         if (itemLength==1) {
@@ -518,9 +532,9 @@ async function connectQueue() {
                         query['resource_Level2'] = "NS"; //Namespace
                         query['resource_Level3'] = "SE"; //Secert
                         query['resource_Level_Type'] = "KS";  //K8s-Namespaces-Services
-                        query['resource_Rbac'] = "false";
-                        query['resource_Anomaly_Monitor'] = "false";
-                        query['resource_Active'] = "true";
+                        query['resource_Rbac'] = false;
+                        query['resource_Anomaly_Monitor'] = false;
+                        query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
                         if (itemLength==1) {
@@ -566,9 +580,9 @@ async function connectQueue() {
                         query['resource_Level2'] = "NS"; //Namespace
                         query['resource_Level3'] = "EP"; //Endpoint
                         query['resource_Level_Type'] = "KS";  //K8s-Namespaces-Services
-                        query['resource_Rbac'] = "false";
-                        query['resource_Anomaly_Monitor'] = "false";
-                        query['resource_Active'] = "true";
+                        query['resource_Rbac'] = false;
+                        query['resource_Anomaly_Monitor'] = false;
+                        query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
                         if (itemLength==1) {
@@ -613,9 +627,9 @@ async function connectQueue() {
                         query['resource_Level2'] = "NS"; //Namespace
                         query['resource_Level3'] = "CM"; //Configmap
                         query['resource_Level_Type'] = "KS";  //K8s-Namespaces-Services
-                        query['resource_Rbac'] = "false";
-                        query['resource_Anomaly_Monitor'] = "false";
-                        query['resource_Active'] = "true";
+                        query['resource_Rbac'] = false;
+                        query['resource_Anomaly_Monitor'] = false;
+                        query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
                         if (itemLength==1) {
@@ -661,9 +675,9 @@ async function connectQueue() {
                         query['resource_Level2'] = "NS"; //Namespace
                         query['resource_Level3'] = "IG"; //Ingress
                         query['resource_Level_Type'] = "KS";  //K8s-Namespaces-Services
-                        query['resource_Rbac'] = "false";
-                        query['resource_Anomaly_Monitor'] = "false";
-                        query['resource_Active'] = "true";
+                        query['resource_Rbac'] = false;
+                        query['resource_Anomaly_Monitor'] = false;
+                        query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
                         if (itemLength==1) {
@@ -701,17 +715,17 @@ async function connectQueue() {
                     query['resource_Labels'] = result.items[i].metadata.labels ; //object
                     query['resource_Annotations'] = result.items[i].metadata.annotations ; //object
                     query['resource_Pv_Storage'] = result.items[i].spec.capacity.storage; 
-                    query['resource_Pv_claimRef'] = result.items[i].spec.claimRef; //object
-                    query['resource_Pv_storageClassName'] = result.items[i].spec.storageClassName;
-                    query['resource_Pv_volumeMode'] = result.items[i].spec.volumeMode;
+                    query['resource_Pv_Claim_Ref'] = result.items[i].spec.claimRef; //object
+                    query['resource_Pv_Storage_Class_Name'] = result.items[i].spec.storageClassName;
+                    query['resource_Pv_Volume_Mode'] = result.items[i].spec.volumeMode;
                     query['resource_Status'] = result.items[i].status; //object
                     query['resource_Type'] = "PV";    //PVC
                     query['resource_Level1'] = "K8"; //k8s
                     query['resource_Level2'] = "PV";
                     query['resource_Level_Type'] = "KC";  //K8s-Cluster
-                    query['resource_Rbac'] = "false";
-                    query['resource_Anomaly_Monitor'] = "false";
-                    query['resource_Active'] = "true";
+                    query['resource_Rbac'] = false;
+                    query['resource_Anomaly_Monitor'] = false;
+                    query['resource_Active'] = true;
                     query['resource_Status_Updated_At'] = new Date();
 
                     if (itemLength==1) {
@@ -746,18 +760,18 @@ async function connectQueue() {
                         query['resource_Target_Created_At'] = result.items[i].metadata.creationTimestamp ;
                         query['resource_Labels'] = result.items[i].metadata.labels ; //object
                         query['resource_Annotations'] = result.items[i].metadata.annotations ; //object
-                        query['resource_Sc_provisioner'] = result.items[i].provisioner; 
-                        query['resource_Sc_reclaimPolicy'] = result.items[i].reclaimPolicy;
-                        query['resource_Sc_allowVolumeExpansion'] = result.items[i].allowVolumeExpansion;
-                        query['resource_Sc_volumeBindingMode'] = result.items[i].volumeBindingMode;
+                        query['resource_Sc_Provisioner'] = result.items[i].provisioner; 
+                        query['resource_Sc_Reclaim_Policy'] = result.items[i].reclaimPolicy;
+                        query['resource_Sc_Allow_Volume_Expansion'] = result.items[i].allowVolumeExpansion;
+                        query['resource_Sc_Volume_Binding_Mode'] = result.items[i].volumeBindingMode;
                         query['resource_Status'] = result.items[i].status; //object
                         query['resource_Type'] = "SC";    //PVC
                         query['resource_Level1'] = "K8"; //k8s
                         query['resource_Level2'] = "SC";
                         query['resource_Level_Type'] = "KC";  //K8s-Cluster
-                        query['resource_Rbac'] = "false";
-                        query['resource_Anomaly_Monitor'] = "false";
-                        query['resource_Active'] = "true";
+                        query['resource_Rbac'] = false;
+                        query['resource_Anomaly_Monitor'] = false;
+                        query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
                         if (itemLength==1) {
@@ -795,7 +809,7 @@ async function connectQueue() {
                 default:        
                 } //end of switch        
 
-                //callAPI(API_SERVER_RESOURCE_URL+":"+API_SERVER_RESOURCE_PORT, API_MSG );
+                callAPI(API_RESOURCE_URL, API_MSG );
                 channel.ack(msg);
                 console.log("Data sent : ",RABBITMQ_SERVER_QUEUE_RESOURCE);
         
@@ -810,11 +824,11 @@ async function connectQueue() {
 
         channel.consume(RABBITMQ_SERVER_QUEUE_ALERT, (msg) => {
             result = JSON.parse(msg.content.toString());
-            if (result.status = 4) {
+            if (result.status == 4) {  //status=4 means Sudory client successfully sends the result back to Sudory server
                 API_MSG = {"cluster_uuid": result.cluster_uuid,
                           "result": result.result, 
                          };
-                callAPI(API_SERVER_ALERT_URL+":"+API_SERVER_ALERT_PORT, API_MSG );
+                callAPI(API_ALERT_URL, API_MSG );
             }
             channel.ack(data);
             console.log("Data sent : ",RABBITMQ_SERVER_QUEUE_ALERT, API_MSG);
@@ -823,11 +837,11 @@ async function connectQueue() {
 
         channel.consume(RABBITMQ_SERVER_QUEUE_METRIC, (msg) => {
             result = JSON.parse(msg.content.toString());
-            if (result.status = 4) {
+            if (result.status == 4) {
                 API_MSG = {"cluster_uuid": result.cluster_uuid,
                           "result": result.result, 
                           };
-                callAPI(API_SERVER_METRIC_URL+":"+API_SERVER_METRIC_PORT, API_MSG );
+                callAPI(API_METRIC_URL, API_MSG );
             }
             channel.ack(data);
             console.log("Data sent : ",RABBITMQ_SERVER_QUEUE_METRIC, API_MSG );
@@ -845,8 +859,8 @@ async function callAPI(apiURL, apiMsg) {
     .then
     (
       (response) => {
-        const status = response.data.status;
-        console.log("api called", status);
+        const status = response.data.message;
+        console.log("API called: ", status);
       },
       (error) => {
         console.log("error due to unexpoected error: ", error);
