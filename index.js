@@ -137,10 +137,91 @@ async function connectQueue() {
                     break;
 
                     case "00000000000000000000000000000004":  //04, for K8s namespaces
+                    for (var i=0; i<itemLength; i++)
+                    {
+                        
+                        query['cluster_uuid'] = TotalMsg.cluster_uuid ;  
+                        query['resource_Name'] = result.items[i].metadata.name ;
+                        query['resource_Labels'] = result.items[i].metadata.labels ;
+                        query['resource_Annotations'] = result.items[i].metadata.annotations ;
+                        //query['resource_Namespace'] = result.items[i].metadata.namespace; 
+                        //query['resource_Instance'] = internalIp + ":" + NODE_EXPORTER_PORT;
+                        query['resource_Status'] = result.items[i].status;
+                        query['resource_Type'] = "NS";
+                        query['resource_Level1'] = "K8";
+                        query['resource_Level2'] = "NS";
+                        //query['resource_Level3'] = "SV";
+                        query['resource_Level_Type'] = "KS";
+                        query['resource_Rbac'] = "false";
+                        query['resource_Anomaly_Monitor'] = "false";
+                        query['resource_Active'] = "true";
+                        query['resource_Status_Updated_At'] = new Date();
+
+                        if (i==0) {
+                            mergedQuery = '{"namespace":[' + JSON.stringify(query);
+                            
+                        }
+                        else if (i==(itemLength-1)) {
+                            mergedQuery = mergedQuery + "," + JSON.stringify(query) + "]}";
+                            API_MSG =JSON.parse(mergedQuery);
+                            console.log(API_MSG);
+                        }
+                        else {
+                            mergedQuery = mergedQuery +  "," + JSON.stringify(query);
+                        }
+                    }
 
                     break;
 
                     case "00000000000000000000000000000002":  //02, for K8s pods
+
+                    break;
+
+                    case "00000000000000000000000000001002":  //1002, for K8s deployment
+
+                    break;
+
+                    case "00000000000000000000000000001004":  //1004, for K8s statefulset
+
+                    break;
+
+                    case "00000000000000000000000000001006":  //1006, for K8s daemonset
+
+                    break;
+
+                    case "00000000000000000000000000001008":  //1008, for K8s replicaset
+
+                    break;
+
+                    case "00000000000000000000000000000018":  //18, for K8s pvc
+
+                    break;
+
+                    case "00000000000000000000000000000013":  //13, for K8s secret
+
+                    break;
+
+                    case "00000000000000000000000000000016":  //16, for K8s endpoint
+
+                    break;
+
+                    case "00000000000000000000000000000006":  //06, for K8s endpoint
+
+                    break;
+
+                    case "00000000000000000000000000000008":  //08, for K8s event
+
+                    break;
+
+                    case "00000000000000000000000000002002":  //2002, for K8s ingress
+
+                    break;
+
+                    case "00000000000000000000000000000012":  //12, for K8s PV
+
+                    break;
+
+                    case "00000000000000000000000000003002":  //3002, for K8s storage class
 
                     break;
 
