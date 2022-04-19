@@ -56,7 +56,7 @@ async function connectQueue() {
                                 }
                             }
                             
-                            query['cluster_uuid'] = TotalMsg.cluster_uuid ;  
+                            query['resource_Group_Uuid'] = TotalMsg.cluster_uuid ;  
                             query['resource_Name'] = result.items[i].metadata.name ;
                             query['resource_Labels'] = result.items[i].metadata.labels ;
                             query['resource_Annotations'] = result.items[i].metadata.annotations ;
@@ -87,9 +87,9 @@ async function connectQueue() {
                             }
                         }
                  
-                    break;
+                break;
 
-                    case "00000000000000000000000000000010":  //10, for K8s nodes
+                case "00000000000000000000000000000010":  //10, for K8s nodes
 
                     for (var i=0; i<itemLength; i++)
                     {
@@ -103,7 +103,7 @@ async function connectQueue() {
                             }
                         }
                         
-                        query['cluster_uuid'] = TotalMsg.cluster_uuid ;  
+                        query['resource_Group_Uuid'] = TotalMsg.cluster_uuid ;  
                         query['resource_Name'] = result.items[i].metadata.name ;
                         query['resource_Labels'] = result.items[i].metadata.labels ;
                         query['resource_Annotations'] = result.items[i].metadata.annotations ;
@@ -134,13 +134,14 @@ async function connectQueue() {
                         }
                     }
              
-                    break;
+                break;
 
-                    case "00000000000000000000000000000004":  //04, for K8s namespaces
+                case "00000000000000000000000000000004":  //04, for K8s namespaces
+                
                     for (var i=0; i<itemLength; i++)
                     {
                         
-                        query['cluster_uuid'] = TotalMsg.cluster_uuid ;  
+                        query['resource_Group_Uuid'] = TotalMsg.cluster_uuid ;  
                         query['resource_Name'] = result.items[i].metadata.name ;
                         query['resource_Labels'] = result.items[i].metadata.labels ;
                         query['resource_Annotations'] = result.items[i].metadata.annotations ;
@@ -171,32 +172,35 @@ async function connectQueue() {
                         }
                     }
 
-                    break;
+                break;
 
-                    case "00000000000000000000000000000002":  //02, for K8s pods
+                case "00000000000000000000000000000002":  //02, for K8s pods
+
                     for (var i=0; i<itemLength; i++)
                     {
 
-                        query['cluster_uuid'] = TotalMsg.cluster_uuid ;  
+                        query['resource_Group_Uuid'] = TotalMsg.cluster_uuid ;  
                         query['resource_Name'] = result.items[i].metadata.name ;
                         query['resource_Labels'] = result.items[i].metadata.labels ;
                         query['resource_Annotations'] = result.items[i].metadata.annotations ;
                         query['resource_Namespace'] = result.items[i].metadata.namespace; 
                         query['resource_Instance'] = result.items[i].status.podIP;
                         query['resource_Pod_Phase'] = result.items[i].status.phase;
+                        query['resource_Container'] = result.items[i].spec.containers;
+                        //query['resource_Match_Labels'] = result.items[i].spec.selector.matchLabels;
                         query['resource_Status'] = result.items[i].status;
                         query['resource_Type'] = "PD";
-                        query['resource_Level1'] = "K8";
-                        query['resource_Level2'] = "ND";
-                        query['resource_Level3'] = "PD";
-                        query['resource_Level_Type'] = "KN";
+                        query['resource_Level1'] = "K8"; //k8s
+                        query['resource_Level2'] = "ND"; //Node
+                        query['resource_Level3'] = "PD"; //Pod
+                        query['resource_Level_Type'] = "KN";  //K8s-Nodes-Pods
                         query['resource_Rbac'] = "false";
                         query['resource_Anomaly_Monitor'] = "false";
                         query['resource_Active'] = "true";
                         query['resource_Status_Updated_At'] = new Date();
 
                         if (i==0) {
-                            mergedQuery = '{"pod":[' + JSON.stringify(query);
+                            mergedQuery = '{"deployment":[' + JSON.stringify(query);
                             
                         }
                         else if (i==(itemLength-1)) {
@@ -209,60 +213,170 @@ async function connectQueue() {
                         }
                     }
 
-                    break;
+                break;
 
-                    case "00000000000000000000000000001002":  //1002, for K8s deployment
+                case "00000000000000000000000000001002":  //1002, for K8s deployment
+
+                for (var i=0; i<itemLength; i++)
+                {
+
+                    query['resource_Group_Uuid'] = TotalMsg.cluster_uuid ;  
+                    query['resource_Name'] = result.items[i].metadata.name ;
+                    query['resource_Labels'] = result.items[i].metadata.labels ;
+                    query['resource_Annotations'] = result.items[i].metadata.annotations ;
+                    query['resource_Namespace'] = result.items[i].metadata.namespace; 
+                    query['resource_Instance'] = result.items[i].status.podIP;
+                    //query['resource_Pod_Phase'] = result.items[i].status.phase;
+                    //query['resource_Container'] = result.items[i].spec.containers;
+                    query['resource_Match_Labels'] = result.items[i].spec.selector.matchLabels;
+                    query['resource_Status'] = result.items[i].status;
+                    query['resource_Type'] = "DP";
+                    query['resource_Level1'] = "K8"; //k8s
+                    query['resource_Level2'] = "NS"; //Namespace
+                    query['resource_Level3'] = "DP"; //Deployment
+                    query['resource_Level_Type'] = "KS";  //K8s-Namespaces-Services
+                    query['resource_Rbac'] = "false";
+                    query['resource_Anomaly_Monitor'] = "false";
+                    query['resource_Active'] = "true";
+                    query['resource_Status_Updated_At'] = new Date();
+
+                    if (i==0) {
+                        mergedQuery = '{"deployment":[' + JSON.stringify(query);
+                        
+                    }
+                    else if (i==(itemLength-1)) {
+                        mergedQuery = mergedQuery + "," + JSON.stringify(query) + "]}";
+                        API_MSG =JSON.parse(mergedQuery);
+                        console.log(API_MSG);
+                    }
+                    else {
+                        mergedQuery = mergedQuery +  "," + JSON.stringify(query);
+                    }
+                }
 
 
+                break;
 
-                    
-                    break;
+                case "00000000000000000000000000001004":  //1004, for K8s statefulset
 
-                    case "00000000000000000000000000001004":  //1004, for K8s statefulset
+                for (var i=0; i<itemLength; i++)
+                {
 
-                    break;
+                    query['resource_Group_Uuid'] = TotalMsg.cluster_uuid ;  
+                    query['resource_Name'] = result.items[i].metadata.name ;
+                    query['resource_Labels'] = result.items[i].metadata.labels ;
+                    query['resource_Annotations'] = result.items[i].metadata.annotations ;
+                    query['resource_Namespace'] = result.items[i].metadata.namespace; 
+                    query['resource_Statefulset_Replicas'] = result.items[i].spec.replicas; 
+                    query['resource_Statefulset_Volume_Claim_Templates'] = result.items[i].spec.volumeClaimTemplates; 
+                    query['resource_Instance'] = result.items[i].status.podIP;
+                    query['resource_Match_Labels'] = result.items[i].spec.selector.matchLabels;
+                    query['resource_Status'] = result.items[i].status;
+                    query['resource_Type'] = "SS";    //Statefulset
+                    query['resource_Level1'] = "K8"; //k8s
+                    query['resource_Level2'] = "NS"; //Namespace
+                    query['resource_Level3'] = "SS"; //Deployment
+                    query['resource_Level_Type'] = "KS";  //K8s-Namespaces-Services
+                    query['resource_Rbac'] = "false";
+                    query['resource_Anomaly_Monitor'] = "false";
+                    query['resource_Active'] = "true";
+                    query['resource_Status_Updated_At'] = new Date();
 
-                    case "00000000000000000000000000001006":  //1006, for K8s daemonset
+                    if (i==0) {
+                        mergedQuery = '{"statefulset":[' + JSON.stringify(query);
+                        
+                    }
+                    else if (i==(itemLength-1)) {
+                        mergedQuery = mergedQuery + "," + JSON.stringify(query) + "]}";
+                        API_MSG =JSON.parse(mergedQuery);
+                        console.log(API_MSG);
+                    }
+                    else {
+                        mergedQuery = mergedQuery +  "," + JSON.stringify(query);
+                    }
+                }
 
-                    break;
+                break;
 
-                    case "00000000000000000000000000001008":  //1008, for K8s replicaset
+                case "00000000000000000000000000001006":  //1006, for K8s daemonset
 
-                    break;
+                for (var i=0; i<itemLength; i++)
+                {
 
-                    case "00000000000000000000000000000018":  //18, for K8s pvc
+                    query['resource_Group_Uuid'] = TotalMsg.cluster_uuid ;  
+                    query['resource_Name'] = result.items[i].metadata.name ;
+                    query['resource_Labels'] = result.items[i].metadata.labels ;
+                    query['resource_Annotations'] = result.items[i].metadata.annotations ;
+                    query['resource_Namespace'] = result.items[i].metadata.namespace; 
+                    //query['resource_Statefulset_Replicas'] = result.items[i].spec.replicas; 
+                    //query['resource_Statefulset_Volume_Claim_Templates'] = result.items[i].spec.volumeClaimTemplates; 
+                    query['resource_Instance'] = result.items[i].status.podIP;
+                    query['resource_Match_Labels'] = result.items[i].spec.selector.matchLabels;
+                    query['resource_Status'] = result.items[i].status;
+                    query['resource_Type'] = "DS";    //Daemonset
+                    query['resource_Level1'] = "K8"; //k8s
+                    query['resource_Level2'] = "NS"; //Namespace
+                    query['resource_Level3'] = "DS"; //Deployment
+                    query['resource_Level_Type'] = "KS";  //K8s-Namespaces-Services
+                    query['resource_Rbac'] = "false";
+                    query['resource_Anomaly_Monitor'] = "false";
+                    query['resource_Active'] = "true";
+                    query['resource_Status_Updated_At'] = new Date();
 
-                    break;
+                    if (i==0) {
+                        mergedQuery = '{"daemonset":[' + JSON.stringify(query);
+                        
+                    }
+                    else if (i==(itemLength-1)) {
+                        mergedQuery = mergedQuery + "," + JSON.stringify(query) + "]}";
+                        API_MSG =JSON.parse(mergedQuery);
+                        console.log(API_MSG);
+                    }
+                    else {
+                        mergedQuery = mergedQuery +  "," + JSON.stringify(query);
+                    }
+                }
 
-                    case "00000000000000000000000000000013":  //13, for K8s secret
 
-                    break;
+                break;
 
-                    case "00000000000000000000000000000016":  //16, for K8s endpoint
+                case "00000000000000000000000000001008":  //1008, for K8s replicaset
 
-                    break;
+                break;
 
-                    case "00000000000000000000000000000006":  //06, for K8s endpoint
+                case "00000000000000000000000000000018":  //18, for K8s pvc
 
-                    break;
+                break;
 
-                    case "00000000000000000000000000000008":  //08, for K8s event
+                case "00000000000000000000000000000013":  //13, for K8s secret
 
-                    break;
+                break;
 
-                    case "00000000000000000000000000002002":  //2002, for K8s ingress
+                case "00000000000000000000000000000016":  //16, for K8s endpoint
 
-                    break;
+                break;
 
-                    case "00000000000000000000000000000012":  //12, for K8s PV
+                case "00000000000000000000000000000006":  //06, for K8s endpoint
 
-                    break;
+                break;
 
-                    case "00000000000000000000000000003002":  //3002, for K8s storage class
+                case "00000000000000000000000000000008":  //08, for K8s event
 
-                    break;
+                break;
 
-                    default:        
+                case "00000000000000000000000000002002":  //2002, for K8s ingress
+
+                break;
+
+                case "00000000000000000000000000000012":  //12, for K8s PV
+
+                break;
+
+                case "00000000000000000000000000003002":  //3002, for K8s storage class
+
+                break;
+
+                default:        
                 } //end of switch        
 
                 //callAPI(API_SERVER_RESOURCE_URL+":"+API_SERVER_RESOURCE_PORT, API_MSG );
