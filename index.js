@@ -784,11 +784,11 @@ async function connectQueue() {
 
                 break;
 
-                case "0000000000000000000000000000xxxx":  //xxxx, for K8s Job
+                case "0000000000000000000000000000xxxx":  //xxxx, for K8s Job, will be implemented once Sudory template is ready
 
                 break;
 
-                case "0000000000000000000000000000yyyy":  //yyyy, for K8s cron-job
+                case "0000000000000000000000000000yyyy":  //yyyy, for K8s cron-job will be implemented once Sudory template is ready
 
                 break;
 
