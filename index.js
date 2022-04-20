@@ -1,7 +1,9 @@
 const dontenv = require('dotenv');
 dontenv.config();
-
+const amqp = require("amqplib");
+const axios = require('axios');
 const express = require("express");
+
 const app = express();
 app.use(express.json());
 
@@ -22,15 +24,18 @@ const API_NAME_METRIC_POST = process.env.API_NAME_METRIC_POST || "/metricMass"
 const API_SERVER_ALERT_URL = process.env.API_SERVER_ALERT_URL || "http://localhost"
 const API_SERVER_ALERT_PORT = process.env.API_SERVER_ALERT_PORT || "5001"
 const API_NAME_ALERT_POST = process.env.API_NAME_ALERT_POST || "/alertMass"
+const RABBITMQ_SERVER_USER = process.env.RABBITMQ_SERVER_USER || "guest"
+const RABBITMQ_SERVER_PASSWORD = process.env.RABBITMQ_SERVER_PASSWORD || "guest"
 
+const RabbitOpt = "amqp://" + RABBITMQ_SERVER_USER + ":" + RABBITMQ_SERVER_PASSWORD + "@";
 
-const amqp = require("amqplib");
-const axios = require('axios');
 var channel, connection;
-const connect_string = RABBITMQ_SERVER_URL + ":" + RABBITMQ_SERVER_PORT;
+const connect_string = RabbitOpt+RABBITMQ_SERVER_URL + ":" + RABBITMQ_SERVER_PORT;
 const API_RESOURCE_URL = API_SERVER_RESOURCE_URL+":"+API_SERVER_RESOURCE_PORT + API_NAME_RESOURCE_POST;
 const API_METRIC_URL = API_SERVER_METRIC_URL+":"+API_SERVER_METRIC_PORT + API_NAME_METRIC_POST;
 const API_ALERT_URL = API_SERVER_ALERT_URL+":"+API_SERVER_ALERT_PORT + API_NAME_ALERT_POST;
+
+console.log(connect_string); 
 
 connectQueue() // call connectQueue function
 
@@ -38,6 +43,8 @@ async function connectQueue() {
     try {
 
         var result = "";  
+
+
         connection = await amqp.connect(connect_string);
         channel = await connection.createChannel();
 
@@ -90,13 +97,13 @@ async function connectQueue() {
                             query['resource_Status_Updated_At'] = new Date();
 
                             if (itemLength==1) {
-                                mergedQuery = '{"service":[' + JSON.stringify(query) + "]}";
+                                mergedQuery = '{"resource":[' + JSON.stringify(query) + "]}";
                                 API_MSG =JSON.parse(mergedQuery);
                                 console.log(API_MSG);
                             }
                             else {    
                                 if (i==0) {
-                                    mergedQuery = '{"service":[' + JSON.stringify(query);
+                                    mergedQuery = '{"resource":[' + JSON.stringify(query);
                                     
                                 }
                                 else if (i==(itemLength-1)) {
@@ -145,13 +152,13 @@ async function connectQueue() {
                         query['resource_Status_Updated_At'] = new Date();
 
                         if (itemLength==1) {
-                            mergedQuery = '{"node":[' + JSON.stringify(query) + "]}";
+                            mergedQuery = '{"resource":[' + JSON.stringify(query) + "]}";
                             API_MSG =JSON.parse(mergedQuery);
                             console.log(API_MSG);
                         }
                         else {    
                             if (i==0) {
-                                mergedQuery = '{"node":[' + JSON.stringify(query);
+                                mergedQuery = '{"resource":[' + JSON.stringify(query);
                                 
                             }
                             else if (i==(itemLength-1)) {
@@ -191,13 +198,13 @@ async function connectQueue() {
                         query['resource_Status_Updated_At'] = new Date();
 
                         if (itemLength==1) {
-                            mergedQuery = '{"namespace":[' + JSON.stringify(query) + "]}";
+                            mergedQuery = '{"resource":[' + JSON.stringify(query) + "]}";
                             API_MSG =JSON.parse(mergedQuery);
                             console.log(API_MSG);
                         }
                         else {    
                             if (i==0) {
-                                mergedQuery = '{"namespace":[' + JSON.stringify(query);
+                                mergedQuery = '{"resource":[' + JSON.stringify(query);
                                 
                             }
                             else if (i==(itemLength-1)) {
@@ -241,13 +248,13 @@ async function connectQueue() {
                         query['resource_Status_Updated_At'] = new Date();
 
                         if (itemLength==1) {
-                            mergedQuery = '{"pod":[' + JSON.stringify(query) + "]}";
+                            mergedQuery = '{"resource":[' + JSON.stringify(query) + "]}";
                             API_MSG =JSON.parse(mergedQuery);
                             console.log(API_MSG);
                         }
                         else {    
                             if (i==0) {
-                                mergedQuery = '{"pod":[' + JSON.stringify(query);
+                                mergedQuery = '{"resource":[' + JSON.stringify(query);
                                 
                             }
                             else if (i==(itemLength-1)) {
@@ -289,13 +296,13 @@ async function connectQueue() {
                         query['resource_Status_Updated_At'] = new Date();
 
                         if (itemLength==1) {
-                            mergedQuery = '{"deployment":[' + JSON.stringify(query) + "]}";
+                            mergedQuery = '{"resource":[' + JSON.stringify(query) + "]}";
                             API_MSG =JSON.parse(mergedQuery);
                             console.log(API_MSG);
                         }
                         else {    
                             if (i==0) {
-                                mergedQuery = '{"deployment":[' + JSON.stringify(query);
+                                mergedQuery = '{"resource":[' + JSON.stringify(query);
                                 
                             }
                             else if (i==(itemLength-1)) {
@@ -340,13 +347,13 @@ async function connectQueue() {
                         query['resource_Status_Updated_At'] = new Date();
 
                         if (itemLength==1) {
-                            mergedQuery = '{"statefulset":[' + JSON.stringify(query) + "]}";
+                            mergedQuery = '{"resource":[' + JSON.stringify(query) + "]}";
                             API_MSG =JSON.parse(mergedQuery);
                             console.log(API_MSG);
                         }
                         else {    
                             if (i==0) {
-                                mergedQuery = '{"statefulset":[' + JSON.stringify(query);
+                                mergedQuery = '{"resource":[' + JSON.stringify(query);
                                 
                             }
                             else if (i==(itemLength-1)) {
@@ -388,13 +395,13 @@ async function connectQueue() {
                         query['resource_Status_Updated_At'] = new Date();
 
                         if (itemLength==1) {
-                            mergedQuery = '{"daemonset":[' + JSON.stringify(query) + "]}";
+                            mergedQuery = '{"resource":[' + JSON.stringify(query) + "]}";
                             API_MSG =JSON.parse(mergedQuery);
                             console.log(API_MSG);
                         }
                         else {    
                             if (i==0) {
-                                mergedQuery = '{"daemonet":[' + JSON.stringify(query);
+                                mergedQuery = '{"resource":[' + JSON.stringify(query);
                                 
                             }
                             else if (i==(itemLength-1)) {
@@ -439,13 +446,13 @@ async function connectQueue() {
                         query['resource_Status_Updated_At'] = new Date();
 
                         if (itemLength==1) {
-                            mergedQuery = '{"replicaset":[' + JSON.stringify(query) + "]}";
+                            mergedQuery = '{"resource":[' + JSON.stringify(query) + "]}";
                             API_MSG =JSON.parse(mergedQuery);
                             console.log(API_MSG);
                         }
                         else {    
                             if (i==0) {
-                                mergedQuery = '{"replicaset":[' + JSON.stringify(query);
+                                mergedQuery = '{"resource":[' + JSON.stringify(query);
                                 
                             }
                             else if (i==(itemLength-1)) {
@@ -491,13 +498,13 @@ async function connectQueue() {
                         query['resource_Status_Updated_At'] = new Date();
 
                         if (itemLength==1) {
-                            mergedQuery = '{"pvc":[' + JSON.stringify(query) + "]}";
+                            mergedQuery = '{"resource":[' + JSON.stringify(query) + "]}";
                             API_MSG =JSON.parse(mergedQuery);
                             console.log(API_MSG);
                         }
                         else {    
                             if (i==0) {
-                                mergedQuery = '{"pvc":[' + JSON.stringify(query);
+                                mergedQuery = '{"resource":[' + JSON.stringify(query);
                                 
                             }
                             else if (i==(itemLength-1)) {
@@ -538,13 +545,13 @@ async function connectQueue() {
                         query['resource_Status_Updated_At'] = new Date();
 
                         if (itemLength==1) {
-                            mergedQuery = '{"secret":[' + JSON.stringify(query) + "]}";
+                            mergedQuery = '{"resource":[' + JSON.stringify(query) + "]}";
                             API_MSG =JSON.parse(mergedQuery);
                             console.log(API_MSG);
                         }
                         else {    
                             if (i==0) {
-                                mergedQuery = '{"secret":[' + JSON.stringify(query);
+                                mergedQuery = '{"resource":[' + JSON.stringify(query);
                                 
                             }
                             else if (i==(itemLength-1)) {
@@ -586,13 +593,13 @@ async function connectQueue() {
                         query['resource_Status_Updated_At'] = new Date();
 
                         if (itemLength==1) {
-                            mergedQuery = '{"endpoint":[' + JSON.stringify(query) + "]}";
+                            mergedQuery = '{"resource":[' + JSON.stringify(query) + "]}";
                             API_MSG =JSON.parse(mergedQuery);
                             console.log(API_MSG);
                         }
                         else {    
                             if (i==0) {
-                                mergedQuery = '{"endpoint":[' + JSON.stringify(query);
+                                mergedQuery = '{"resource":[' + JSON.stringify(query);
                                 
                             }
                             else if (i==(itemLength-1)) {
@@ -633,13 +640,13 @@ async function connectQueue() {
                         query['resource_Status_Updated_At'] = new Date();
 
                         if (itemLength==1) {
-                            mergedQuery = '{"configmap":[' + JSON.stringify(query) + "]}";
+                            mergedQuery = '{"resource":[' + JSON.stringify(query) + "]}";
                             API_MSG =JSON.parse(mergedQuery);
                             console.log(API_MSG);
                         }
                         else {    
                             if (i==0) {
-                                mergedQuery = '{"configmap":[' + JSON.stringify(query);
+                                mergedQuery = '{"resource":[' + JSON.stringify(query);
                                 
                             }
                             else if (i==(itemLength-1)) {
@@ -681,13 +688,13 @@ async function connectQueue() {
                         query['resource_Status_Updated_At'] = new Date();
 
                         if (itemLength==1) {
-                            mergedQuery = '{"ingress":[' + JSON.stringify(query) + "]}";
+                            mergedQuery = '{"resource":[' + JSON.stringify(query) + "]}";
                             API_MSG =JSON.parse(mergedQuery);
                             console.log(API_MSG);
                         }
                         else {    
                             if (i==0) {
-                                mergedQuery = '{"ingress":[' + JSON.stringify(query);
+                                mergedQuery = '{"resource":[' + JSON.stringify(query);
                                 
                             }
                             else if (i==(itemLength-1)) {
@@ -729,13 +736,13 @@ async function connectQueue() {
                     query['resource_Status_Updated_At'] = new Date();
 
                     if (itemLength==1) {
-                        mergedQuery = '{"pv":[' + JSON.stringify(query) + "]}";
+                        mergedQuery = '{"resource":[' + JSON.stringify(query) + "]}";
                         API_MSG =JSON.parse(mergedQuery);
                         console.log(API_MSG);
                     }
                     else {    
                         if (i==0) {
-                            mergedQuery = '{"pv":[' + JSON.stringify(query);
+                            mergedQuery = '{"resource":[' + JSON.stringify(query);
                             
                         }
                         else if (i==(itemLength-1)) {
@@ -775,13 +782,13 @@ async function connectQueue() {
                         query['resource_Status_Updated_At'] = new Date();
 
                         if (itemLength==1) {
-                            mergedQuery = '{"sc":[' + JSON.stringify(query) + "]}";
+                            mergedQuery = '{"resource":[' + JSON.stringify(query) + "]}";
                             API_MSG =JSON.parse(mergedQuery);
                             console.log(API_MSG);
                         }
                         else {    
                             if (i==0) {
-                                mergedQuery = '{"pv":[' + JSON.stringify(query);
+                                mergedQuery = '{"resource":[' + JSON.stringify(query);
                                 
                             }
                             else if (i==(itemLength-1)) {
@@ -863,7 +870,7 @@ async function callAPI(apiURL, apiMsg) {
         console.log("API called: ", status);
       },
       (error) => {
-        console.log("error due to unexpoected error: ", error);
+        console.log("error due to unexpoected error: ", error.response);
       })
 
 }
