@@ -26,8 +26,8 @@ const API_SERVER_ALERT_PORT = process.env.API_SERVER_ALERT_PORT || "5001"
 const API_NAME_ALERT_POST = process.env.API_NAME_ALERT_POST || "/alertMass"
 const RABBITMQ_SERVER_USER = process.env.RABBITMQ_SERVER_USER || "guest"
 const RABBITMQ_SERVER_PASSWORD = process.env.RABBITMQ_SERVER_PASSWORD || "guest"
-const RABBITMQ_SERVER_VIRTUAL_HOST = process.env.RABBITMQ_SERVER_VIRTUAL_HOST || "nexclipper"
-
+//const RABBITMQ_SERVER_VIRTUAL_HOST = process.env.RABBITMQ_SERVER_VIRTUAL_HOST || "nexclipper"
+const RABBITMQ_SERVER_VIRTUAL_HOST = process.env.RABBITMQ_SERVER_VIRTUAL_HOST
 const RabbitOpt = "amqp://" + RABBITMQ_SERVER_USER + ":" + RABBITMQ_SERVER_PASSWORD + "@";
 
 var channel, connection;
@@ -98,14 +98,14 @@ async function connectQueue() {
                             query['resource_Status_Updated_At'] = new Date();
 
                             if (itemLength==1) {
-                                mergedQuery = '{"resource":[' + JSON.stringify(query) + "]}";
+                                mergedQuery = '{"resource_Group_Uuid": "' + TotalMsg.cluster_uuid + '", ' + '"resource":[' + JSON.stringify(query) + "]}";
                                 API_MSG =JSON.parse(mergedQuery);
                                 console.log(API_MSG);
                             }
                             else {    
                                 if (i==0) {
-                                    mergedQuery = '{"resource":[' + JSON.stringify(query);
-                                    
+                                    mergedQuery = '{"resource_Group_Uuid": "' + TotalMsg.cluster_uuid + '", ' + '"resource":[' + JSON.stringify(query);
+                                        
                                 }
                                 else if (i==(itemLength-1)) {
                                     mergedQuery = mergedQuery + "," + JSON.stringify(query) + "]}";
@@ -153,17 +153,18 @@ async function connectQueue() {
                         query['resource_Status_Updated_At'] = new Date();
 
                         if (itemLength==1) {
-                            mergedQuery = '{"resource":[' + JSON.stringify(query) + "]}";
+                            mergedQuery = '{"resource_Group_Uuid": "' + TotalMsg.cluster_uuid + '", ' + '"resource":[' + JSON.stringify(query) + "]}";
                             API_MSG =JSON.parse(mergedQuery);
                             console.log(API_MSG);
                         }
                         else {    
                             if (i==0) {
-                                mergedQuery = '{"resource":[' + JSON.stringify(query);
+                                mergedQuery = '{"resource_Group_Uuid": "' + TotalMsg.cluster_uuid + '", ' + '"resource":[' + JSON.stringify(query);
                                 
                             }
                             else if (i==(itemLength-1)) {
                                 mergedQuery = mergedQuery + "," + JSON.stringify(query) + "]}";
+                                console.log(mergedQuery);
                                 API_MSG =JSON.parse(mergedQuery);
                                 console.log(API_MSG);
                             }
@@ -199,13 +200,13 @@ async function connectQueue() {
                         query['resource_Status_Updated_At'] = new Date();
 
                         if (itemLength==1) {
-                            mergedQuery = '{"resource":[' + JSON.stringify(query) + "]}";
+                            mergedQuery = '{"resource_Group_Uuid": "' + TotalMsg.cluster_uuid + '", ' + '"resource":[' + JSON.stringify(query) + "]}";
                             API_MSG =JSON.parse(mergedQuery);
                             console.log(API_MSG);
                         }
                         else {    
                             if (i==0) {
-                                mergedQuery = '{"resource":[' + JSON.stringify(query);
+                                mergedQuery = '{"resource_Group_Uuid": "' + TotalMsg.cluster_uuid + '", ' + '"resource":[' + JSON.stringify(query);
                                 
                             }
                             else if (i==(itemLength-1)) {
@@ -249,13 +250,13 @@ async function connectQueue() {
                         query['resource_Status_Updated_At'] = new Date();
 
                         if (itemLength==1) {
-                            mergedQuery = '{"resource":[' + JSON.stringify(query) + "]}";
+                            mergedQuery = '{"resource_Group_Uuid": "' + TotalMsg.cluster_uuid + '", ' + '"resource":[' + JSON.stringify(query) + "]}";
                             API_MSG =JSON.parse(mergedQuery);
                             console.log(API_MSG);
                         }
                         else {    
                             if (i==0) {
-                                mergedQuery = '{"resource":[' + JSON.stringify(query);
+                                mergedQuery = '{"resource_Group_Uuid": "' + TotalMsg.cluster_uuid + '", ' + '"resource":[' + JSON.stringify(query);
                                 
                             }
                             else if (i==(itemLength-1)) {
@@ -297,13 +298,13 @@ async function connectQueue() {
                         query['resource_Status_Updated_At'] = new Date();
 
                         if (itemLength==1) {
-                            mergedQuery = '{"resource":[' + JSON.stringify(query) + "]}";
+                            mergedQuery = '{"resource_Group_Uuid": "' + TotalMsg.cluster_uuid + '", ' + '"resource":[' + JSON.stringify(query) + "]}";
                             API_MSG =JSON.parse(mergedQuery);
                             console.log(API_MSG);
                         }
                         else {    
                             if (i==0) {
-                                mergedQuery = '{"resource":[' + JSON.stringify(query);
+                                mergedQuery = '{"resource_Group_Uuid": "' + TotalMsg.cluster_uuid + '", ' + '"resource":[' + JSON.stringify(query);
                                 
                             }
                             else if (i==(itemLength-1)) {
@@ -348,13 +349,13 @@ async function connectQueue() {
                         query['resource_Status_Updated_At'] = new Date();
 
                         if (itemLength==1) {
-                            mergedQuery = '{"resource":[' + JSON.stringify(query) + "]}";
+                            mergedQuery = '{"resource_Group_Uuid": "' + TotalMsg.cluster_uuid + '", ' + '"resource":[' + JSON.stringify(query) + "]}";
                             API_MSG =JSON.parse(mergedQuery);
                             console.log(API_MSG);
                         }
                         else {    
                             if (i==0) {
-                                mergedQuery = '{"resource":[' + JSON.stringify(query);
+                                mergedQuery = '{"resource_Group_Uuid": "' + TotalMsg.cluster_uuid + '", ' + '"resource":[' + JSON.stringify(query);
                                 
                             }
                             else if (i==(itemLength-1)) {
@@ -396,13 +397,13 @@ async function connectQueue() {
                         query['resource_Status_Updated_At'] = new Date();
 
                         if (itemLength==1) {
-                            mergedQuery = '{"resource":[' + JSON.stringify(query) + "]}";
+                            mergedQuery = '{"resource_Group_Uuid": "' + TotalMsg.cluster_uuid + '", ' + '"resource":[' + JSON.stringify(query) + "]}";
                             API_MSG =JSON.parse(mergedQuery);
                             console.log(API_MSG);
                         }
                         else {    
                             if (i==0) {
-                                mergedQuery = '{"resource":[' + JSON.stringify(query);
+                                mergedQuery = '{"resource_Group_Uuid": "' + TotalMsg.cluster_uuid + '", ' + '"resource":[' + JSON.stringify(query);
                                 
                             }
                             else if (i==(itemLength-1)) {
@@ -447,13 +448,13 @@ async function connectQueue() {
                         query['resource_Status_Updated_At'] = new Date();
 
                         if (itemLength==1) {
-                            mergedQuery = '{"resource":[' + JSON.stringify(query) + "]}";
+                            mergedQuery = '{"resource_Group_Uuid": "' + TotalMsg.cluster_uuid + '", ' + '"resource":[' + JSON.stringify(query) + "]}";
                             API_MSG =JSON.parse(mergedQuery);
                             console.log(API_MSG);
                         }
                         else {    
                             if (i==0) {
-                                mergedQuery = '{"resource":[' + JSON.stringify(query);
+                                mergedQuery = '{"resource_Group_Uuid": "' + TotalMsg.cluster_uuid + '", ' + '"resource":[' + JSON.stringify(query);
                                 
                             }
                             else if (i==(itemLength-1)) {
@@ -499,13 +500,13 @@ async function connectQueue() {
                         query['resource_Status_Updated_At'] = new Date();
 
                         if (itemLength==1) {
-                            mergedQuery = '{"resource":[' + JSON.stringify(query) + "]}";
+                            mergedQuery = '{"resource_Group_Uuid": "' + TotalMsg.cluster_uuid + '", ' + '"resource":[' + JSON.stringify(query) + "]}";
                             API_MSG =JSON.parse(mergedQuery);
                             console.log(API_MSG);
                         }
                         else {    
                             if (i==0) {
-                                mergedQuery = '{"resource":[' + JSON.stringify(query);
+                                mergedQuery = '{"resource_Group_Uuid": "' + TotalMsg.cluster_uuid + '", ' + '"resource":[' + JSON.stringify(query);
                                 
                             }
                             else if (i==(itemLength-1)) {
@@ -546,13 +547,13 @@ async function connectQueue() {
                         query['resource_Status_Updated_At'] = new Date();
 
                         if (itemLength==1) {
-                            mergedQuery = '{"resource":[' + JSON.stringify(query) + "]}";
+                            mergedQuery = '{"resource_Group_Uuid": "' + TotalMsg.cluster_uuid + '", ' + '"resource":[' + JSON.stringify(query) + "]}";
                             API_MSG =JSON.parse(mergedQuery);
                             console.log(API_MSG);
                         }
                         else {    
                             if (i==0) {
-                                mergedQuery = '{"resource":[' + JSON.stringify(query);
+                                mergedQuery = '{"resource_Group_Uuid": "' + TotalMsg.cluster_uuid + '", ' + '"resource":[' + JSON.stringify(query);
                                 
                             }
                             else if (i==(itemLength-1)) {
@@ -594,13 +595,13 @@ async function connectQueue() {
                         query['resource_Status_Updated_At'] = new Date();
 
                         if (itemLength==1) {
-                            mergedQuery = '{"resource":[' + JSON.stringify(query) + "]}";
+                            mergedQuery = '{"resource_Group_Uuid": "' + TotalMsg.cluster_uuid + '", ' + '"resource":[' + JSON.stringify(query) + "]}";
                             API_MSG =JSON.parse(mergedQuery);
                             console.log(API_MSG);
                         }
                         else {    
                             if (i==0) {
-                                mergedQuery = '{"resource":[' + JSON.stringify(query);
+                                mergedQuery = '{"resource_Group_Uuid": "' + TotalMsg.cluster_uuid + '", ' + '"resource":[' + JSON.stringify(query);
                                 
                             }
                             else if (i==(itemLength-1)) {
@@ -629,7 +630,7 @@ async function connectQueue() {
                         query['resource_Labels'] = result.items[i].metadata.labels ; //object
                         query['resource_Annotations'] = result.items[i].metadata.annotations ; //object
                         query['resource_Namespace'] = result.items[i].metadata.namespace;
-                        query['resource_Configmap_Data'] = result.items[i].data;
+                        query['resource_Configmap_Data'] = result.items[i].data; //object
                         query['resource_Type'] = "CM";    //Configmap
                         query['resource_Level1'] = "K8"; //k8s
                         query['resource_Level2'] = "NS"; //Namespace
@@ -641,13 +642,13 @@ async function connectQueue() {
                         query['resource_Status_Updated_At'] = new Date();
 
                         if (itemLength==1) {
-                            mergedQuery = '{"resource":[' + JSON.stringify(query) + "]}";
+                            mergedQuery = '{"resource_Group_Uuid": "' + TotalMsg.cluster_uuid + '", ' + '"resource":[' + JSON.stringify(query) + "]}";
                             API_MSG =JSON.parse(mergedQuery);
                             console.log(API_MSG);
                         }
                         else {    
                             if (i==0) {
-                                mergedQuery = '{"resource":[' + JSON.stringify(query);
+                                mergedQuery = '{"resource_Group_Uuid": "' + TotalMsg.cluster_uuid + '", ' + '"resource":[' + JSON.stringify(query);
                                 
                             }
                             else if (i==(itemLength-1)) {
@@ -689,13 +690,13 @@ async function connectQueue() {
                         query['resource_Status_Updated_At'] = new Date();
 
                         if (itemLength==1) {
-                            mergedQuery = '{"resource":[' + JSON.stringify(query) + "]}";
+                            mergedQuery = '{"resource_Group_Uuid": "' + TotalMsg.cluster_uuid + '", ' + '"resource":[' + JSON.stringify(query) + "]}";
                             API_MSG =JSON.parse(mergedQuery);
                             console.log(API_MSG);
                         }
                         else {    
                             if (i==0) {
-                                mergedQuery = '{"resource":[' + JSON.stringify(query);
+                                mergedQuery = '{"resource_Group_Uuid": "' + TotalMsg.cluster_uuid + '", ' + '"resource":[' + JSON.stringify(query);
                                 
                             }
                             else if (i==(itemLength-1)) {
@@ -727,7 +728,7 @@ async function connectQueue() {
                     query['resource_Pv_Storage_Class_Name'] = result.items[i].spec.storageClassName;
                     query['resource_Pv_Volume_Mode'] = result.items[i].spec.volumeMode;
                     query['resource_Status'] = result.items[i].status; //object
-                    query['resource_Type'] = "PV";    //PVC
+                    query['resource_Type'] = "PV";    //PV'
                     query['resource_Level1'] = "K8"; //k8s
                     query['resource_Level2'] = "PV";
                     query['resource_Level_Type'] = "KC";  //K8s-Cluster
@@ -737,14 +738,14 @@ async function connectQueue() {
                     query['resource_Status_Updated_At'] = new Date();
 
                     if (itemLength==1) {
-                        mergedQuery = '{"resource":[' + JSON.stringify(query) + "]}";
+                        mergedQuery = '{"resource_Group_Uuid": "' + TotalMsg.cluster_uuid + '", ' + '"resource":[' + JSON.stringify(query) + "]}";
                         API_MSG =JSON.parse(mergedQuery);
                         console.log(API_MSG);
                     }
                     else {    
                         if (i==0) {
-                            mergedQuery = '{"resource":[' + JSON.stringify(query);
-                            
+                            mergedQuery = '{"resource_Group_Uuid": "' + TotalMsg.cluster_uuid + '", ' + '"resource":[' + JSON.stringify(query);
+                        
                         }
                         else if (i==(itemLength-1)) {
                             mergedQuery = mergedQuery + "," + JSON.stringify(query) + "]}";
@@ -783,13 +784,13 @@ async function connectQueue() {
                         query['resource_Status_Updated_At'] = new Date();
 
                         if (itemLength==1) {
-                            mergedQuery = '{"resource":[' + JSON.stringify(query) + "]}";
+                            mergedQuery = '{"resource_Group_Uuid": "' + TotalMsg.cluster_uuid + '", ' + '"resource":[' + JSON.stringify(query) + "]}";
                             API_MSG =JSON.parse(mergedQuery);
                             console.log(API_MSG);
                         }
                         else {    
                             if (i==0) {
-                                mergedQuery = '{"resource":[' + JSON.stringify(query);
+                                mergedQuery = '{"resource_Group_Uuid": "' + TotalMsg.cluster_uuid + '", ' + '"resource":[' + JSON.stringify(query);
                                 
                             }
                             else if (i==(itemLength-1)) {
@@ -806,11 +807,11 @@ async function connectQueue() {
 
                 break;
 
-                case "0000000000000000000000000000xxxx":  //xxxx, for K8s Job, will be implemented once Sudory template is ready
+                case "0000000000000000000000000000xxxx":  //xxxx, for K8s Job, JO will be implemented once Sudory template is ready
 
                 break;
 
-                case "0000000000000000000000000000yyyy":  //yyyy, for K8s cron-job will be implemented once Sudory template is ready
+                case "0000000000000000000000000000yyyy":  //yyyy, for K8s cron-job CJ will be implemented once Sudory template is ready
 
                 break;
 
