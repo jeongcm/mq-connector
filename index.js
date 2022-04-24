@@ -100,7 +100,7 @@ async function connectQueue() {
                             query['resource_Active'] = true;
                             query['resource_Status_Updated_At'] = new Date();
 
-                            tempQuery = formater(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
+                            tempQuery = formatter(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
                             mergedQuery = tempQuery;     
                         }
 
@@ -140,7 +140,7 @@ async function connectQueue() {
                         query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
-                        tempQuery = formater(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
+                        tempQuery = formatter(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
                         mergedQuery = tempQuery; 
 
                     }
@@ -172,7 +172,7 @@ async function connectQueue() {
                         query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
-                        tempQuery = formater(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
+                        tempQuery = formatter(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
                         mergedQuery = tempQuery; 
     
                     }
@@ -207,7 +207,7 @@ async function connectQueue() {
                         query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
-                        tempQuery = formater(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
+                        tempQuery = formatter(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
                         mergedQuery = tempQuery; 
 
                     }
@@ -241,7 +241,7 @@ async function connectQueue() {
                         query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
-                        tempQuery = formater(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
+                        tempQuery = formatter(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
                         mergedQuery = tempQuery; 
     
                     }
@@ -278,7 +278,7 @@ async function connectQueue() {
                         query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
-                        tempQuery = formater(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
+                        tempQuery = formatter(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
                         mergedQuery = tempQuery; 
     
                     }
@@ -312,7 +312,7 @@ async function connectQueue() {
                         query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
-                        tempQuery = formater(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
+                        tempQuery = formatter(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
                         mergedQuery = tempQuery; 
 
                     }
@@ -349,7 +349,7 @@ async function connectQueue() {
                         query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
-                        tempQuery = formater(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
+                        tempQuery = formatter(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
                         mergedQuery = tempQuery; 
     
                     }
@@ -387,7 +387,7 @@ async function connectQueue() {
                         query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
-                        tempQuery = formater(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
+                        tempQuery = formatter(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
                         mergedQuery = tempQuery; 
     
                     }
@@ -420,7 +420,7 @@ async function connectQueue() {
                         query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
-                        tempQuery = formater(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
+                        tempQuery = formatter(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
                         mergedQuery = tempQuery; 
     
                     }
@@ -454,7 +454,7 @@ async function connectQueue() {
                         query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
-                        tempQuery = formater(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
+                        tempQuery = formatter(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
                         mergedQuery = tempQuery; 
     
                     }
@@ -487,7 +487,7 @@ async function connectQueue() {
                         query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
-                        tempQuery = formater(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
+                        tempQuery = formatter(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
                         mergedQuery = tempQuery; 
     
                     }
@@ -521,7 +521,7 @@ async function connectQueue() {
                         query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
-                        tempQuery = formater(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
+                        tempQuery = formatter(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
                         mergedQuery = tempQuery; 
     
                     }
@@ -556,7 +556,7 @@ async function connectQueue() {
                         query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
-                        tempQuery = formater(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
+                        tempQuery = formatter(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
                         mergedQuery = tempQuery; 
     
                     }
@@ -591,7 +591,7 @@ async function connectQueue() {
                             query['resource_Active'] = true;
                             query['resource_Status_Updated_At'] = new Date();
 
-                            tempQuery = formater(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
+                            tempQuery = formatter(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
                             mergedQuery = tempQuery; 
                         }
 
@@ -671,7 +671,7 @@ async function callAPI(apiURL, apiMsg) {
 }
 
 
-function formater(i, itemLength, resourceType, cluster_uuid, query, mergedQuery) {
+function formatter(i, itemLength, resourceType, cluster_uuid, query, mergedQuery) {
 
     let interimQuery = {};
     try {
