@@ -14,7 +14,7 @@ const RABBITMQ_SERVER_QUEUE_RESOURCE = process.env.RABBITMQ_SERVER_QUEUE_RESOURC
 const RABBITMQ_SERVER_QUEUE_ALERT = process.env.RABBITMQ_SERVER_QUEUE_ALERT || "nc_alert";
 const RABBITMQ_SERVER_QUEUE_METRIC = process.env.RABBITMQ_SERVER_QUEUE_METRIC || "nc_metric";
 const RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED = process.env.RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED || "nc_metric_received";
-const NODE_EXPORTER_PORT = process.env.NODE_EXPORTER_PORT || 9090;
+const NODE_EXPORTER_PORT = process.env.NODE_EXPORTER_PORT || 9100 ;
 
 const API_SERVER_RESOURCE_URL = process.env.API_SERVER_RESOURCE_URL || "http://localhost"
 const API_SERVER_RESOURCE_PORT = process.env.API_SERVER_RESOURCE_PORT || "5001"
@@ -62,17 +62,17 @@ async function connectQueue() {
         await channel.assertQueue(RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED);
 
         channel.consume(RABBITMQ_SERVER_QUEUE_RESOURCE, (msg) => {
-            TotalMsg = JSON.parse(msg.content.toString());
-            result = TotalMsg.result;
-            itemLength = result.items.length;
-
             var query = {};
             var mergedQuery = {};
             var tempQuery = {};
             var API_MSG = {};
-
+            
+            const TotalMsg = JSON.parse(msg.content.toString());
+            const cluster_uuid =  TotalMsg.cluster_uuid;
 
             if (TotalMsg.status == 4) {
+                const result = JSON.parse(TotalMsg.result);
+                const itemLength = result.items.length;
                 switch (TotalMsg.template_uuid) {
                     case "00000000000000000000000000000020":  //20, for K8s services
                         var resourceType = "SV";
@@ -121,7 +121,7 @@ async function connectQueue() {
                     for (var i=0; i<itemLength; i++)
                     {
                         // get internal IP address from addresses array and assign to InternalIP variable.
-                        internalIpLength = result.items[i].status.addresses.length
+                        let internalIpLength = result.items[i].status.addresses.length
                         for (var j=0; j<internalIpLength; j++)
                         {
                             if (result.items[i].status.addresses[j].type = 'InternalIP')
@@ -617,69 +617,103 @@ async function connectQueue() {
 
                 default:        
                 } //end of switch        
-
-                callAPI(API_RESOURCE_URL, API_MSG );
-                channel.ack(msg);
-                console.log("Data sent : ",RABBITMQ_SERVER_QUEUE_RESOURCE);
-        
+                callAPI(API_RESOURCE_URL, API_MSG )
+                .then
+                (
+                  (response) => {
+                    channel.ack(msg);
+                    console.log("MQ message acknowleged: " + RABBITMQ_SERVER_QUEUE_RESOURCE + ", cluster_uuid: " + cluster_uuid );
+                      },
+                  (error) => {
+                    console.log("MQ message un-acknowleged: " + RABBITMQ_SERVER_QUEUE_RESOURCE + ", cluster_uuid: " + cluster_uuid);  
+                    throw error;
+                  })
             }
             else {
                 channel.ack(msg);
-                console.log("Message ignored");
-
-            }      
-
+                console.log("Message ignored" + RABBITMQ_SERVER_QUEUE_RESOURCE + ", cluster_uuid: " + cluster_uuid);
+            }
         })
 
         channel.consume(RABBITMQ_SERVER_QUEUE_ALERT, (msg) => {
             result = JSON.parse(msg.content.toString());
-            if (result.status == 4) {  //status=4 means Sudory client successfully sends the result back to Sudory server
-                API_MSG = {"cluster_uuid": result.cluster_uuid,
-                          "result": result.result, 
-                         };
-                callAPI(API_ALERT_URL, API_MSG );
-            } else {
-            API_MSG = {"result status": result.status};     
-            }
+            const cluster_uuid = result.cluster_uuid;
 
-            channel.ack(msg);
-            console.log("Msg processed : ",RABBITMQ_SERVER_QUEUE_ALERT, API_MSG);
-            
-        })
+            if (result.status != 4) {
+                console.log("Msg processed, nothing to update : " + RABBITMQ_SERVER_QUEUE_ALERT + ", cluster_uuid: " + cluster_uuid );
+                channel.ack(msg);
+                }
+            else {
+                console.log("calling NC-CONNECT API : " + RABBITMQ_SERVER_QUEUE_ALERT + ", cluster_uuid: " + cluster_uuid );
+                console.log(API_ALERT_URL);
+                callAPI(API_ALERT_URL, result)
+                .then
+                (
+                  (response) => {
+                    channel.ack(msg);
+                    console.log("MQ message acknowleged: " + RABBITMQ_SERVER_QUEUE_ALERT + ", cluster_uuid: " + cluster_uuid );
+                      },
+                  (error) => {
+                    console.log("MQ message un-acknowleged: ",RABBITMQ_SERVER_QUEUE_ALERT + ", cluster_uuid: " + cluster_uuid);  
+                    throw error;
+                  })
+                };
+        }); // end of msg consume
 
         channel.consume(RABBITMQ_SERVER_QUEUE_METRIC, (msg) => {
-            result = JSON.parse(msg.content.toString());
-            if (result.status == 4) {
-                API_MSG = {"cluster_uuid": result.cluster_uuid,
-                          "result": result.result, 
-                          };
-                callAPI(API_METRIC_URL, API_MSG );
-            } else {
-                API_MSG = {"result status": result.status};     
-                }
-            channel.ack(msg);
-            console.log("Msg processed : ",RABBITMQ_SERVER_QUEUE_METRIC, API_MSG );
 
-        })
+            result = JSON.parse(msg.content.toString());
+            const cluster_uuid = result.cluster_uuid;
+
+            if (result.status != 4) {
+                console.log("Msg processed, nothing to update : " + RABBITMQ_SERVER_QUEUE_METRIC + ", cluster_uuid: " + cluster_uuid );
+                channel.ack(msg);
+                }
+            else {
+                console.log("calling NC-CONNECT API : " + RABBITMQ_SERVER_QUEUE_METRIC + ", cluster_uuid: " + cluster_uuid );
+                console.log(API_METRIC_URL);
+                callAPI(API_METRIC_URL, result)
+                .then
+                (
+                  (response) => {
+                    channel.ack(msg);
+                    console.log("MQ message acknowleged: " + RABBITMQ_SERVER_QUEUE_METRIC + ", cluster_uuid: " + cluster_uuid );
+                      },
+                  (error) => {
+                    console.log("MQ message un-acknowleged: ",RABBITMQ_SERVER_QUEUE_METRIC + ", cluster_uuid: " + cluster_uuid);  
+                    throw error;
+                  })
+                };
+        }); // end of msg consume
 
         channel.consume(RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED, (msg) => {
+
             result = JSON.parse(msg.content.toString());
-            if (result.status == 4) {
-                API_MSG = {"cluster_uuid": result.cluster_uuid,
-                          "result": result.result, 
-                          };
-                callAPI(API_METRIC_RECEIVED_URL, API_MSG );
-            } else {
-                API_MSG = {"result status": result.status};     
+            const cluster_uuid = result.cluster_uuid;
+
+            if (result.status != 4) {
+                console.log("Msg processed, nothing to update : " + RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid );
+                channel.ack(msg);
                 }
-            channel.ack(msg);
-            console.log("Msg processed : ",RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED, API_MSG );
-
-        })
-
-
+            else {
+                console.log("calling NC-CONNECT API : " + RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid );
+                console.log(API_METRIC_RECEIVED_URL);
+                callAPI(API_METRIC_RECEIVED_URL, result)
+                .then
+                (
+                  (response) => {
+                    channel.ack(msg);
+                    console.log("MQ message acknowleged: " + RABBITMQ_SRABBITMQ_SERVER_QUEUE_METRIC_RECEIVEDERVER_QUEUE_METRIC + ", cluster_uuid: " + cluster_uuid );
+                      },
+                  (error) => {
+                    console.log("MQ message un-acknowleged: ",RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid);  
+                    //throw error;
+                  })
+                }; 
+        }); // end of msg consume
     } catch (error) {
         console.log(error);
+        //throw error;
     }
 }
 
@@ -689,18 +723,17 @@ async function callAPI(apiURL, apiMsg) {
     .then
     (
       (response) => {
-        const status = response.data.message;
-        console.log("API called: ", apiURL, status);
+        const responseStatus = response + ", status code: " + response.status;
+        console.log("API called: ", apiURL, responseStatus);
       },
       (error) => {
-        console.log("error due to unexpoected error: ", error.response);
+        const errorStatus = error + ", status code:  " + error.status;  
+        console.log("API error due to unexpoected error: ", apiURL, errorStatus);
       })
 
 }
 
-
 function formatter_resource(i, itemLength, resourceType, cluster_uuid, query, mergedQuery) {
-
     let interimQuery = {};
     try {
         if (itemLength==1) {
@@ -717,11 +750,9 @@ function formatter_resource(i, itemLength, resourceType, cluster_uuid, query, me
                 interimQuery = mergedQuery +  "," + JSON.stringify(query);
             }
         }
-
     } catch (error) {
         console.log("error due to unexpoected error: ", error.response);
     }
- 
     return interimQuery;
 }
 
