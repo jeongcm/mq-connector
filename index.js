@@ -10,33 +10,41 @@ app.use(express.json());
 const MQCOMMM_PORT = process.env.MQCOMMM_PORT || 4001;
 const RABBITMQ_SERVER_URL = process.env.RABBITMQ_SERVER_URL || "amqp://localhost";
 const RABBITMQ_SERVER_PORT = process.env.RABBITMQ_SERVER_PORT || 5672;
-const RABBITMQ_SERVER_QUEUE_RESOURCE = process.env.RABBITMQ_SERVER_QUEUE_RESOURCE || "lari_resource";
-const RABBITMQ_SERVER_QUEUE_ALERT = process.env.RABBITMQ_SERVER_QUEUE_ALERT || "lari_resource";
-const RABBITMQ_SERVER_QUEUE_METRIC = process.env.RABBITMQ_SERVER_QUEUE_METRIC || "lari_metric";
+const RABBITMQ_SERVER_QUEUE_RESOURCE = process.env.RABBITMQ_SERVER_QUEUE_RESOURCE || "nc_resource";
+const RABBITMQ_SERVER_QUEUE_ALERT = process.env.RABBITMQ_SERVER_QUEUE_ALERT || "nc_alert";
+const RABBITMQ_SERVER_QUEUE_METRIC = process.env.RABBITMQ_SERVER_QUEUE_METRIC || "nc_metric";
+const RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED = process.env.RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED || "nc_metric_received";
 const NODE_EXPORTER_PORT = process.env.NODE_EXPORTER_PORT || 9090;
 
 const API_SERVER_RESOURCE_URL = process.env.API_SERVER_RESOURCE_URL || "http://localhost"
 const API_SERVER_RESOURCE_PORT = process.env.API_SERVER_RESOURCE_PORT || "5001"
 const API_NAME_RESOURCE_POST = process.env.API_NAME_RESOURCE_POST || "/resourceMass"
+
 const API_SERVER_METRIC_URL = process.env.API_SERVER_METRIC_URL || "http://localhost"
 const API_SERVER_METRIC_PORT = process.env.API_SERVER_METRIC_PORT || "5001"
-const API_NAME_METRIC_POST = process.env.API_NAME_METRIC_POST || "/metricMass"
+const API_NAME_METRIC_POST = process.env.API_NAME_METRIC_POST || "/metricMetaMass"
+
+const API_SERVER_METRIC_RECEIVED_URL = process.env.API_SERVER_METRIC_RECEIVED_URL || "http://localhost"
+const API_SERVER_METRIC_RECEIVED_PORT = process.env.API_SERVER_METRIC_RECEIVED_PORT || "5001"
+const API_NAME_METRIC_RECEIVED_POST = process.env.API_NAME_METRIC_RECEIVED_POST || "/metricReceivedMass"
+
 const API_SERVER_ALERT_URL = process.env.API_SERVER_ALERT_URL || "http://localhost"
 const API_SERVER_ALERT_PORT = process.env.API_SERVER_ALERT_PORT || "5001"
 const API_NAME_ALERT_POST = process.env.API_NAME_ALERT_POST || "/alertMass"
-const RABBITMQ_SERVER_USER = process.env.RABBITMQ_SERVER_USER || "guest"
-const RABBITMQ_SERVER_PASSWORD = process.env.RABBITMQ_SERVER_PASSWORD || "guest"
-//const RABBITMQ_SERVER_VIRTUAL_HOST = process.env.RABBITMQ_SERVER_VIRTUAL_HOST || "nexclipper"
-const RABBITMQ_SERVER_VIRTUAL_HOST = process.env.RABBITMQ_SERVER_VIRTUAL_HOST
+
+const RABBITMQ_SERVER_USER = process.env.RABBITMQ_SERVER_USER || "nexclipper"
+const RABBITMQ_SERVER_PASSWORD = process.env.RABBITMQ_SERVER_PASSWORD || "nexclipper"
+const RABBITMQ_SERVER_VIRTUAL_HOST = process.env.RABBITMQ_SERVER_VIRTUAL_HOST || "nexclipper"
 const RabbitOpt = "amqp://" + RABBITMQ_SERVER_USER + ":" + RABBITMQ_SERVER_PASSWORD + "@";
 
 var channel, connection;
 const connect_string = RabbitOpt + RABBITMQ_SERVER_URL + ":" + RABBITMQ_SERVER_PORT + "/" + RABBITMQ_SERVER_VIRTUAL_HOST;
 const API_RESOURCE_URL = API_SERVER_RESOURCE_URL+":"+API_SERVER_RESOURCE_PORT + API_NAME_RESOURCE_POST;
 const API_METRIC_URL = API_SERVER_METRIC_URL+":"+API_SERVER_METRIC_PORT + API_NAME_METRIC_POST;
+const API_METRIC_RECEIVED_URL = API_SERVER_METRIC_RECEIVED_URL+":"+API_SERVER_METRIC_RECEIVED_PORT + API_NAME_METRIC_RECEIVED_POST;
 const API_ALERT_URL = API_SERVER_ALERT_URL+":"+API_SERVER_ALERT_PORT + API_NAME_ALERT_POST;
 
-console.log(connect_string); 
+//console.log(connect_string); 
 
 connectQueue() // call connectQueue function
 
@@ -44,8 +52,6 @@ async function connectQueue() {
     try {
 
         var result = "";  
-
-
         connection = await amqp.connect(connect_string);
         channel = await connection.createChannel();
 
@@ -53,6 +59,7 @@ async function connectQueue() {
         await channel.assertQueue(RABBITMQ_SERVER_QUEUE_RESOURCE);
         await channel.assertQueue(RABBITMQ_SERVER_QUEUE_ALERT);
         await channel.assertQueue(RABBITMQ_SERVER_QUEUE_METRIC);
+        await channel.assertQueue(RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED);
 
         channel.consume(RABBITMQ_SERVER_QUEUE_RESOURCE, (msg) => {
             TotalMsg = JSON.parse(msg.content.toString());
@@ -100,7 +107,7 @@ async function connectQueue() {
                             query['resource_Active'] = true;
                             query['resource_Status_Updated_At'] = new Date();
 
-                            tempQuery = formatter(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
+                            tempQuery = formatter_resource(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
                             mergedQuery = tempQuery;     
                         }
 
@@ -140,7 +147,7 @@ async function connectQueue() {
                         query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
-                        tempQuery = formatter(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
+                        tempQuery = formatter_resource(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
                         mergedQuery = tempQuery; 
 
                     }
@@ -172,7 +179,7 @@ async function connectQueue() {
                         query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
-                        tempQuery = formatter(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
+                        tempQuery = formatter_resource(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
                         mergedQuery = tempQuery; 
     
                     }
@@ -207,7 +214,7 @@ async function connectQueue() {
                         query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
-                        tempQuery = formatter(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
+                        tempQuery = formatter_resource(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
                         mergedQuery = tempQuery; 
 
                     }
@@ -241,7 +248,7 @@ async function connectQueue() {
                         query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
-                        tempQuery = formatter(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
+                        tempQuery = formatter_resource(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
                         mergedQuery = tempQuery; 
     
                     }
@@ -278,7 +285,7 @@ async function connectQueue() {
                         query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
-                        tempQuery = formatter(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
+                        tempQuery = formatter_resource(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
                         mergedQuery = tempQuery; 
     
                     }
@@ -312,7 +319,7 @@ async function connectQueue() {
                         query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
-                        tempQuery = formatter(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
+                        tempQuery = formatter_resource(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
                         mergedQuery = tempQuery; 
 
                     }
@@ -349,7 +356,7 @@ async function connectQueue() {
                         query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
-                        tempQuery = formatter(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
+                        tempQuery = formatter_resource(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
                         mergedQuery = tempQuery; 
     
                     }
@@ -387,7 +394,7 @@ async function connectQueue() {
                         query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
-                        tempQuery = formatter(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
+                        tempQuery = formatter_resource(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
                         mergedQuery = tempQuery; 
     
                     }
@@ -420,7 +427,7 @@ async function connectQueue() {
                         query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
-                        tempQuery = formatter(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
+                        tempQuery = formatter_resource(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
                         mergedQuery = tempQuery; 
     
                     }
@@ -454,7 +461,7 @@ async function connectQueue() {
                         query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
-                        tempQuery = formatter(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
+                        tempQuery = formatter_resource(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
                         mergedQuery = tempQuery; 
     
                     }
@@ -487,7 +494,7 @@ async function connectQueue() {
                         query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
-                        tempQuery = formatter(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
+                        tempQuery = formatter_resource(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
                         mergedQuery = tempQuery; 
     
                     }
@@ -521,7 +528,7 @@ async function connectQueue() {
                         query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
-                        tempQuery = formatter(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
+                        tempQuery = formatter_resource(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
                         mergedQuery = tempQuery; 
     
                     }
@@ -556,7 +563,7 @@ async function connectQueue() {
                         query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
-                        tempQuery = formatter(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
+                        tempQuery = formatter_resource(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
                         mergedQuery = tempQuery; 
     
                     }
@@ -591,7 +598,7 @@ async function connectQueue() {
                             query['resource_Active'] = true;
                             query['resource_Status_Updated_At'] = new Date();
 
-                            tempQuery = formatter(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
+                            tempQuery = formatter_resource(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
                             mergedQuery = tempQuery; 
                         }
 
@@ -631,9 +638,12 @@ async function connectQueue() {
                           "result": result.result, 
                          };
                 callAPI(API_ALERT_URL, API_MSG );
+            } else {
+            API_MSG = {"result status": result.status};     
             }
-            channel.ack(data);
-            console.log("Data sent : ",RABBITMQ_SERVER_QUEUE_ALERT, API_MSG);
+
+            channel.ack(msg);
+            console.log("Msg processed : ",RABBITMQ_SERVER_QUEUE_ALERT, API_MSG);
             
         })
 
@@ -644,11 +654,29 @@ async function connectQueue() {
                           "result": result.result, 
                           };
                 callAPI(API_METRIC_URL, API_MSG );
-            }
-            channel.ack(data);
-            console.log("Data sent : ",RABBITMQ_SERVER_QUEUE_METRIC, API_MSG );
+            } else {
+                API_MSG = {"result status": result.status};     
+                }
+            channel.ack(msg);
+            console.log("Msg processed : ",RABBITMQ_SERVER_QUEUE_METRIC, API_MSG );
 
         })
+
+        channel.consume(RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED, (msg) => {
+            result = JSON.parse(msg.content.toString());
+            if (result.status == 4) {
+                API_MSG = {"cluster_uuid": result.cluster_uuid,
+                          "result": result.result, 
+                          };
+                callAPI(API_METRIC_RECEIVED_URL, API_MSG );
+            } else {
+                API_MSG = {"result status": result.status};     
+                }
+            channel.ack(msg);
+            console.log("Msg processed : ",RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED, API_MSG );
+
+        })
+
 
     } catch (error) {
         console.log(error);
@@ -662,7 +690,7 @@ async function callAPI(apiURL, apiMsg) {
     (
       (response) => {
         const status = response.data.message;
-        console.log("API called: ", status);
+        console.log("API called: ", apiURL, status);
       },
       (error) => {
         console.log("error due to unexpoected error: ", error.response);
@@ -671,7 +699,7 @@ async function callAPI(apiURL, apiMsg) {
 }
 
 
-function formatter(i, itemLength, resourceType, cluster_uuid, query, mergedQuery) {
+function formatter_resource(i, itemLength, resourceType, cluster_uuid, query, mergedQuery) {
 
     let interimQuery = {};
     try {
