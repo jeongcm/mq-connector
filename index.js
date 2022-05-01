@@ -1,3 +1,4 @@
+require('log-timestamp')
 const dontenv = require('dotenv');
 dontenv.config();
 const amqp = require("amqplib");
@@ -8,13 +9,14 @@ const app = express();
 app.use(express.json());
 
 const MQCOMMM_PORT = process.env.MQCOMMM_PORT || 4001;
+const NODE_EXPORTER_PORT = process.env.NODE_EXPORTER_PORT || 9100 ;
+
 const RABBITMQ_SERVER_URL = process.env.RABBITMQ_SERVER_URL || "amqp://localhost";
 const RABBITMQ_SERVER_PORT = process.env.RABBITMQ_SERVER_PORT || 5672;
 const RABBITMQ_SERVER_QUEUE_RESOURCE = process.env.RABBITMQ_SERVER_QUEUE_RESOURCE || "nc_resource";
 const RABBITMQ_SERVER_QUEUE_ALERT = process.env.RABBITMQ_SERVER_QUEUE_ALERT || "nc_alert";
 const RABBITMQ_SERVER_QUEUE_METRIC = process.env.RABBITMQ_SERVER_QUEUE_METRIC || "nc_metric";
 const RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED = process.env.RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED || "nc_metric_received";
-const NODE_EXPORTER_PORT = process.env.NODE_EXPORTER_PORT || 9100 ;
 
 const API_SERVER_RESOURCE_URL = process.env.API_SERVER_RESOURCE_URL || "http://localhost"
 const API_SERVER_RESOURCE_PORT = process.env.API_SERVER_RESOURCE_PORT || "5001"
@@ -44,13 +46,10 @@ const API_METRIC_URL = API_SERVER_METRIC_URL+":"+API_SERVER_METRIC_PORT + API_NA
 const API_METRIC_RECEIVED_URL = API_SERVER_METRIC_RECEIVED_URL+":"+API_SERVER_METRIC_RECEIVED_PORT + API_NAME_METRIC_RECEIVED_POST;
 const API_ALERT_URL = API_SERVER_ALERT_URL+":"+API_SERVER_ALERT_PORT + API_NAME_ALERT_POST;
 
-//console.log(connect_string); 
-
 connectQueue() // call connectQueue function
 
 async function connectQueue() {
     try {
-
         var result = "";  
         connection = await amqp.connect(connect_string);
         channel = await connection.createChannel();
@@ -78,6 +77,7 @@ async function connectQueue() {
                         var resourceType = "SV";
                         for (var i=0; i<itemLength; i++)
                         {
+                            tempQuery = {};
                             // get port number from port array and assign to resultPort variable.
                             resultPortsLength = result.items[i].spec.ports.length
                             for (var j=0; j<resultPortsLength; j++)
@@ -122,11 +122,15 @@ async function connectQueue() {
                     {
                         // get internal IP address from addresses array and assign to InternalIP variable.
                         let internalIpLength = result.items[i].status.addresses.length
+                        let internalIp = "";
                         for (var j=0; j<internalIpLength; j++)
                         {
                             if (result.items[i].status.addresses[j].type = 'InternalIP')
                             { 
-                                internalIp = result.items[i].status.addresses[j].address;
+                                if (j==1) {
+                                    internalIp = result.items[i].status.addresses[j].address;
+                                }
+                                //due to address type error, use 2nd order of address data for internal ip.
                             }
                         }
                         
@@ -153,7 +157,7 @@ async function connectQueue() {
                     }
 
                     API_MSG = JSON.parse(mergedQuery); 
-                    console.log(API_MSG);
+                    //console.log(API_MSG);
              
                 break;
 
@@ -185,7 +189,7 @@ async function connectQueue() {
                     }
 
                     API_MSG = JSON.parse(mergedQuery); 
-                    console.log(API_MSG);
+                    //console.log(API_MSG);
 
                 break;
 
@@ -220,7 +224,7 @@ async function connectQueue() {
                     }
 
                     API_MSG = JSON.parse(mergedQuery); 
-                    console.log(API_MSG);
+                    //console.log(API_MSG);
 
                 break;
 
@@ -703,7 +707,7 @@ async function connectQueue() {
                 (
                   (response) => {
                     channel.ack(msg);
-                    console.log("MQ message acknowleged: " + RABBITMQ_SRABBITMQ_SERVER_QUEUE_METRIC_RECEIVEDERVER_QUEUE_METRIC + ", cluster_uuid: " + cluster_uuid );
+                    console.log("MQ message acknowleged: " + RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid );
                       },
                   (error) => {
                     console.log("MQ message un-acknowleged: ",RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid);  
@@ -723,11 +727,11 @@ async function callAPI(apiURL, apiMsg) {
     .then
     (
       (response) => {
-        const responseStatus = response + ", status code: " + response.status;
+        const responseStatus = "status code: " + response.status;
         console.log("API called: ", apiURL, responseStatus);
       },
       (error) => {
-        const errorStatus = error + ", status code:  " + error.status;  
+        const errorStatus = "status code:  " + error.status;  
         console.log("API error due to unexpoected error: ", apiURL, errorStatus);
       })
 
@@ -756,5 +760,4 @@ function formatter_resource(i, itemLength, resourceType, cluster_uuid, query, me
     return interimQuery;
 }
 
-
-app.listen(MQCOMMM_PORT, () => console.log("Server running at port " + MQCOMMM_PORT));
+app.listen(MQCOMMM_PORT, () => console.log("NexClipper MQCOMM Server running at port " + MQCOMMM_PORT));
