@@ -3,7 +3,7 @@ kind: ConfigMap
 metadata:
   name: ${APP_IMAGE_NAME}-configmap
   labels:
-    app: ${APP_IMAGE_NAME}
+    app: ${APP_IMAGE_NAME} 
 data:
   API_SERVER_ALERT_URL: "http://nexclipper-connect.nc.svc.cluster.local"
   API_SERVER_ALERT_PORT: "8081"
