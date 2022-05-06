@@ -1,9 +1,13 @@
-require('log-timestamp')
+//require('log-timestamp')
 const dontenv = require('dotenv');
 dontenv.config();
 const amqp = require("amqplib");
 const axios = require('axios');
 const express = require("express");
+
+require( 'console-stamp' )( console, {
+    format: '(console).yellow :date().green.underline :label(7)'
+  } );
 
 const app = express();
 app.use(express.json());
@@ -46,6 +50,9 @@ const API_METRIC_URL = API_SERVER_METRIC_URL+":"+API_SERVER_METRIC_PORT + API_NA
 const API_METRIC_RECEIVED_URL = API_SERVER_METRIC_RECEIVED_URL+":"+API_SERVER_METRIC_RECEIVED_PORT + API_NAME_METRIC_RECEIVED_POST;
 const API_ALERT_URL = API_SERVER_ALERT_URL+":"+API_SERVER_ALERT_PORT + API_NAME_ALERT_POST;
 
+ 
+var resourceType;
+
 connectQueue() // call connectQueue function
 
 async function connectQueue() {
@@ -73,8 +80,9 @@ async function connectQueue() {
                 const result = JSON.parse(TotalMsg.result);
                 const itemLength = result.items.length;
                 switch (TotalMsg.template_uuid) {
-                    case "00000000000000000000000000000020":  //20, for K8s services
-                        var resourceType = "SV";
+                case "00000000000000000000000000000020":  //20, for K8s services
+                        resourceType = "SV";
+
                         for (var i=0; i<itemLength; i++)
                         {
                             tempQuery = {};
@@ -117,7 +125,7 @@ async function connectQueue() {
                 break;
 
                 case "00000000000000000000000000000010":  //10, for K8s nodes
-                    var resourceType = "ND";
+                    resourceType = "ND";
                     for (var i=0; i<itemLength; i++)
                     {
                         // get internal IP address from addresses array and assign to InternalIP variable.
@@ -162,7 +170,7 @@ async function connectQueue() {
                 break;
 
                 case "00000000000000000000000000000004":  //04, for K8s namespaces
-                    var resourceType = "NS";
+                    resourceType = "NS";
                     for (var i=0; i<itemLength; i++)
                     {
                         
@@ -194,7 +202,7 @@ async function connectQueue() {
                 break;
 
                 case "00000000000000000000000000000002":  //02, for K8s pods
-                    var resourceType = "PD";
+                    resourceType = "PD";
                     for (var i=0; i<itemLength; i++)
                     {
                         query['resource_Group_Uuid'] = TotalMsg.cluster_uuid ;  
@@ -229,7 +237,7 @@ async function connectQueue() {
                 break;
 
                 case "00000000000000000000000000001002":  //1002, for K8s deployment
-                    var resourceType = "DP";
+                    resourceType = "DP";
                     for (var i=0; i<itemLength; i++)
                     {
 
@@ -264,7 +272,7 @@ async function connectQueue() {
                 break;
 
                 case "00000000000000000000000000001004":  //1004, for K8s statefulset
-                    var resourceType = "SS";
+                    resourceType = "SS";
                     for (var i=0; i<itemLength; i++)
                     {
 
@@ -300,7 +308,7 @@ async function connectQueue() {
                 break;
 
                 case "00000000000000000000000000001006":  //1006, for K8s daemonset
-                    var resourceType = "DS";
+                    resourceType = "DS";
                     for (var i=0; i<itemLength; i++)
                     {
 
@@ -336,7 +344,7 @@ async function connectQueue() {
 
                 case "00000000000000000000000000001008":  //1008, for K8s replicaset
 
-                    var resourceType = "RS";
+                    resourceType = "RS";
                     for (var i=0; i<itemLength; i++)
                     {
 
@@ -372,7 +380,7 @@ async function connectQueue() {
 
                 case "00000000000000000000000000000018":  //18, for K8s pvc
 
-                    var resourceType = "PC";
+                    resourceType = "PC";
                     for (var i=0; i<itemLength; i++)
                     {
 
@@ -410,7 +418,7 @@ async function connectQueue() {
                 break;
 
                 case "00000000000000000000000000000014":  //14, for K8s secret
-                    var resourceType = "SE";
+                    resourceType = "SE";
                     for (var i=0; i<itemLength; i++)
                     {
 
@@ -443,7 +451,7 @@ async function connectQueue() {
                 break;
 
                 case "00000000000000000000000000000016":  //16, for K8s endpoint
-                    var resourceType = "EP";
+                    resourceType = "EP";
                     for (var i=0; i<itemLength; i++)
                     {
 
@@ -509,7 +517,7 @@ async function connectQueue() {
                 break;
 
                 case "00000000000000000000000000002002":  //2002, for K8s ingress
-                    var resourceType = "IG";
+                    resourceType = "IG";
                     for (var i=0; i<itemLength; i++)
                     {
                         query['resource_Group_Uuid'] = TotalMsg.cluster_uuid ;  
@@ -544,7 +552,7 @@ async function connectQueue() {
 
                 case "00000000000000000000000000000012":  //12, for K8s PV
 
-                    var resourceType = "PV";    
+                    resourceType = "PV";    
                     for (var i=0; i<itemLength; i++)
                     {
                         query['resource_Group_Uuid'] = TotalMsg.cluster_uuid ;  
@@ -578,7 +586,7 @@ async function connectQueue() {
                 break;
 
                 case "00000000000000000000000000003002":  //3002, for K8s storage class
-                    var resourceType = "SC";
+                    resourceType = "SC";
                     
                     for (var i=0; i<itemLength; i++)
                         {
@@ -626,7 +634,7 @@ async function connectQueue() {
                 (
                   (response) => {
                     channel.ack(msg);
-                    console.log("MQ message acknowleged: " + RABBITMQ_SERVER_QUEUE_RESOURCE + ", cluster_uuid: " + cluster_uuid );
+                    console.log("MQ message acknowleged: " + resourceType + ", " + RABBITMQ_SERVER_QUEUE_RESOURCE + ", cluster_uuid: " + cluster_uuid );
                       },
                   (error) => {
                     console.log("MQ message un-acknowleged: " + RABBITMQ_SERVER_QUEUE_RESOURCE + ", cluster_uuid: " + cluster_uuid);  
