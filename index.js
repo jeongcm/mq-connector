@@ -108,6 +108,7 @@ async function connectQueue() {
                             query['resource_Target_Created_At'] = result.items[i].metadata.creationTimestamp ;
                             query['resource_Labels'] = result.items[i].metadata.labels ; //object
                             query['resource_Annotations'] = result.items[i].metadata.annotations ; //object
+                            query['resource_Owner_References'] = result.items[i].metadata.ownerReferences ; //object
                             query['resource_Namespace'] = result.items[i].metadata.namespace; 
                             query['resource_Instance'] = result.items[i].spec.clusterIP + ":" + resultPort;
                             query['resource_Status'] = result.items[i].status; //object
@@ -153,6 +154,7 @@ async function connectQueue() {
                         query['resource_Target_Created_At'] = result.items[i].metadata.creationTimestamp ;
                         query['resource_Labels'] = result.items[i].metadata.labels ; //object
                         query['resource_Annotations'] = result.items[i].metadata.annotations ; //object
+                        query['resource_Owner_References'] = result.items[i].metadata.ownerReferences ; //object
                         query['resource_Instance'] = internalIp + ":" + NODE_EXPORTER_PORT;
                         query['resource_Status'] = result.items[i].status; //object
                         query['resource_Type'] = resourceType;
@@ -184,6 +186,7 @@ async function connectQueue() {
                         query['resource_Target_Created_At'] = result.items[i].metadata.creationTimestamp ;
                         query['resource_Labels'] = result.items[i].metadata.labels ; //object
                         query['resource_Annotations'] = result.items[i].metadata.annotations ; //object
+                        query['resource_Owner_References'] = result.items[i].metadata.ownerReferences ; //object
                         query['resource_Status'] = result.items[i].status; //object
                         query['resource_Type'] = resourceType;
                         query['resource_Level1'] = "K8";
@@ -214,6 +217,7 @@ async function connectQueue() {
                         query['resource_Target_Created_At'] = result.items[i].metadata.creationTimestamp ;
                         query['resource_Labels'] = result.items[i].metadata.labels ; //object
                         query['resource_Annotations'] = result.items[i].metadata.annotations ; //object
+                        query['resource_Owner_References'] = result.items[i].metadata.ownerReferences ; //object
                         query['resource_Namespace'] = result.items[i].metadata.namespace; 
                         query['resource_Instance'] = result.items[i].status.podIP;
                         query['resource_Pod_Phase'] = result.items[i].status.phase;
@@ -249,6 +253,7 @@ async function connectQueue() {
                         query['resource_Target_Created_At'] = result.items[i].metadata.creationTimestamp ;
                         query['resource_Labels'] = result.items[i].metadata.labels ; //object
                         query['resource_Annotations'] = result.items[i].metadata.annotations ; //object
+                        query['resource_Owner_References'] = result.items[i].metadata.ownerReferences ; //object
                         query['resource_Namespace'] = result.items[i].metadata.namespace; 
                         query['resource_Match_Labels'] = result.items[i].spec.selector.matchLabels; //object
                         query['resource_Status'] = result.items[i].status; //object
@@ -282,6 +287,7 @@ async function connectQueue() {
                         query['resource_Target_Created_At'] = result.items[i].metadata.creationTimestamp ;
                         query['resource_Labels'] = result.items[i].metadata.labels ; //object
                         query['resource_Annotations'] = result.items[i].metadata.annotations ; //object
+                        query['resource_Owner_References'] = result.items[i].metadata.ownerReferences ; //object
                         query['resource_Namespace'] = result.items[i].metadata.namespace; 
                         query['resource_Sts_Replicas'] = result.items[i].spec.replicas; 
                         query['resource_Sts_Volume_Claim_Templates'] = result.items[i].spec.volumeClaimTemplates; //array
@@ -318,6 +324,7 @@ async function connectQueue() {
                         query['resource_Target_Created_At'] = result.items[i].metadata.creationTimestamp ;
                         query['resource_Labels'] = result.items[i].metadata.labels ; //object
                         query['resource_Annotations'] = result.items[i].metadata.annotations ; //object
+                        query['resource_Owner_References'] = result.items[i].metadata.ownerReferences ; //object
                         query['resource_Namespace'] = result.items[i].metadata.namespace; 
                         query['resource_Match_Labels'] = result.items[i].spec.selector.matchLabels; //object
                         query['resource_Status'] = result.items[i].status; //object
@@ -352,6 +359,7 @@ async function connectQueue() {
                         query['resource_Target_Created_At'] = result.items[i].metadata.creationTimestamp ;
                         query['resource_Labels'] = result.items[i].metadata.labels ; //object
                         query['resource_Annotations'] = result.items[i].metadata.annotations ; //object
+                        query['resource_Owner_References'] = result.items[i].metadata.ownerReferences ; //object
                         query['resource_Namespace'] = result.items[i].metadata.namespace;
                         query['resource_Replicas'] = result.items[i].spec.replicas;
                         query['resource_Match_Labels'] = result.items[i].spec.selector.matchLabels; //object
@@ -388,6 +396,7 @@ async function connectQueue() {
                         query['resource_Target_Created_At'] = result.items[i].metadata.creationTimestamp ;
                         query['resource_Labels'] = result.items[i].metadata.labels ; //object
                         query['resource_Annotations'] = result.items[i].metadata.annotations ; //object
+                        query['resource_Owner_References'] = result.items[i].metadata.ownerReferences ; //object
                         query['resource_Namespace'] = result.items[i].metadata.namespace;
                         query['resource_Pvc_Storage'] = result.items[i].spec.resources; //object
                         query['resource_Pvc_Volume_Name'] = result.items[i].spec.volumeName;
@@ -423,6 +432,7 @@ async function connectQueue() {
                         query['resource_Target_Created_At'] = result.items[i].metadata.creationTimestamp ;
                         query['resource_Labels'] = result.items[i].metadata.labels ; //object
                         query['resource_Annotations'] = result.items[i].metadata.annotations ; //object
+                        query['resource_Owner_References'] = result.items[i].metadata.ownerReferences ; //object
                         query['resource_Namespace'] = result.items[i].metadata.namespace;
                         query['resource_Type'] = resourceType;    //Secret
                         query['resource_Level1'] = "K8"; //k8s
@@ -453,6 +463,7 @@ async function connectQueue() {
                         query['resource_Target_Created_At'] = result.items[i].metadata.creationTimestamp ;
                         query['resource_Labels'] = result.items[i].metadata.labels ; //object
                         query['resource_Annotations'] = result.items[i].metadata.annotations ; //object
+                        query['resource_Owner_References'] = result.items[i].metadata.ownerReferences ; //object
                         query['resource_Namespace'] = result.items[i].metadata.namespace;
                         query['resource_Endpoint'] = result.items[i].subsets; //array
                         query['resource_Type'] = resourceType;    //Endpoint
@@ -486,6 +497,7 @@ async function connectQueue() {
                         query['resource_Target_Created_At'] = result.items[i].metadata.creationTimestamp ;
                         query['resource_Labels'] = result.items[i].metadata.labels ; //object
                         query['resource_Annotations'] = result.items[i].metadata.annotations ; //object
+                        query['resource_Owner_References'] = result.items[i].metadata.ownerReferences ; //object
                         query['resource_Namespace'] = result.items[i].metadata.namespace;
                         query['resource_Configmap_Data'] = result.items[i].data; //object
                         query['resource_Type'] = resourceType;    //Configmap
@@ -517,6 +529,7 @@ async function connectQueue() {
                         query['resource_Target_Created_At'] = result.items[i].metadata.creationTimestamp ;
                         query['resource_Labels'] = result.items[i].metadata.labels ; //object
                         query['resource_Annotations'] = result.items[i].metadata.annotations ; //object
+                        query['resource_Owner_References'] = result.items[i].metadata.ownerReferences ; //object
                         query['resource_Namespace'] = result.items[i].metadata.namespace;
                         query['resource_Status'] = result.items[i].status; //object
                         query['resource_Ingress_Class'] = result.items[i].spec.ingressClassName; 
@@ -551,6 +564,7 @@ async function connectQueue() {
                         query['resource_Target_Created_At'] = result.items[i].metadata.creationTimestamp ;
                         query['resource_Labels'] = result.items[i].metadata.labels ; //object
                         query['resource_Annotations'] = result.items[i].metadata.annotations ; //object
+                        query['resource_Owner_References'] = result.items[i].metadata.ownerReferences ; //object
                         query['resource_Pv_Storage'] = result.items[i].spec.capacity.storage; 
                         query['resource_Pv_Claim_Ref'] = result.items[i].spec.claimRef; //object
                         query['resource_Pv_Storage_Class_Name'] = result.items[i].spec.storageClassName;
@@ -585,6 +599,7 @@ async function connectQueue() {
                             query['resource_Target_Created_At'] = result.items[i].metadata.creationTimestamp ;
                             query['resource_Labels'] = result.items[i].metadata.labels ; //object
                             query['resource_Annotations'] = result.items[i].metadata.annotations ; //object
+                            query['resource_Owner_References'] = result.items[i].metadata.ownerReferences ; //object
                             query['resource_Sc_Provisioner'] = result.items[i].provisioner; 
                             query['resource_Sc_Reclaim_Policy'] = result.items[i].reclaimPolicy;
                             query['resource_Sc_Allow_Volume_Expansion'] = result.items[i].allowVolumeExpansion;
