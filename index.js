@@ -222,6 +222,7 @@ async function connectQueue() {
                         query['resource_Instance'] = result.items[i].status.podIP;
                         query['resource_Pod_Phase'] = result.items[i].status.phase;
                         query['resource_Pod_Container'] = result.items[i].spec.containers; //array
+                        query['resource_Pod_Volume'] = result.items[i].spec.volumes; //array
                         query['resource_Status'] = result.items[i].status; //object
                         query['resource_Type'] = resourceType;
                         query['resource_Level1'] = "K8"; //k8s
