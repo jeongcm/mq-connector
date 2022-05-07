@@ -76,9 +76,16 @@ async function connectQueue() {
             const TotalMsg = JSON.parse(msg.content.toString());
             const cluster_uuid =  TotalMsg.cluster_uuid;
 
+            console.log("##########",TotalMsg);
             if (TotalMsg.status == 4) {
                 const result = JSON.parse(TotalMsg.result);
                 const itemLength = result.items.length;
+                if (itemLength ==0) 
+                    {
+                        console.log("Message ignored, no instance from the msg" + RABBITMQ_SERVER_QUEUE_RESOURCE + ", cluster_uuid: " + cluster_uuid);
+                        channel.ack(msg);
+                        return;
+                    }
                 switch (TotalMsg.template_uuid) {
                 case "00000000000000000000000000000020":  //20, for K8s services
                         resourceType = "SV";
@@ -120,7 +127,6 @@ async function connectQueue() {
                         }
 
                         API_MSG = JSON.parse(mergedQuery); 
-                        console.log(API_MSG);
                  
                 break;
 
@@ -161,11 +167,10 @@ async function connectQueue() {
 
                         tempQuery = formatter_resource(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
                         mergedQuery = tempQuery; 
-
                     }
 
                     API_MSG = JSON.parse(mergedQuery); 
-                    //console.log(API_MSG);
+
              
                 break;
 
@@ -197,7 +202,6 @@ async function connectQueue() {
                     }
 
                     API_MSG = JSON.parse(mergedQuery); 
-                    //console.log(API_MSG);
 
                 break;
 
@@ -232,7 +236,6 @@ async function connectQueue() {
                     }
 
                     API_MSG = JSON.parse(mergedQuery); 
-                    //console.log(API_MSG);
 
                 break;
 
@@ -266,8 +269,6 @@ async function connectQueue() {
                     }
 
                     API_MSG = JSON.parse(mergedQuery); 
-                    console.log(API_MSG);
-
 
                 break;
 
@@ -303,7 +304,7 @@ async function connectQueue() {
                     }
 
                     API_MSG = JSON.parse(mergedQuery); 
-                    console.log(API_MSG);
+                   // console.log(API_MSG);
 
                 break;
 
@@ -337,8 +338,6 @@ async function connectQueue() {
                     }
 
                     API_MSG = JSON.parse(mergedQuery); 
-                    console.log(API_MSG);
-
 
                 break;
 
@@ -374,7 +373,7 @@ async function connectQueue() {
                     }
 
                     API_MSG = JSON.parse(mergedQuery); 
-                    console.log(API_MSG);
+
 
                     break;
 
@@ -407,13 +406,10 @@ async function connectQueue() {
                         query['resource_Status_Updated_At'] = new Date();
 
                         tempQuery = formatter_resource(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
-                        mergedQuery = tempQuery; 
-    
+                        mergedQuery = tempQuery;
                     }
 
                     API_MSG = JSON.parse(mergedQuery); 
-                    console.log(API_MSG);
-
 
                 break;
 
@@ -441,12 +437,9 @@ async function connectQueue() {
 
                         tempQuery = formatter_resource(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
                         mergedQuery = tempQuery; 
-    
                     }
 
                     API_MSG = JSON.parse(mergedQuery); 
-                    console.log(API_MSG);
-
 
                 break;
 
@@ -479,7 +472,7 @@ async function connectQueue() {
                     }
 
                     API_MSG = JSON.parse(mergedQuery); 
-                    console.log(API_MSG);
+
 
                 break;
 
@@ -512,12 +505,11 @@ async function connectQueue() {
                     }
 
                     API_MSG = JSON.parse(mergedQuery); 
-                    console.log(API_MSG);
 
                 break;
 
                 case "00000000000000000000000000002002":  //2002, for K8s ingress
-                    resourceType = "IG";
+                    console.log("ingres...."); 
                     for (var i=0; i<itemLength; i++)
                     {
                         query['resource_Group_Uuid'] = TotalMsg.cluster_uuid ;  
@@ -540,19 +532,22 @@ async function connectQueue() {
                         query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
+                        console.log(query);
+
                         tempQuery = formatter_resource(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
+                        console.log(tempQuery); 
                         mergedQuery = tempQuery; 
     
                     }
-
+                    
                     API_MSG = JSON.parse(mergedQuery); 
-                    console.log(API_MSG);
 
                 break;
 
                 case "00000000000000000000000000000012":  //12, for K8s PV
 
                     resourceType = "PV";    
+                    console.log("PV...."); 
                     for (var i=0; i<itemLength; i++)
                     {
                         query['resource_Group_Uuid'] = TotalMsg.cluster_uuid ;  
@@ -576,12 +571,12 @@ async function connectQueue() {
                         query['resource_Status_Updated_At'] = new Date();
 
                         tempQuery = formatter_resource(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
+                        console.log(tempQuery);
                         mergedQuery = tempQuery; 
     
                     }
 
                     API_MSG = JSON.parse(mergedQuery); 
-                    console.log(API_MSG);
 
                 break;
 
@@ -615,7 +610,7 @@ async function connectQueue() {
                         }
 
                         API_MSG = JSON.parse(mergedQuery); 
-                        console.log(API_MSG);
+
 
                 break;
 
@@ -629,17 +624,23 @@ async function connectQueue() {
 
                 default:        
                 } //end of switch        
-                callAPI(API_RESOURCE_URL, API_MSG )
+                callAPI(API_RESOURCE_URL, API_MSG, resourceType)
                 .then
                 (
                   (response) => {
-                    channel.ack(msg);
+                    channel.ack(msg);  
                     console.log("MQ message acknowleged: " + resourceType + ", " + RABBITMQ_SERVER_QUEUE_RESOURCE + ", cluster_uuid: " + cluster_uuid );
                       },
                   (error) => {
                     console.log("MQ message un-acknowleged: " + RABBITMQ_SERVER_QUEUE_RESOURCE + ", cluster_uuid: " + cluster_uuid);  
                     throw error;
-                  })
+                  }).catch 
+                  (
+                    (error)=> { 
+                        console.log("unknown error");
+                        throw error;
+                    }
+                  )
             }
             else {
                 channel.ack(msg);
@@ -725,18 +726,18 @@ async function connectQueue() {
         }); // end of msg consume
     } catch (error) {
         console.log(error);
-        //throw error;
+        throw error;
     }
 }
 
-async function callAPI(apiURL, apiMsg) {
+async function callAPI(apiURL,apiMsg, resourceType) {
    
     await axios.post(apiURL,apiMsg)
     .then
     (
       (response) => {
         const responseStatus = "status code: " + response.status;
-        console.log("API called: ", apiURL, responseStatus);
+        console.log("API called: ", resourceType, " ", apiURL, " ", responseStatus);
       },
       (error) => {
         const errorStatus = "status code:  " + error.status;  
