@@ -76,7 +76,6 @@ async function connectQueue() {
             const TotalMsg = JSON.parse(msg.content.toString());
             const cluster_uuid =  TotalMsg.cluster_uuid;
 
-            console.log("##########",TotalMsg);
             if (TotalMsg.status == 4) {
                 const result = JSON.parse(TotalMsg.result);
                 const itemLength = result.items.length;
@@ -509,7 +508,7 @@ async function connectQueue() {
                 break;
 
                 case "00000000000000000000000000002002":  //2002, for K8s ingress
-                    console.log("ingres...."); 
+                    
                     for (var i=0; i<itemLength; i++)
                     {
                         query['resource_Group_Uuid'] = TotalMsg.cluster_uuid ;  
@@ -532,10 +531,7 @@ async function connectQueue() {
                         query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
-                        console.log(query);
-
                         tempQuery = formatter_resource(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
-                        console.log(tempQuery); 
                         mergedQuery = tempQuery; 
     
                     }
@@ -547,7 +543,6 @@ async function connectQueue() {
                 case "00000000000000000000000000000012":  //12, for K8s PV
 
                     resourceType = "PV";    
-                    console.log("PV...."); 
                     for (var i=0; i<itemLength; i++)
                     {
                         query['resource_Group_Uuid'] = TotalMsg.cluster_uuid ;  
@@ -571,7 +566,6 @@ async function connectQueue() {
                         query['resource_Status_Updated_At'] = new Date();
 
                         tempQuery = formatter_resource(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
-                        console.log(tempQuery);
                         mergedQuery = tempQuery; 
     
                     }
