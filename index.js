@@ -521,7 +521,7 @@ async function connectQueue() {
                 break;
 
                 case "00000000000000000000000000002002":  //2002, for K8s ingress
-                    
+                    var resourceType = "IG";
                     for (var i=0; i<itemLength; i++)
                     {
                         query['resource_Group_Uuid'] = TotalMsg.cluster_uuid ;  
