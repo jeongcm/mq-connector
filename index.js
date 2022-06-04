@@ -120,6 +120,7 @@ async function connectQueue() {
                             query['resource_Owner_References'] = result.items[i].metadata.ownerReferences ; //object
                             query['resource_Namespace'] = result.items[i].metadata.namespace; 
                             query['resource_Instance'] = result.items[i].spec.clusterIP + ":" + resultPort;
+                            query['resource_Service_Spec'] = result.items[i].spec;
                             query['resource_Status'] = result.items[i].status; //object
                             query['resource_Type'] = resourceType;
                             query['resource_Level1'] = "K8";
