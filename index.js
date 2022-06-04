@@ -790,7 +790,7 @@ async function connectQueueMongo() {
             const cluster_uuid =  TotalMsg.cluster_uuid;
 
             if (TotalMsg.status == 4) {
-                console.log(TotalMsg.result);
+                //console.log(TotalMsg.result);
                 //const result = TotalMsg.result;
                 const result = JSON.parse(TotalMsg.result);
                 const itemLength = result.items.length;
@@ -817,6 +817,7 @@ async function connectQueueMongo() {
                                 }
                             }
                             query['resource_Type'] = resourceType ;
+                            query['resource_Spec'] = result.items[i].spec;
                             query['resource_Group_Uuid'] = TotalMsg.cluster_uuid ;  
                             query['resource_Name'] = result.items[i].metadata.name ;
                             query['resource_Target_Uuid'] = result.items[i].metadata.uid ;
@@ -864,6 +865,7 @@ async function connectQueueMongo() {
                         }
                         
                         query['resource_Type'] = resourceType ;
+                        query['resource_Spec'] = result.items[i].spec;
                         query['resource_Group_Uuid'] = TotalMsg.cluster_uuid ;  
                         query['resource_Name'] = result.items[i].metadata.name ;
                         query['resource_Target_Uuid'] = result.items[i].metadata.uid ;
@@ -878,7 +880,7 @@ async function connectQueueMongo() {
                         query['resource_Level2'] = resourceType;
                         query['resource_Level_Type'] = "KN";
                         query['resource_Rbac'] = true;
-                        query['resource_Anomaly_Monitor'] = true;
+                        query['resource_Anomaly_Monitor'] = false;
                         query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
@@ -928,6 +930,7 @@ async function connectQueueMongo() {
                     for (var i=0; i<itemLength; i++)
                     {
                         query['resource_Type'] = resourceType ;
+                        query['resource_Spec'] = result.items[i].spec;
                         query['resource_Group_Uuid'] = TotalMsg.cluster_uuid ;  
                         query['resource_Name'] = result.items[i].metadata.name ;
                         query['resource_Target_Uuid'] = result.items[i].metadata.uid ;
@@ -947,7 +950,7 @@ async function connectQueueMongo() {
                         query['resource_Level3'] = resourceType; //Pod
                         query['resource_Level_Type'] = "KN";  //K8s-Nodes-Pods
                         query['resource_Rbac'] = false;
-                        query['resource_Anomaly_Monitor'] = false;
+                        query['resource_Anomaly_Monitor'] = true;
                         query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
@@ -965,6 +968,7 @@ async function connectQueueMongo() {
                     for (var i=0; i<itemLength; i++)
                     {
                         query['resource_Type'] = resourceType ;
+                        query['resource_Spec'] = result.items[i].spec;
                         query['resource_Group_Uuid'] = TotalMsg.cluster_uuid ;  
                         query['resource_Name'] = result.items[i].metadata.name ;
                         query['resource_Target_Uuid'] = result.items[i].metadata.uid ;
@@ -999,6 +1003,7 @@ async function connectQueueMongo() {
                     for (var i=0; i<itemLength; i++)
                     {
                         query['resource_Type'] = resourceType ;
+                        query['resource_Spec'] = result.items[i].spec;
                         query['resource_Group_Uuid'] = TotalMsg.cluster_uuid ;  
                         query['resource_Name'] = result.items[i].metadata.name ;
                         query['resource_Target_Uuid'] = result.items[i].metadata.uid ;
@@ -1036,6 +1041,7 @@ async function connectQueueMongo() {
                     for (var i=0; i<itemLength; i++)
                     {
                         query['resource_Type'] = resourceType ;
+                        query['resource_Spec'] = result.items[i].spec;
                         query['resource_Group_Uuid'] = TotalMsg.cluster_uuid ;  
                         query['resource_Name'] = result.items[i].metadata.name ;
                         query['resource_Target_Uuid'] = result.items[i].metadata.uid ;
@@ -1071,6 +1077,7 @@ async function connectQueueMongo() {
                     for (var i=0; i<itemLength; i++)
                     {
                         query['resource_Type'] = resourceType ;
+                        query['resource_Spec'] = result.items[i].spec;
                         query['resource_Group_Uuid'] = TotalMsg.cluster_uuid ;  
                         query['resource_Name'] = result.items[i].metadata.name ;
                         query['resource_Target_Uuid'] = result.items[i].metadata.uid ;
@@ -1108,6 +1115,7 @@ async function connectQueueMongo() {
                     for (var i=0; i<itemLength; i++)
                     {
                         query['resource_Type'] = resourceType ;
+                        query['resource_Spec'] = result.items[i].spec;
                         query['resource_Group_Uuid'] = TotalMsg.cluster_uuid ;  
                         query['resource_Name'] = result.items[i].metadata.name ;
                         query['resource_Target_Uuid'] = result.items[i].metadata.uid ;
@@ -1144,6 +1152,7 @@ async function connectQueueMongo() {
                     for (var i=0; i<itemLength; i++)
                     {
                         query['resource_Type'] = resourceType ;
+                        query['resource_Spec'] = result.items[i].spec;
                         query['resource_Group_Uuid'] = TotalMsg.cluster_uuid ;  
                         query['resource_Name'] = result.items[i].metadata.name ;
                         query['resource_Target_Uuid'] = result.items[i].metadata.uid ;
@@ -1175,6 +1184,7 @@ async function connectQueueMongo() {
                     for (var i=0; i<itemLength; i++)
                     {
                         query['resource_Type'] = resourceType ;
+                        query['resource_Spec'] = result.items[i].spec;
                         query['resource_Group_Uuid'] = TotalMsg.cluster_uuid ;  
                         query['resource_Name'] = result.items[i].metadata.name ;
                         query['resource_Target_Uuid'] = result.items[i].metadata.uid ;
@@ -1209,6 +1219,7 @@ async function connectQueueMongo() {
                     for (var i=0; i<itemLength; i++)
                     {
                         query['resource_Type'] = resourceType ;
+                        query['resource_Spec'] = result.items[i].spec;
                         query['resource_Group_Uuid'] = TotalMsg.cluster_uuid ;  
                         query['resource_Name'] = result.items[i].metadata.name ;
                         query['resource_Target_Uuid'] = result.items[i].metadata.uid ;
@@ -1242,6 +1253,7 @@ async function connectQueueMongo() {
                     for (var i=0; i<itemLength; i++)
                     {
                         query['resource_Type'] = resourceType ;
+                        query['resource_Spec'] = result.items[i].spec;
                         query['resource_Group_Uuid'] = TotalMsg.cluster_uuid ;  
                         query['resource_Name'] = result.items[i].metadata.name ;
                         query['resource_Target_Uuid'] = result.items[i].metadata.uid ;
@@ -1278,6 +1290,7 @@ async function connectQueueMongo() {
                     for (var i=0; i<itemLength; i++)
                     {
                         query['resource_Type'] = resourceType ;
+                        query['resource_Spec'] = result.items[i].spec;
                         query['resource_Group_Uuid'] = TotalMsg.cluster_uuid ;  
                         query['resource_Name'] = result.items[i].metadata.name ;
                         query['resource_Target_Uuid'] = result.items[i].metadata.uid ;
@@ -1314,6 +1327,7 @@ async function connectQueueMongo() {
                     for (var i=0; i<itemLength; i++)
                         {
                             query['resource_Type'] = resourceType ;
+                            query['resource_Spec'] = result.items[i].spec;
                             query['resource_Group_Uuid'] = TotalMsg.cluster_uuid ;  
                             query['resource_Name'] = result.items[i].metadata.name ;
                             query['resource_Target_Uuid'] = result.items[i].metadata.uid ;
