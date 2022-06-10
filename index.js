@@ -12,6 +12,7 @@ require( 'console-stamp' )( console, {
 
 const app = express();
 app.use(express.json( {limit: MAX_API_BODY_SIZE} ));
+app.use(express.urlencoded( {limit: MAX_API_BODY_SIZE} ));
 
 const MQCOMMM_PORT = process.env.MQCOMMM_PORT || 4001;
 const NODE_EXPORTER_PORT = process.env.NODE_EXPORTER_PORT || 9100 ;

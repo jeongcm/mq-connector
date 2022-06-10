@@ -28,6 +28,7 @@ data:
   RABBITMQ_SERVER_URL: "ncmq-rabbitmq.rabbitmq.svc.cluster.local"
   RABBITMQ_SERVER_USER: "nexclipper"
   MQCOMM_RESOURCE_TARGET_DB: "MONGODB"
+  MAX_API_BODY_SIZE: 500mb
   
 
 ---
