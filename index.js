@@ -4,17 +4,17 @@ dontenv.config();
 const amqp = require("amqplib");
 const axios = require('axios');
 const express = require("express");
+const MAX_API_BODY_SIZE = process.env.MAX_API_BODY_SIZE || "50mb"; 
 
 require( 'console-stamp' )( console, {
     format: '(console).yellow :date().green.underline :label(7)'
   } );
 
 const app = express();
-app.use(express.json());
+app.use(express.limit(MAX_API_BODY_SIZE));
 
 const MQCOMMM_PORT = process.env.MQCOMMM_PORT || 4001;
 const NODE_EXPORTER_PORT = process.env.NODE_EXPORTER_PORT || 9100 ;
-
 const RABBITMQ_SERVER_URL = process.env.RABBITMQ_SERVER_URL || "amqp://localhost";
 const RABBITMQ_SERVER_PORT = process.env.RABBITMQ_SERVER_PORT || 5672;
 const RABBITMQ_SERVER_QUEUE_RESOURCE = process.env.RABBITMQ_SERVER_QUEUE_RESOURCE || "nc_resource";
