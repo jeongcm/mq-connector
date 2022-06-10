@@ -11,7 +11,7 @@ require( 'console-stamp' )( console, {
   } );
 
 const app = express();
-app.use(express.limit(MAX_API_BODY_SIZE));
+app.use(express.json( {limit: MAX_API_BODY_SIZE} ));
 
 const MQCOMMM_PORT = process.env.MQCOMMM_PORT || 4001;
 const NODE_EXPORTER_PORT = process.env.NODE_EXPORTER_PORT || 9100 ;
@@ -706,7 +706,7 @@ async function connectQueue() {
                       },
                   (error) => {
                     console.log("MQ message un-acknowleged: ",RABBITMQ_SERVER_QUEUE_ALERT + ", cluster_uuid: " + cluster_uuid);  
-                    throw error;
+                    console.log(error);
                   })
                 };
         }); // end of msg consume
@@ -731,7 +731,7 @@ async function connectQueue() {
                       },
                   (error) => {
                     console.log("MQ message un-acknowleged: ",RABBITMQ_SERVER_QUEUE_METRIC + ", cluster_uuid: " + cluster_uuid);  
-                    throw error;
+                    console.log(error);
                   })
                 };
         }); // end of msg consume
@@ -756,7 +756,7 @@ async function connectQueue() {
                       },
                   (error) => {
                     console.log("MQ message un-acknowleged: ",RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid);  
-                    //throw error;
+                    console.log(error);
                   })
                 }; 
         }); // end of msg consume
@@ -1412,7 +1412,7 @@ async function connectQueueMongo() {
                       },
                   (error) => {
                     console.log("MQ message un-acknowleged: ",RABBITMQ_SERVER_QUEUE_ALERT + ", cluster_uuid: " + cluster_uuid);  
-                    throw error;
+                    console.log(error);
                   })
                 };
         }); // end of msg consume
@@ -1437,7 +1437,7 @@ async function connectQueueMongo() {
                       },
                   (error) => {
                     console.log("MQ message un-acknowleged: ",RABBITMQ_SERVER_QUEUE_METRIC + ", cluster_uuid: " + cluster_uuid);  
-                    throw error;
+                    console.log(error);
                   })
                 };
         }); // end of msg consume
@@ -1462,7 +1462,7 @@ async function connectQueueMongo() {
                       },
                   (error) => {
                     console.log("MQ message un-acknowleged: ",RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid);  
-                    //throw error;
+                    console.log(error);
                   })
                 }; 
         }); // end of msg consume
