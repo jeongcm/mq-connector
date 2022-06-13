@@ -4,7 +4,7 @@ dontenv.config();
 const amqp = require("amqplib");
 const axios = require('axios');
 const express = require("express");
-const MAX_API_BODY_SIZE = process.env.MAX_API_BODY_SIZE || "50mb"; 
+const MAX_API_BODY_SIZE = process.env.MAX_API_BODY_SIZE || "500mb"; 
 
 require( 'console-stamp' )( console, {
     format: '(console).yellow :date().green.underline :label(7)'
@@ -23,25 +23,25 @@ const RABBITMQ_SERVER_QUEUE_ALERT = process.env.RABBITMQ_SERVER_QUEUE_ALERT || "
 const RABBITMQ_SERVER_QUEUE_METRIC = process.env.RABBITMQ_SERVER_QUEUE_METRIC || "nc_metric";
 const RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED = process.env.RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED || "nc_metric_received";
 
-const API_SERVER_RESOURCE_URL = process.env.API_SERVER_RESOURCE_URL || "http://localhost"
-const API_SERVER_RESOURCE_PORT = process.env.API_SERVER_RESOURCE_PORT || "5001"
-const API_NAME_RESOURCE_POST = process.env.API_NAME_RESOURCE_POST || "/resourceMass"
+const API_SERVER_RESOURCE_URL = process.env.API_SERVER_RESOURCE_URL || "http://localhost";
+const API_SERVER_RESOURCE_PORT = process.env.API_SERVER_RESOURCE_PORT || "5001";
+const API_NAME_RESOURCE_POST = process.env.API_NAME_RESOURCE_POST || "/resourceMass";
 
-const API_SERVER_METRIC_URL = process.env.API_SERVER_METRIC_URL || "http://localhost"
-const API_SERVER_METRIC_PORT = process.env.API_SERVER_METRIC_PORT || "5001"
-const API_NAME_METRIC_POST = process.env.API_NAME_METRIC_POST || "/metricMetaMass"
+const API_SERVER_METRIC_URL = process.env.API_SERVER_METRIC_URL || "http://localhost";
+const API_SERVER_METRIC_PORT = process.env.API_SERVER_METRIC_PORT || "5001";
+const API_NAME_METRIC_POST = process.env.API_NAME_METRIC_POST || "/metricMetaMass";
 
-const API_SERVER_METRIC_RECEIVED_URL = process.env.API_SERVER_METRIC_RECEIVED_URL || "http://localhost"
-const API_SERVER_METRIC_RECEIVED_PORT = process.env.API_SERVER_METRIC_RECEIVED_PORT || "5001"
-const API_NAME_METRIC_RECEIVED_POST = process.env.API_NAME_METRIC_RECEIVED_POST || "/metricReceivedMass"
+const API_SERVER_METRIC_RECEIVED_URL = process.env.API_SERVER_METRIC_RECEIVED_URL || "http://localhost";
+const API_SERVER_METRIC_RECEIVED_PORT = process.env.API_SERVER_METRIC_RECEIVED_PORT || "5001";
+const API_NAME_METRIC_RECEIVED_POST = process.env.API_NAME_METRIC_RECEIVED_POST || "/metricReceivedMass";
 
-const API_SERVER_ALERT_URL = process.env.API_SERVER_ALERT_URL || "http://localhost"
-const API_SERVER_ALERT_PORT = process.env.API_SERVER_ALERT_PORT || "5001"
-const API_NAME_ALERT_POST = process.env.API_NAME_ALERT_POST || "/alertMass"
+const API_SERVER_ALERT_URL = process.env.API_SERVER_ALERT_URL || "http://localhost";
+const API_SERVER_ALERT_PORT = process.env.API_SERVER_ALERT_PORT || "5001";
+const API_NAME_ALERT_POST = process.env.API_NAME_ALERT_POST || "/alertMass";
 
-const RABBITMQ_SERVER_USER = process.env.RABBITMQ_SERVER_USER || "nexclipper"
-const RABBITMQ_SERVER_PASSWORD = process.env.RABBITMQ_SERVER_PASSWORD || "nexclipper"
-const RABBITMQ_SERVER_VIRTUAL_HOST = process.env.RABBITMQ_SERVER_VIRTUAL_HOST || "nexclipper"
+const RABBITMQ_SERVER_USER = process.env.RABBITMQ_SERVER_USER || "nexclipper";
+const RABBITMQ_SERVER_PASSWORD = process.env.RABBITMQ_SERVER_PASSWORD || "nexclipper";
+const RABBITMQ_SERVER_VIRTUAL_HOST = process.env.RABBITMQ_SERVER_VIRTUAL_HOST || "nexclipper";
 const RabbitOpt = "amqp://" + RABBITMQ_SERVER_USER + ":" + RABBITMQ_SERVER_PASSWORD + "@";
 
 var channel, connection;
@@ -62,7 +62,7 @@ if (MQCOMM_RESOURCE_TARGET_DB=="MONGODB") {
 {
     connectQueue()
     console.log ("Connected for Mariadb/Resource")
-}    
+} 
 
 async function connectQueue() {
     try {
@@ -673,12 +673,12 @@ async function connectQueue() {
                       },
                   (error) => {
                     console.log("MQ message un-acknowleged: " + RABBITMQ_SERVER_QUEUE_RESOURCE + ", cluster_uuid: " + cluster_uuid);  
-                    throw error;
+                    //throw error;
                   }).catch 
                   (
                     (error)=> { 
                         console.log("MQ message un-acknowleged2: " + RABBITMQ_SERVER_QUEUE_RESOURCE + ", cluster_uuid: " + cluster_uuid); 
-                        throw error;
+                        //throw error;
                     }
                   )
             }
@@ -773,7 +773,7 @@ async function connectQueueMongo() {
         var result = "";  
         connection = await amqp.connect(connect_string);
         channel = await connection.createChannel();
-
+        
         // connect to RABBITMQ_SERVER_QUEUE_NAME, create one if doesnot exist already
         await channel.assertQueue(RABBITMQ_SERVER_QUEUE_RESOURCE);
         await channel.assertQueue(RABBITMQ_SERVER_QUEUE_ALERT);
@@ -1379,12 +1379,12 @@ async function connectQueueMongo() {
                       },
                   (error) => {
                     console.log("MQ message un-acknowleged: " + RABBITMQ_SERVER_QUEUE_RESOURCE + ", cluster_uuid: " + cluster_uuid);  
-                    throw error;
+                    //throw error;
                   }).catch 
                   (
                     (error)=> { 
                         console.log("MQ message un-acknowleged2: " + RABBITMQ_SERVER_QUEUE_RESOURCE + ", cluster_uuid: " + cluster_uuid); 
-                        throw error;
+                        //throw error;
                     }
                   )
             }
@@ -1444,9 +1444,11 @@ async function connectQueueMongo() {
         }); // end of msg consume
 
         await channel.consume(RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED, (msg) => {
-
             result = JSON.parse(msg.content.toString());
+            console.log("max body size: ", MAX_API_BODY_SIZE);
+            console.log("rabbitmq message size", (Buffer.byteLength(msg.content.toString()))/1024/1024, "mb");
             const cluster_uuid = result.cluster_uuid;
+            console.log("************************");
 
             if (result.status != 4) {
                 console.log("Msg processed, nothing to update : " + RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid );
@@ -1454,6 +1456,8 @@ async function connectQueueMongo() {
                 }
             else {
                 console.log("calling NC-CONNECT API : " + RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid );
+                console.log(result);
+
                 callAPI(API_METRIC_RECEIVED_URL, result, "metric_received")
                 .then
                 (
@@ -1465,8 +1469,11 @@ async function connectQueueMongo() {
                     console.log("MQ message un-acknowleged: ",RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid);  
                     console.log(error);
                   })
-                }; 
+ 
+                };
+
         }); // end of msg consume
+        
     } catch (error) {
         console.log(error);
         throw error;
@@ -1475,8 +1482,7 @@ async function connectQueueMongo() {
 
 
 
-async function callAPI(apiURL,apiMsg, resourceType) {
-
+async function callAPI(apiURL, apiMsg , resourceType) {
     await axios.post(apiURL,apiMsg)
     .then
     (
