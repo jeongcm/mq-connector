@@ -1446,7 +1446,7 @@ async function connectQueueMongo() {
         await channel.consume(RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED, (msg) => {
             result = JSON.parse(msg.content.toString());
             console.log("max body size: ", MAX_API_BODY_SIZE);
-            console.log("rabbitmq message size", (Buffer.byteLength(msg.content.toString()))/1024/1024, "mb");
+            const rabbitmq_message_size = (Buffer.byteLength(msg.content.toString()))/1024/1024;
             const cluster_uuid = result.cluster_uuid;
             console.log("************************");
 
@@ -1463,10 +1463,10 @@ async function connectQueueMongo() {
                 (
                   (response) => {
                     channel.ack(msg);
-                    console.log("MQ message acknowleged: " + RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid );
+                    console.log("MQ message acknowleged: " + RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid + ", Msg Size (MB): ", rabbitmq_message_size);  
                       },
                   (error) => {
-                    console.log("MQ message un-acknowleged: ",RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid);  
+                    console.log("MQ message un-acknowleged: ",RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid + ", Msg Size (MB): ", rabbitmq_message_size);  
                     console.log(error);
                   })
  
@@ -1483,7 +1483,7 @@ async function connectQueueMongo() {
 
 
 async function callAPI(apiURL, apiMsg , resourceType) {
-    await axios.post(apiURL,apiMsg)
+    await axios.post(apiURL,apiMsg, {maxContentLength:Infinity, maxBodyLength: Infinity})
     .then
     (
       (response) => {
