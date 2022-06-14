@@ -1448,7 +1448,6 @@ async function connectQueueMongo() {
             console.log("max body size: ", MAX_API_BODY_SIZE);
             const rabbitmq_message_size = (Buffer.byteLength(msg.content.toString()))/1024/1024;
             const cluster_uuid = result.cluster_uuid;
-            console.log("************************");
 
             if (result.status != 4) {
                 console.log("Msg processed, nothing to update : " + RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid );
@@ -1456,7 +1455,7 @@ async function connectQueueMongo() {
                 }
             else {
                 console.log("calling NC-CONNECT API : " + RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid );
-                console.log(result);
+                //console.log(result);
 
                 callAPI(API_METRIC_RECEIVED_URL, result, "metric_received")
                 .then
