@@ -880,7 +880,7 @@ async function connectQueueMongo() {
                         query['resource_Level1'] = "K8";
                         query['resource_Level2'] = resourceType;
                         query['resource_Level_Type'] = "KN";
-                        query['resource_Rbac'] = true;
+                        query['resource_Rbac'] = false;
                         query['resource_Anomaly_Monitor'] = false;
                         query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
@@ -912,7 +912,7 @@ async function connectQueueMongo() {
                         query['resource_Level2'] = resourceType;
                         //query['resource_Level3'] = "SV";
                         query['resource_Level_Type'] = "KS";
-                        query['resource_Rbac'] = false;
+                        query['resource_Rbac'] = true;
                         query['resource_Anomaly_Monitor'] = false;
                         query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
@@ -1445,16 +1445,16 @@ async function connectQueueMongo() {
 
         await channel.consume(RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED, (msg) => {
             result = JSON.parse(msg.content.toString());
-            console.log("max body size: ", MAX_API_BODY_SIZE);
             const rabbitmq_message_size = (Buffer.byteLength(msg.content.toString()))/1024/1024;
             const cluster_uuid = result.cluster_uuid;
-
+            console.log ("rabbitmq_message_size(mb): ", rabbitmq_message_size);
+            console.log ("result status: ", result.status);
             if (result.status != 4) {
                 console.log("Msg processed, nothing to update : " + RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid );
                 channel.ack(msg);
                 }
             else {
-                console.log("calling NC-CONNECT API : " + RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid );
+                console.log("calling metric received mass upload API : " + RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid );
                 //console.log(result);
 
                 callAPI(API_METRIC_RECEIVED_URL, result, "metric_received")
@@ -1469,8 +1469,8 @@ async function connectQueueMongo() {
                     console.log(error);
                   })
  
-                };
-
+                }; // end of else
+            result = "";    
         }); // end of msg consume
         
     } catch (error) {
