@@ -697,7 +697,7 @@ async function connectQueue() {
                 channel.ack(msg);
                 }
             else {
-                console.log("calling NC-CONNECT API : " + RABBITMQ_SERVER_QUEUE_ALERT + ", cluster_uuid: " + cluster_uuid );
+                console.log("calling alert interface API : " + RABBITMQ_SERVER_QUEUE_ALERT + ", cluster_uuid: " + cluster_uuid );
                 callAPI(API_ALERT_URL, result, "alerts")
                 .then
                 (
@@ -722,7 +722,7 @@ async function connectQueue() {
                 channel.ack(msg);
                 }
             else {
-                console.log("calling NC-CONNECT API : " + RABBITMQ_SERVER_QUEUE_METRIC + ", cluster_uuid: " + cluster_uuid );
+                console.log("calling metric meta interface API : " + RABBITMQ_SERVER_QUEUE_METRIC + ", cluster_uuid: " + cluster_uuid );
                 callAPI(API_METRIC_URL, result, "metric")
                 .then
                 (
@@ -747,7 +747,7 @@ async function connectQueue() {
                 channel.ack(msg);
                 }
             else {
-                console.log("calling NC-CONNECT API : " + RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid );
+                console.log("calling metric received interface API : " + RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid );
                 callAPI(API_METRIC_RECEIVED_URL, result, "metric_received")
                 .then
                 (
@@ -786,18 +786,29 @@ async function connectQueueMongo() {
             var mergedQuery = {};
             var tempQuery = {};
             var API_MSG = {};
-            
-            const TotalMsg = JSON.parse(msg.content.toString());
-            const cluster_uuid =  TotalMsg.cluster_uuid;
+            //console.log("rabbit msg",msg); 
+            let TotalMsg = JSON.parse(msg.content.toString());
+            //console.log("JSON convereted rabbit msg",TotalMsg); 
+            let cluster_uuid =  TotalMsg.cluster_uuid;
+            let service_uuid = TotalMsg.service_uuid;
 
             if (TotalMsg.status == 4) {
                 //console.log(TotalMsg.result);
                 //const result = TotalMsg.result;
+                
+                if (!TotalMsg.result)   
+                    {
+                        console.log("Message ignored, No result in the message.: " + TotalMsg.template_uuid + ", cluster_uuid: " + cluster_uuid, ", service_uuid: ", service_uuid);
+                        channel.ack(msg);
+                        return;
+
+                    }
+
                 const result = JSON.parse(TotalMsg.result);
                 const itemLength = result.items.length;
                 if (itemLength ==0) 
                     {
-                        console.log("Message ignored, no instance for resource, from the msg, template uuid: " + TotalMsg.template_uuid + ", cluster_uuid: " + cluster_uuid);
+                        console.log("Message ignored, No instance for resource, from the msg, template uuid: " + TotalMsg.template_uuid + ", cluster_uuid: " + cluster_uuid, ", service_uuid: ", service_uuid);
                         channel.ack(msg);
                         return;
                     }
@@ -1390,7 +1401,7 @@ async function connectQueueMongo() {
             }
             else {
                 channel.ack(msg);
-                console.log("Message ignored" + RABBITMQ_SERVER_QUEUE_RESOURCE + ", cluster_uuid: " + cluster_uuid);
+                console.log("Message ignored " + RABBITMQ_SERVER_QUEUE_RESOURCE + ", cluster_uuid: " + cluster_uuid);
             }
         })
 
@@ -1403,7 +1414,7 @@ async function connectQueueMongo() {
                 channel.ack(msg);
                 }
             else {
-                console.log("calling NC-CONNECT API : " + RABBITMQ_SERVER_QUEUE_ALERT + ", cluster_uuid: " + cluster_uuid );
+                console.log("calling alert interface API : " + RABBITMQ_SERVER_QUEUE_ALERT + ", cluster_uuid: " + cluster_uuid );
                 callAPI(API_ALERT_URL, result, "alerts")
                 .then
                 (
@@ -1428,7 +1439,7 @@ async function connectQueueMongo() {
                 channel.ack(msg);
                 }
             else {
-                console.log("calling NC-CONNECT API : " + RABBITMQ_SERVER_QUEUE_METRIC + ", cluster_uuid: " + cluster_uuid );
+                console.log("calling metric meta interface API : " + RABBITMQ_SERVER_QUEUE_METRIC + ", cluster_uuid: " + cluster_uuid );
                 callAPI(API_METRIC_URL, result, "metric")
                 .then
                 (
