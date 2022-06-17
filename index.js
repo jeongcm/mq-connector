@@ -13,8 +13,12 @@ require( 'console-stamp' )( console, {
 const app = express();
 app.use(express.json( {limit: MAX_API_BODY_SIZE} ));
 app.use(express.urlencoded( {limit: MAX_API_BODY_SIZE} ));
+app.get('/health', (req, res)=>{
+    res.send ("health check passed");
+});
 
-const MQCOMMM_PORT = process.env.MQCOMMM_PORT || 4001;
+const MQCOMM_PORT = process.env.MQCOMM_PORT || 4001;
+//const MQCOMM_HEALTH_PORT = process.env.MQCOMM_HEALTH_PORT || 4012;
 const NODE_EXPORTER_PORT = process.env.NODE_EXPORTER_PORT || 9100 ;
 const RABBITMQ_SERVER_URL = process.env.RABBITMQ_SERVER_URL || "amqp://localhost";
 const RABBITMQ_SERVER_PORT = process.env.RABBITMQ_SERVER_PORT || 5672;
@@ -1553,4 +1557,4 @@ function formatter_resource_mongo(i, itemLength, resourceType, cluster_uuid, que
     return interimQuery;
 }
 
-app.listen(MQCOMMM_PORT, () => console.log("NexClipper MQCOMM Server running at port " + MQCOMMM_PORT));
+app.listen(MQCOMM_PORT, () => console.log("NexClipper MQCOMM Server running at port " + MQCOMM_PORT));
