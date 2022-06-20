@@ -1566,7 +1566,7 @@ function formatter_resource_mongo(i, itemLength, resourceType, cluster_uuid, que
 
 function massUploadMetricReceived(metricReceivedMassFeed, clusterUuid){
 
-    await axios(
+    axios(
         {
           method: 'post',
           url: `http://vm-victoria-metrics-single-server.vm.svc.cluster.local:8428/api/v1/import?extra_label=clusterUuid=${clusterUuid}`,
