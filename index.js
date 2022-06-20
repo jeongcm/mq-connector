@@ -1565,7 +1565,7 @@ function formatter_resource_mongo(i, itemLength, resourceType, cluster_uuid, que
 }
 
 function massUploadMetricReceived(metricReceivedMassFeed, clusterUuid){
-
+    let result;
     axios(
         {
           method: 'post',
