@@ -1504,7 +1504,7 @@ async function connectQueueMongo() {
 }
 
 async function callAPI(apiURL, apiMsg , resourceType) {
-    await axios.post(apiURL,apiMsg, {maxContentLength:Infinity, maxBodyLength: Infinity})
+    axios.post(apiURL,apiMsg, {maxContentLength:Infinity, maxBodyLength: Infinity})
     .then
     (
       (response) => {
@@ -1580,7 +1580,6 @@ function massUploadMetricReceived(metricReceivedMassFeed, clusterUuid){
         });
 
     return result;
-
 
 }
 
