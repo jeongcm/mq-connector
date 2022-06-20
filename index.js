@@ -95,11 +95,11 @@ async function connectQueue() {
                 const itemLength = result.items.length;
                 if (itemLength ==0) 
                     {
-                        console.log("Message ignored, no instance for resource, from the msg, template uuid: " + TotalMsg.template_uuid + ", cluster_uuid: " + cluster_uuid);
+                        console.log("Message ignored, no instance for resource, from the msg, template uuid: " + template_uuid + ", cluster_uuid: " + cluster_uuid);
                         channel.ack(msg);
                         return;
                     }
-                switch (TotalMsg.template_uuid) {
+                switch (template_uuid) {
                 case "00000000000000000000000000000020":  //20, for K8s services
                         resourceType = "SV";
 
@@ -116,7 +116,7 @@ async function connectQueue() {
                                 }
                             }
                             
-                            query['resource_Group_Uuid'] = TotalMsg.cluster_uuid ;  
+                            query['resource_Group_Uuid'] = cluster_uuid ;  
                             query['resource_Name'] = result.items[i].metadata.name ;
                             query['resource_Target_Uuid'] = result.items[i].metadata.uid ;
                             query['resource_Target_Created_At'] = result.items[i].metadata.creationTimestamp ;
@@ -137,7 +137,7 @@ async function connectQueue() {
                             query['resource_Active'] = true;
                             query['resource_Status_Updated_At'] = new Date();
 
-                            tempQuery = formatter_resource(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
+                            tempQuery = formatter_resource(i, itemLength, resourceType, cluster_uuid, query, mergedQuery);
                             mergedQuery = tempQuery;     
                         }
 
@@ -163,7 +163,7 @@ async function connectQueue() {
                             }
                         }
                         
-                        query['resource_Group_Uuid'] = TotalMsg.cluster_uuid ;  
+                        query['resource_Group_Uuid'] = cluster_uuid ;  
                         query['resource_Name'] = result.items[i].metadata.name ;
                         query['resource_Target_Uuid'] = result.items[i].metadata.uid ;
                         query['resource_Target_Created_At'] = result.items[i].metadata.creationTimestamp ;
@@ -182,7 +182,7 @@ async function connectQueue() {
                         query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
-                        tempQuery = formatter_resource(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
+                        tempQuery = formatter_resource(i, itemLength, resourceType, cluster_uuid, query, mergedQuery);
                         mergedQuery = tempQuery; 
                     }
 
@@ -195,7 +195,7 @@ async function connectQueue() {
                     for (var i=0; i<itemLength; i++)
                     {
                         
-                        query['resource_Group_Uuid'] = TotalMsg.cluster_uuid ;  
+                        query['resource_Group_Uuid'] = cluster_uuid ;  
                         query['resource_Name'] = result.items[i].metadata.name ;
                         query['resource_Target_Uuid'] = result.items[i].metadata.uid ;
                         query['resource_Target_Created_At'] = result.items[i].metadata.creationTimestamp ;
@@ -214,7 +214,7 @@ async function connectQueue() {
                         query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
-                        tempQuery = formatter_resource(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
+                        tempQuery = formatter_resource(i, itemLength, resourceType, cluster_uuid, query, mergedQuery);
                         mergedQuery = tempQuery; 
     
                     }
@@ -227,7 +227,7 @@ async function connectQueue() {
                     resourceType = "PD";
                     for (var i=0; i<itemLength; i++)
                     {
-                        query['resource_Group_Uuid'] = TotalMsg.cluster_uuid ;  
+                        query['resource_Group_Uuid'] = cluster_uuid ;  
                         query['resource_Name'] = result.items[i].metadata.name ;
                         query['resource_Target_Uuid'] = result.items[i].metadata.uid ;
                         query['resource_Target_Created_At'] = result.items[i].metadata.creationTimestamp ;
@@ -251,7 +251,7 @@ async function connectQueue() {
                         query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
-                        tempQuery = formatter_resource(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
+                        tempQuery = formatter_resource(i, itemLength, resourceType, cluster_uuid, query, mergedQuery);
                         mergedQuery = tempQuery; 
 
                     }
@@ -265,7 +265,7 @@ async function connectQueue() {
                     for (var i=0; i<itemLength; i++)
                     {
 
-                        query['resource_Group_Uuid'] = TotalMsg.cluster_uuid ;  
+                        query['resource_Group_Uuid'] = cluster_uuid ;  
                         query['resource_Name'] = result.items[i].metadata.name ;
                         query['resource_Target_Uuid'] = result.items[i].metadata.uid ;
                         query['resource_Target_Created_At'] = result.items[i].metadata.creationTimestamp ;
@@ -286,7 +286,7 @@ async function connectQueue() {
                         query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
-                        tempQuery = formatter_resource(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
+                        tempQuery = formatter_resource(i, itemLength, resourceType, cluster_uuid, query, mergedQuery);
                         mergedQuery = tempQuery; 
     
                     }
@@ -300,7 +300,7 @@ async function connectQueue() {
                     for (var i=0; i<itemLength; i++)
                     {
 
-                        query['resource_Group_Uuid'] = TotalMsg.cluster_uuid ;  
+                        query['resource_Group_Uuid'] = cluster_uuid ;  
                         query['resource_Name'] = result.items[i].metadata.name ;
                         query['resource_Target_Uuid'] = result.items[i].metadata.uid ;
                         query['resource_Target_Created_At'] = result.items[i].metadata.creationTimestamp ;
@@ -323,7 +323,7 @@ async function connectQueue() {
                         query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
-                        tempQuery = formatter_resource(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
+                        tempQuery = formatter_resource(i, itemLength, resourceType, cluster_uuid, query, mergedQuery);
                         mergedQuery = tempQuery; 
     
                     }
@@ -338,7 +338,7 @@ async function connectQueue() {
                     for (var i=0; i<itemLength; i++)
                     {
 
-                        query['resource_Group_Uuid'] = TotalMsg.cluster_uuid ;  
+                        query['resource_Group_Uuid'] = cluster_uuid ;  
                         query['resource_Name'] = result.items[i].metadata.name ;
                         query['resource_Target_Uuid'] = result.items[i].metadata.uid ;
                         query['resource_Target_Created_At'] = result.items[i].metadata.creationTimestamp ;
@@ -359,7 +359,7 @@ async function connectQueue() {
                         query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
-                        tempQuery = formatter_resource(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
+                        tempQuery = formatter_resource(i, itemLength, resourceType, cluster_uuid, query, mergedQuery);
                         mergedQuery = tempQuery; 
 
                     }
@@ -374,7 +374,7 @@ async function connectQueue() {
                     for (var i=0; i<itemLength; i++)
                     {
 
-                        query['resource_Group_Uuid'] = TotalMsg.cluster_uuid ;  
+                        query['resource_Group_Uuid'] = cluster_uuid ;  
                         query['resource_Name'] = result.items[i].metadata.name ;
                         query['resource_Target_Uuid'] = result.items[i].metadata.uid ;
                         query['resource_Target_Created_At'] = result.items[i].metadata.creationTimestamp ;
@@ -396,7 +396,7 @@ async function connectQueue() {
                         query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
-                        tempQuery = formatter_resource(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
+                        tempQuery = formatter_resource(i, itemLength, resourceType, cluster_uuid, query, mergedQuery);
                         mergedQuery = tempQuery; 
     
                     }
@@ -412,7 +412,7 @@ async function connectQueue() {
                     for (var i=0; i<itemLength; i++)
                     {
 
-                        query['resource_Group_Uuid'] = TotalMsg.cluster_uuid ;  
+                        query['resource_Group_Uuid'] = cluster_uuid ;  
                         query['resource_Name'] = result.items[i].metadata.name ;
                         query['resource_Target_Uuid'] = result.items[i].metadata.uid ;
                         query['resource_Target_Created_At'] = result.items[i].metadata.creationTimestamp ;
@@ -436,7 +436,7 @@ async function connectQueue() {
                         query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
-                        tempQuery = formatter_resource(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
+                        tempQuery = formatter_resource(i, itemLength, resourceType, cluster_uuid, query, mergedQuery);
                         mergedQuery = tempQuery;
                     }
 
@@ -449,7 +449,7 @@ async function connectQueue() {
                     for (var i=0; i<itemLength; i++)
                     {
 
-                        query['resource_Group_Uuid'] = TotalMsg.cluster_uuid ;  
+                        query['resource_Group_Uuid'] = cluster_uuid ;  
                         query['resource_Name'] = result.items[i].metadata.name ;
                         query['resource_Target_Uuid'] = result.items[i].metadata.uid ;
                         query['resource_Target_Created_At'] = result.items[i].metadata.creationTimestamp ;
@@ -468,7 +468,7 @@ async function connectQueue() {
                         query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
-                        tempQuery = formatter_resource(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
+                        tempQuery = formatter_resource(i, itemLength, resourceType, cluster_uuid, query, mergedQuery);
                         mergedQuery = tempQuery; 
                     }
 
@@ -481,7 +481,7 @@ async function connectQueue() {
                     for (var i=0; i<itemLength; i++)
                     {
 
-                        query['resource_Group_Uuid'] = TotalMsg.cluster_uuid ;  
+                        query['resource_Group_Uuid'] = cluster_uuid ;  
                         query['resource_Name'] = result.items[i].metadata.name ;
                         query['resource_Target_Uuid'] = result.items[i].metadata.uid ;
                         query['resource_Target_Created_At'] = result.items[i].metadata.creationTimestamp ;
@@ -501,7 +501,7 @@ async function connectQueue() {
                         query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
-                        tempQuery = formatter_resource(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
+                        tempQuery = formatter_resource(i, itemLength, resourceType, cluster_uuid, query, mergedQuery);
                         mergedQuery = tempQuery; 
     
                     }
@@ -516,7 +516,7 @@ async function connectQueue() {
                     for (var i=0; i<itemLength; i++)
                     {
 
-                        query['resource_Group_Uuid'] = TotalMsg.cluster_uuid ;  
+                        query['resource_Group_Uuid'] = cluster_uuid ;  
                         query['resource_Name'] = result.items[i].metadata.name ;
                         query['resource_Target_Uuid'] = result.items[i].metadata.uid ;
                         query['resource_Target_Created_At'] = result.items[i].metadata.creationTimestamp ;
@@ -536,7 +536,7 @@ async function connectQueue() {
                         query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
-                        tempQuery = formatter_resource(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
+                        tempQuery = formatter_resource(i, itemLength, resourceType, cluster_uuid, query, mergedQuery);
                         mergedQuery = tempQuery; 
     
                     }
@@ -549,7 +549,7 @@ async function connectQueue() {
                     var resourceType = "IG";
                     for (var i=0; i<itemLength; i++)
                     {
-                        query['resource_Group_Uuid'] = TotalMsg.cluster_uuid ;  
+                        query['resource_Group_Uuid'] = cluster_uuid ;  
                         query['resource_Name'] = result.items[i].metadata.name ;
                         query['resource_Target_Uuid'] = result.items[i].metadata.uid ;
                         query['resource_Target_Created_At'] = result.items[i].metadata.creationTimestamp ;
@@ -571,7 +571,7 @@ async function connectQueue() {
                         query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
-                        tempQuery = formatter_resource(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
+                        tempQuery = formatter_resource(i, itemLength, resourceType, cluster_uuid, query, mergedQuery);
                         mergedQuery = tempQuery; 
     
                     }
@@ -585,7 +585,7 @@ async function connectQueue() {
                     resourceType = "PV";    
                     for (var i=0; i<itemLength; i++)
                     {
-                        query['resource_Group_Uuid'] = TotalMsg.cluster_uuid ;  
+                        query['resource_Group_Uuid'] = cluster_uuid ;  
                         query['resource_Name'] = result.items[i].metadata.name ;
                         query['resource_Target_Uuid'] = result.items[i].metadata.uid ;
                         query['resource_Target_Created_At'] = result.items[i].metadata.creationTimestamp ;
@@ -607,7 +607,7 @@ async function connectQueue() {
                         query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
-                        tempQuery = formatter_resource(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
+                        tempQuery = formatter_resource(i, itemLength, resourceType, cluster_uuid, query, mergedQuery);
                         mergedQuery = tempQuery; 
     
                     }
@@ -621,7 +621,7 @@ async function connectQueue() {
                     
                     for (var i=0; i<itemLength; i++)
                         {
-                            query['resource_Group_Uuid'] = TotalMsg.cluster_uuid ;  
+                            query['resource_Group_Uuid'] = cluster_uuid ;  
                             query['resource_Name'] = result.items[i].metadata.name ;
                             query['resource_Target_Uuid'] = result.items[i].metadata.uid ;
                             query['resource_Target_Created_At'] = result.items[i].metadata.creationTimestamp ;
@@ -643,7 +643,7 @@ async function connectQueue() {
                             query['resource_Active'] = true;
                             query['resource_Status_Updated_At'] = new Date();
 
-                            tempQuery = formatter_resource(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
+                            tempQuery = formatter_resource(i, itemLength, resourceType, cluster_uuid, query, mergedQuery);
                             mergedQuery = tempQuery; 
                         }
 
@@ -795,28 +795,30 @@ async function connectQueueMongo() {
             //console.log("JSON convereted rabbit msg",TotalMsg); 
             let cluster_uuid =  TotalMsg.cluster_uuid;
             let service_uuid = TotalMsg.service_uuid;
+            let template_uuid = TotalMsg.template_uuid;
+            let status = TotalMsg.status;
 
-            if (TotalMsg.status == 4) {
-                //console.log(TotalMsg.result);
-                //const result = TotalMsg.result;
+            if (status == 4) {
                 
                 if (!TotalMsg.result)   
                     {
-                        console.log("Message ignored, No result in the message.: " + TotalMsg.template_uuid + ", cluster_uuid: " + cluster_uuid, ", service_uuid: ", service_uuid);
+                        console.log("Message ignored, No result in the message.: " + template_uuid + ", cluster_uuid: " + cluster_uuid, ", service_uuid: ", service_uuid);
                         channel.ack(msg);
+                        TotalMsg="";
                         return;
 
                     }
 
                 const result = JSON.parse(TotalMsg.result);
+                TotalMsg="";
                 const itemLength = result.items.length;
                 if (itemLength ==0) 
                     {
-                        console.log("Message ignored, No instance for resource, from the msg, template uuid: " + TotalMsg.template_uuid + ", cluster_uuid: " + cluster_uuid, ", service_uuid: ", service_uuid);
+                        console.log("Message ignored, No instance for resource, from the msg, template uuid: " + template_uuid + ", cluster_uuid: " + cluster_uuid, ", service_uuid: ", service_uuid);
                         channel.ack(msg);
                         return;
                     }
-                switch (TotalMsg.template_uuid) {
+                switch (template_uuid) {
                 case "00000000000000000000000000000020":  //20, for K8s services
                         resourceType = "SV";
 
@@ -834,7 +836,7 @@ async function connectQueueMongo() {
                             }
                             query['resource_Type'] = resourceType ;
                             query['resource_Spec'] = result.items[i].spec;
-                            query['resource_Group_Uuid'] = TotalMsg.cluster_uuid ;  
+                            query['resource_Group_Uuid'] = cluster_uuid ;  
                             query['resource_Name'] = result.items[i].metadata.name ;
                             query['resource_Target_Uuid'] = result.items[i].metadata.uid ;
                             query['resource_Target_Created_At'] = result.items[i].metadata.creationTimestamp ;
@@ -854,7 +856,7 @@ async function connectQueueMongo() {
                             query['resource_Active'] = true;
                             query['resource_Status_Updated_At'] = new Date();
 
-                            tempQuery = formatter_resource_mongo(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
+                            tempQuery = formatter_resource_mongo(i, itemLength, resourceType, cluster_uuid, query, mergedQuery);
                             mergedQuery = tempQuery;     
                         }
                         API_MSG = JSON.parse(mergedQuery); 
@@ -882,7 +884,7 @@ async function connectQueueMongo() {
                         
                         query['resource_Type'] = resourceType ;
                         query['resource_Spec'] = result.items[i].spec;
-                        query['resource_Group_Uuid'] = TotalMsg.cluster_uuid ;  
+                        query['resource_Group_Uuid'] = cluster_uuid ;  
                         query['resource_Name'] = result.items[i].metadata.name ;
                         query['resource_Target_Uuid'] = result.items[i].metadata.uid ;
                         query['resource_Target_Created_At'] = result.items[i].metadata.creationTimestamp ;
@@ -900,7 +902,7 @@ async function connectQueueMongo() {
                         query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
-                        tempQuery = formatter_resource_mongo(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
+                        tempQuery = formatter_resource_mongo(i, itemLength, resourceType, cluster_uuid, query, mergedQuery);
                         mergedQuery = tempQuery;     
                    
                     }
@@ -914,7 +916,7 @@ async function connectQueueMongo() {
                     for (var i=0; i<itemLength; i++)
                     {
                         query['resource_Type'] = resourceType ;   
-                        query['resource_Group_Uuid'] = TotalMsg.cluster_uuid ;  
+                        query['resource_Group_Uuid'] = cluster_uuid ;  
                         query['resource_Name'] = result.items[i].metadata.name ;
                         query['resource_Target_Uuid'] = result.items[i].metadata.uid ;
                         query['resource_Target_Created_At'] = result.items[i].metadata.creationTimestamp ;
@@ -932,7 +934,7 @@ async function connectQueueMongo() {
                         query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
-                        tempQuery = formatter_resource_mongo(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
+                        tempQuery = formatter_resource_mongo(i, itemLength, resourceType, cluster_uuid, query, mergedQuery);
                         mergedQuery = tempQuery; 
     
                     }
@@ -947,7 +949,7 @@ async function connectQueueMongo() {
                     {
                         query['resource_Type'] = resourceType ;
                         query['resource_Spec'] = result.items[i].spec;
-                        query['resource_Group_Uuid'] = TotalMsg.cluster_uuid ;  
+                        query['resource_Group_Uuid'] = cluster_uuid ;  
                         query['resource_Name'] = result.items[i].metadata.name ;
                         query['resource_Target_Uuid'] = result.items[i].metadata.uid ;
                         query['resource_Target_Created_At'] = result.items[i].metadata.creationTimestamp ;
@@ -970,7 +972,7 @@ async function connectQueueMongo() {
                         query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
-                        tempQuery = formatter_resource_mongo(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
+                        tempQuery = formatter_resource_mongo(i, itemLength, resourceType, cluster_uuid, query, mergedQuery);
                         mergedQuery = tempQuery; 
 
                     }
@@ -985,7 +987,7 @@ async function connectQueueMongo() {
                     {
                         query['resource_Type'] = resourceType ;
                         query['resource_Spec'] = result.items[i].spec;
-                        query['resource_Group_Uuid'] = TotalMsg.cluster_uuid ;  
+                        query['resource_Group_Uuid'] = cluster_uuid ;  
                         query['resource_Name'] = result.items[i].metadata.name ;
                         query['resource_Target_Uuid'] = result.items[i].metadata.uid ;
                         query['resource_Target_Created_At'] = result.items[i].metadata.creationTimestamp ;
@@ -1005,7 +1007,7 @@ async function connectQueueMongo() {
                         query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
-                        tempQuery = formatter_resource_mongo(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
+                        tempQuery = formatter_resource_mongo(i, itemLength, resourceType, cluster_uuid, query, mergedQuery);
                         mergedQuery = tempQuery; 
     
                     }
@@ -1020,7 +1022,7 @@ async function connectQueueMongo() {
                     {
                         query['resource_Type'] = resourceType ;
                         query['resource_Spec'] = result.items[i].spec;
-                        query['resource_Group_Uuid'] = TotalMsg.cluster_uuid ;  
+                        query['resource_Group_Uuid'] = cluster_uuid ;  
                         query['resource_Name'] = result.items[i].metadata.name ;
                         query['resource_Target_Uuid'] = result.items[i].metadata.uid ;
                         query['resource_Target_Created_At'] = result.items[i].metadata.creationTimestamp ;
@@ -1042,7 +1044,7 @@ async function connectQueueMongo() {
                         query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
-                        tempQuery = formatter_resource_mongo(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
+                        tempQuery = formatter_resource_mongo(i, itemLength, resourceType, cluster_uuid, query, mergedQuery);
                         mergedQuery = tempQuery; 
     
                     }
@@ -1058,7 +1060,7 @@ async function connectQueueMongo() {
                     {
                         query['resource_Type'] = resourceType ;
                         query['resource_Spec'] = result.items[i].spec;
-                        query['resource_Group_Uuid'] = TotalMsg.cluster_uuid ;  
+                        query['resource_Group_Uuid'] = cluster_uuid ;  
                         query['resource_Name'] = result.items[i].metadata.name ;
                         query['resource_Target_Uuid'] = result.items[i].metadata.uid ;
                         query['resource_Target_Created_At'] = result.items[i].metadata.creationTimestamp ;
@@ -1078,7 +1080,7 @@ async function connectQueueMongo() {
                         query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
-                        tempQuery = formatter_resource_mongo(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
+                        tempQuery = formatter_resource_mongo(i, itemLength, resourceType, cluster_uuid, query, mergedQuery);
                         mergedQuery = tempQuery; 
 
                     }
@@ -1094,7 +1096,7 @@ async function connectQueueMongo() {
                     {
                         query['resource_Type'] = resourceType ;
                         query['resource_Spec'] = result.items[i].spec;
-                        query['resource_Group_Uuid'] = TotalMsg.cluster_uuid ;  
+                        query['resource_Group_Uuid'] = cluster_uuid ;  
                         query['resource_Name'] = result.items[i].metadata.name ;
                         query['resource_Target_Uuid'] = result.items[i].metadata.uid ;
                         query['resource_Target_Created_At'] = result.items[i].metadata.creationTimestamp ;
@@ -1115,7 +1117,7 @@ async function connectQueueMongo() {
                         query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
-                        tempQuery = formatter_resource_mongo(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
+                        tempQuery = formatter_resource_mongo(i, itemLength, resourceType, cluster_uuid, query, mergedQuery);
                         mergedQuery = tempQuery; 
     
                     }
@@ -1132,7 +1134,7 @@ async function connectQueueMongo() {
                     {
                         query['resource_Type'] = resourceType ;
                         query['resource_Spec'] = result.items[i].spec;
-                        query['resource_Group_Uuid'] = TotalMsg.cluster_uuid ;  
+                        query['resource_Group_Uuid'] = cluster_uuid ;  
                         query['resource_Name'] = result.items[i].metadata.name ;
                         query['resource_Target_Uuid'] = result.items[i].metadata.uid ;
                         query['resource_Target_Created_At'] = result.items[i].metadata.creationTimestamp ;
@@ -1155,7 +1157,7 @@ async function connectQueueMongo() {
                         query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
-                        tempQuery = formatter_resource_mongo(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
+                        tempQuery = formatter_resource_mongo(i, itemLength, resourceType, cluster_uuid, query, mergedQuery);
                         mergedQuery = tempQuery;
                     }
 
@@ -1169,7 +1171,7 @@ async function connectQueueMongo() {
                     {
                         query['resource_Type'] = resourceType ;
                         query['resource_Spec'] = result.items[i].spec;
-                        query['resource_Group_Uuid'] = TotalMsg.cluster_uuid ;  
+                        query['resource_Group_Uuid'] = cluster_uuid ;  
                         query['resource_Name'] = result.items[i].metadata.name ;
                         query['resource_Target_Uuid'] = result.items[i].metadata.uid ;
                         query['resource_Target_Created_At'] = result.items[i].metadata.creationTimestamp ;
@@ -1187,7 +1189,7 @@ async function connectQueueMongo() {
                         query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
-                        tempQuery = formatter_resource_mongo(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
+                        tempQuery = formatter_resource_mongo(i, itemLength, resourceType, cluster_uuid, query, mergedQuery);
                         mergedQuery = tempQuery; 
                     }
 
@@ -1201,7 +1203,7 @@ async function connectQueueMongo() {
                     {
                         query['resource_Type'] = resourceType ;
                         query['resource_Spec'] = result.items[i].spec;
-                        query['resource_Group_Uuid'] = TotalMsg.cluster_uuid ;  
+                        query['resource_Group_Uuid'] = cluster_uuid ;  
                         query['resource_Name'] = result.items[i].metadata.name ;
                         query['resource_Target_Uuid'] = result.items[i].metadata.uid ;
                         query['resource_Target_Created_At'] = result.items[i].metadata.creationTimestamp ;
@@ -1220,7 +1222,7 @@ async function connectQueueMongo() {
                         query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
-                        tempQuery = formatter_resource_mongo(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
+                        tempQuery = formatter_resource_mongo(i, itemLength, resourceType, cluster_uuid, query, mergedQuery);
                         mergedQuery = tempQuery; 
     
                     }
@@ -1236,7 +1238,7 @@ async function connectQueueMongo() {
                     {
                         query['resource_Type'] = resourceType ;
                         query['resource_Spec'] = result.items[i].spec;
-                        query['resource_Group_Uuid'] = TotalMsg.cluster_uuid ;  
+                        query['resource_Group_Uuid'] = cluster_uuid ;  
                         query['resource_Name'] = result.items[i].metadata.name ;
                         query['resource_Target_Uuid'] = result.items[i].metadata.uid ;
                         query['resource_Target_Created_At'] = result.items[i].metadata.creationTimestamp ;
@@ -1255,7 +1257,7 @@ async function connectQueueMongo() {
                         query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
-                        tempQuery = formatter_resource_mongo(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
+                        tempQuery = formatter_resource_mongo(i, itemLength, resourceType, cluster_uuid, query, mergedQuery);
                         mergedQuery = tempQuery; 
     
                     }
@@ -1270,7 +1272,7 @@ async function connectQueueMongo() {
                     {
                         query['resource_Type'] = resourceType ;
                         query['resource_Spec'] = result.items[i].spec;
-                        query['resource_Group_Uuid'] = TotalMsg.cluster_uuid ;  
+                        query['resource_Group_Uuid'] = cluster_uuid ;  
                         query['resource_Name'] = result.items[i].metadata.name ;
                         query['resource_Target_Uuid'] = result.items[i].metadata.uid ;
                         query['resource_Target_Created_At'] = result.items[i].metadata.creationTimestamp ;
@@ -1291,7 +1293,7 @@ async function connectQueueMongo() {
                         query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
-                        tempQuery = formatter_resource_mongo(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
+                        tempQuery = formatter_resource_mongo(i, itemLength, resourceType, cluster_uuid, query, mergedQuery);
                         mergedQuery = tempQuery; 
     
                     }
@@ -1307,7 +1309,7 @@ async function connectQueueMongo() {
                     {
                         query['resource_Type'] = resourceType ;
                         query['resource_Spec'] = result.items[i].spec;
-                        query['resource_Group_Uuid'] = TotalMsg.cluster_uuid ;  
+                        query['resource_Group_Uuid'] = cluster_uuid ;  
                         query['resource_Name'] = result.items[i].metadata.name ;
                         query['resource_Target_Uuid'] = result.items[i].metadata.uid ;
                         query['resource_Target_Created_At'] = result.items[i].metadata.creationTimestamp ;
@@ -1328,7 +1330,7 @@ async function connectQueueMongo() {
                         query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
 
-                        tempQuery = formatter_resource_mongo(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
+                        tempQuery = formatter_resource_mongo(i, itemLength, resourceType, cluster_uuid, query, mergedQuery);
                         mergedQuery = tempQuery; 
     
                     }
@@ -1344,7 +1346,7 @@ async function connectQueueMongo() {
                         {
                             query['resource_Type'] = resourceType ;
                             query['resource_Spec'] = result.items[i].spec;
-                            query['resource_Group_Uuid'] = TotalMsg.cluster_uuid ;  
+                            query['resource_Group_Uuid'] = cluster_uuid ;  
                             query['resource_Name'] = result.items[i].metadata.name ;
                             query['resource_Target_Uuid'] = result.items[i].metadata.uid ;
                             query['resource_Target_Created_At'] = result.items[i].metadata.creationTimestamp ;
@@ -1365,7 +1367,7 @@ async function connectQueueMongo() {
                             query['resource_Active'] = true;
                             query['resource_Status_Updated_At'] = new Date();
 
-                            tempQuery = formatter_resource_mongo(i, itemLength, resourceType, TotalMsg.cluster_uuid, query, mergedQuery);
+                            tempQuery = formatter_resource_mongo(i, itemLength, resourceType, cluster_uuid, query, mergedQuery);
                             mergedQuery = tempQuery; 
                         }
                         
@@ -1384,7 +1386,7 @@ async function connectQueueMongo() {
 
                 default:        
                 } //end of switch
-
+                result = "";
                 callAPI(API_RESOURCE_URL, API_MSG, resourceType)
                 .then
                 (
@@ -1424,10 +1426,12 @@ async function connectQueueMongo() {
                 (
                   (response) => {
                     channel.ack(msg);
+                    result = "";
                     console.log("MQ message acknowleged: " + RABBITMQ_SERVER_QUEUE_ALERT + ", cluster_uuid: " + cluster_uuid );
                       },
                   (error) => {
                     console.log("MQ message un-acknowleged: ",RABBITMQ_SERVER_QUEUE_ALERT + ", cluster_uuid: " + cluster_uuid);  
+                    result = "";
                     console.log(error);
                   })
                 };
@@ -1449,10 +1453,12 @@ async function connectQueueMongo() {
                 (
                   (response) => {
                     channel.ack(msg);
+                    result = "";
                     console.log("MQ message acknowleged: " + RABBITMQ_SERVER_QUEUE_METRIC + ", cluster_uuid: " + cluster_uuid );
                       },
                   (error) => {
                     console.log("MQ message un-acknowleged: ",RABBITMQ_SERVER_QUEUE_METRIC + ", cluster_uuid: " + cluster_uuid);  
+                    result = "";
                     console.log(error);
                   })
                 };
@@ -1477,15 +1483,17 @@ async function connectQueueMongo() {
                 (
                   (response) => {
                     channel.ack(msg);
+                    result = "";                    
                     console.log("MQ message acknowleged: " + RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid + ", Msg Size (MB): ", rabbitmq_message_size);  
                       },
                   (error) => {
                     console.log("MQ message un-acknowleged: ",RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid + ", Msg Size (MB): ", rabbitmq_message_size);  
+                    result = "";
                     console.log(error);
                   })
  
                 }; // end of else
-            result = "";    
+
         }); // end of msg consume
         
     } catch (error) {
@@ -1493,8 +1501,6 @@ async function connectQueueMongo() {
         throw error;
     }
 }
-
-
 
 async function callAPI(apiURL, apiMsg , resourceType) {
     await axios.post(apiURL,apiMsg, {maxContentLength:Infinity, maxBodyLength: Infinity})
