@@ -1564,11 +1564,10 @@ function formatter_resource_mongo(i, itemLength, resourceType, cluster_uuid, que
     return interimQuery;
 }
 
-function massUploadMetricReceived(metricReceivedMassFeed, clusterUuid){
+async function massUploadMetricReceived(metricReceivedMassFeed, clusterUuid){
 
     let url = `http://vm-victoria-metrics-single-server.vm.svc.cluster.local:8428/api/v1/import?extra_label=clusterUuid=${clusterUuid}`
-    axios.post (
-          url, metricReceivedMassFeed, {maxContentLength:Infinity, maxBodyLength: Infinity})
+    axios.post (url, metricReceivedMassFeed, {maxContentLength:Infinity, maxBodyLength: Infinity})
         .then
         (
           (response) => {
