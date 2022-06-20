@@ -1572,6 +1572,7 @@ async function massUploadMetricReceived(metricReceivedMassFeed, clusterUuid){
         (
           (response) => {
             const responseStatus = "status code: " + response.status;
+            console.log(metricReceivedMassFeed);
             console.log (response);
             console.log("VictoriaMetrics API called: ", clusterUuid," ", responseStatus);
           },
