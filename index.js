@@ -1478,7 +1478,8 @@ async function connectQueueMongo() {
                 console.log("calling metric received mass upload API : " + RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid );
                 //console.log(result);
 
-                callAPI(API_METRIC_RECEIVED_URL, result, "metric_received")
+                //callAPI(API_METRIC_RECEIVED_URL, result, "metric_received")
+                massUploadMetricReceived(result, cluster_uuid)
                 .then
                 (
                   (response) => {
@@ -1561,6 +1562,26 @@ function formatter_resource_mongo(i, itemLength, resourceType, cluster_uuid, que
         console.log("error due to unexpoected error: ", error.response);
     }
     return interimQuery;
+}
+
+function massUploadMetricReceived(metricReceivedMassFeed, clusterUuid){
+
+    await axios(
+        {
+          method: 'post',
+          url: `http://vm-victoria-metrics-single-server.vm.svc.cluster.local:8428/api/v1/import?extra_label=clusterUuid=${clusterUuid}`,
+          data: metricReceivedMassFeed
+        }).then(async (res) => {
+          console.log(`Success to call VictoriaMetrics API for MetricReceived Feed, status code: ${res.status} `);
+          result = {"response code: ": res.status}  
+        }).catch(error => {
+          console.log(error);
+          throw new HttpException(500, "Unknown error to call VictoriaMetrics api");
+        });
+
+    return result;
+
+
 }
 
 app.listen(MQCOMM_PORT, () => console.log("NexClipper MQCOMM Server running at port " + MQCOMM_PORT));
