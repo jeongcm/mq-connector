@@ -55,6 +55,7 @@ const API_METRIC_URL = API_SERVER_METRIC_URL+":"+API_SERVER_METRIC_PORT + API_NA
 const API_METRIC_RECEIVED_URL = API_SERVER_METRIC_RECEIVED_URL+":"+API_SERVER_METRIC_RECEIVED_PORT + API_NAME_METRIC_RECEIVED_POST;
 const API_ALERT_URL = API_SERVER_ALERT_URL+":"+API_SERVER_ALERT_PORT + API_NAME_ALERT_POST;
 const MQCOMM_RESOURCE_TARGET_DB = process.env.MQCOMM_RESOURCE_TARGET_DB;
+const vm_Url = process.env.VM_URL
  
 
 var resourceType;
@@ -1579,7 +1580,7 @@ async function massUploadMetricReceived(metricReceivedMassFeed, clusterUuid){
         receivedData = null;
 
         const message_size_mb = (Buffer.byteLength(JSON.stringify(receivedMetrics)))/1024/1024;
-        console.log("message:size:", message_size_mb);
+
         if (message_size_mb>5){
           const half = Math.ceil(receivedMetrics.length/2);
           const firstHalf = receivedMetrics.slice(0, half); 
@@ -1595,10 +1596,6 @@ async function massUploadMetricReceived(metricReceivedMassFeed, clusterUuid){
 
           let massFeedResult1 = await callVM(finalResult1, clusterUuid);
           finalResult1=null;
-          if (!massFeedResult1) {
-              console.log ("no response from VM API")
-              return (error); 
-            }
 
           let newResultMap2 = [];
           secondHalf.map((data)=>{
@@ -1610,12 +1607,8 @@ async function massUploadMetricReceived(metricReceivedMassFeed, clusterUuid){
 
           let massFeedResult2 = await callVM(finalResult2, clusterUuid);
           finalResult2=null;
-          if (!massFeedResult2) {
-            console.log ("no response from VM API")  
-            return (error);
-            }
 
-          console.log( `Bulk Metric Received feed - VM is successfully complete` );
+          //console.log( `Bulk Metric Received feed - VM is successfully complete` );
           
           massFeedResult1= null;
           massFeedResult2= null;      
@@ -1629,44 +1622,33 @@ async function massUploadMetricReceived(metricReceivedMassFeed, clusterUuid){
           });
           let finalResult = (newResultMap).join("\n")
           newResultMap = null;
-
-          let massFeedResult = await callVM(finalResult, clusterUuid);
-          finalResult = null;
           
-          if (!massFeedResult) {
-              console.log ("no response from VM API")
-              return (error);
-            }
-          console.log( `Bulk Metric Received feed - VM is successfully complete` );
+          let massFeedResult = await callVM(finalResult, clusterUuid);
+          console.log("massFeedResult: ", massFeedResult.status); 
+          finalResult = null;
+          //console.log( `Bulk Metric Received feed - VM is successfully complete` );
           
           massFeedResult= null;
           } //end of else 
           
-          
       } catch (error) {
-        console.log(error);
+        console.log(error.response);
         throw error;
       }
 
 }    
 
-async function callVM(metricReceivedMassFeed, clusterUuid){
+async function callVM (metricReceivedMassFeed, clusterUuid) {
 
-    let responseStatus;
-    let url = `http://vm-victoria-metrics-single-server.vm.svc.cluster.local:8428/api/v1/import?extra_label=clusterUuid=${clusterUuid}`; 
-
-    axios.post (url, metricReceivedMassFeed, {maxContentLength:Infinity, maxBodyLength: Infinity})
-        .then
-        (
-          (response) => {
-            responseStatus = "status code: " + response.status;
-            console.log("VictoriaMetrics API called: ", clusterUuid," ", responseStatus);
-          },
-          (error) => {
-            const errorStatus = "status code:  " + error;  
-            console.log("VictoriaMetrics API error due to unexpoected error: ", clusterUuid, errorStatus)
-          });
-    return responseStatus
+    //let url = `http://vm-victoria-metrics-single-server.vm.svc.cluster.local:8428/api/v1/import?extra_label=clusterUuid=${clusterUuid}`; 
+    let url = vm_Url + clusterUuid; 
+    
+    try {
+      return axios.post (url, metricReceivedMassFeed, {maxContentLength:Infinity, maxBodyLength: Infinity})
+    } catch (error){
+      console.log("error on calling vm api");
+      throw error;
+    }    
 
 }
 

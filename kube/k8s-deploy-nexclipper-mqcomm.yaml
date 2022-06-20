@@ -30,6 +30,7 @@ data:
   MQCOMM_RESOURCE_TARGET_DB: "MONGODB"
   MAX_API_BODY_SIZE: 500mb
   NODE_OPTIONS: "--max-old-space-size=8192"
+  VM_URL: "http://vm-victoria-metrics-single-server.vm.svc.cluster.local:8428/api/v1/import?extra_label=clusterUuid="
 
   
 
