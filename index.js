@@ -1488,6 +1488,7 @@ async function connectQueueMongo() {
                     console.log("MQ message acknowleged: " + RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid + ", Msg Size (MB): ", rabbitmq_message_size);  
                       },
                   (error) => {
+                    channel.ack(msg);  
                     console.log("MQ message un-acknowleged: ",RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid + ", Msg Size (MB): ", rabbitmq_message_size);  
                     result = "";
                     console.log(error);
@@ -1648,20 +1649,21 @@ async function massUploadMetricReceived(metricReceivedMassFeed, clusterUuid){
 
 async function callVM(metricReceivedMassFeed, clusterUuid){
 
+    let responseStatus;
     let url = `http://vm-victoria-metrics-single-server.vm.svc.cluster.local:8428/api/v1/import?extra_label=clusterUuid=${clusterUuid}`; 
 
     axios.post (url, metricReceivedMassFeed, {maxContentLength:Infinity, maxBodyLength: Infinity})
         .then
         (
           (response) => {
-            const responseStatus = "status code: " + response.status;
+            responseStatus = "status code: " + response.status;
             console.log("VictoriaMetrics API called: ", clusterUuid," ", responseStatus);
           },
           (error) => {
             const errorStatus = "status code:  " + error;  
             console.log("VictoriaMetrics API error due to unexpoected error: ", clusterUuid, errorStatus)
           });
-    return responseStatus 
+    return responseStatus
 
 }
 
