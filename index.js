@@ -1564,22 +1564,103 @@ function formatter_resource_mongo(i, itemLength, resourceType, cluster_uuid, que
     return interimQuery;
 }
 
+
 async function massUploadMetricReceived(metricReceivedMassFeed, clusterUuid){
 
-    let url = `http://vm-victoria-metrics-single-server.vm.svc.cluster.local:8428/api/v1/import?extra_label=clusterUuid=${clusterUuid}`
+    try {
+
+        let receivedData = JSON.parse(metricReceivedMassFeed.result);
+
+        const clusterUuid = metricReceivedMassFeed.cluster_uuid; 
+        metricReceivedMassFeed = null;
+
+        let receivedMetrics = receivedData.result;
+        receivedData = null;
+
+        const message_size_mb = (Buffer.byteLength(JSON.stringify(receivedMetrics)))/1024/1024;
+        console.log("message:size:", message_size_mb);
+        if (message_size_mb>5){
+          const half = Math.ceil(receivedMetrics.length/2);
+          const firstHalf = receivedMetrics.slice(0, half); 
+          const secondHalf = receivedMetrics.slice(-half);  
+
+          let newResultMap1 = [];
+          firstHalf.map((data)=>{
+            const{metric, value} = data;
+            newResultMap1.push(JSON.stringify({metric, values: [parseFloat(value[1])], timestamps:[value[0]*1000]}))
+          });
+          let finalResult1 = (newResultMap1).join("\n")
+          newResultMap1 = null;
+
+          let massFeedResult1 = await callVM(finalResult1, clusterUuid);
+          finalResult1=null;
+          if (!massFeedResult1) {
+              return res.sendStatus(500);
+            }
+
+          let newResultMap2 = [];
+          secondHalf.map((data)=>{
+            const{metric, value} = data;
+            newResultMap2.push(JSON.stringify({metric, values: [parseFloat(value[1])], timestamps:[value[0]*1000]}))
+          });
+          let finalResult2 = (newResultMap2).join("\n")
+          newResultMap2= null;
+
+          let massFeedResult2 = await callVM(finalResult2, clusterUuid);
+          finalResult2=null;
+          if (!massFeedResult2) {
+              return res.sendStatus(500);
+            }
+
+          console.log( `Bulk Metric Received feed - VM is successfully complete` );
+          
+          massFeedResult1= null;
+          massFeedResult2= null;      
+
+        }
+        else {
+          let newResultMap = [];
+          receivedMetrics.map((data)=>{
+            const{metric, value} = data;
+            newResultMap.push(JSON.stringify({metric, values: [parseFloat(value[1])], timestamps:[value[0]*1000]}))
+          });
+          let finalResult = (newResultMap).join("\n")
+          newResultMap = null;
+
+          let massFeedResult = await callVM(finalResult, clusterUuid);
+          finalResult = null;
+          
+          if (!massFeedResult) {
+              return res.sendStatus(500);
+            }
+          console.log( `Bulk Metric Received feed - VM is successfully complete` );
+          
+          massFeedResult= null;
+          } //end of else 
+          
+          
+      } catch (error) {
+        next(error);
+      }
+
+}    
+
+async function callVM(metricReceivedMassFeed, clusterUuid){
+
+    let url = `http://vm-victoria-metrics-single-server.vm.svc.cluster.local:8428/api/v1/import?extra_label=clusterUuid=${clusterUuid}`; 
+
     axios.post (url, metricReceivedMassFeed, {maxContentLength:Infinity, maxBodyLength: Infinity})
         .then
         (
           (response) => {
             const responseStatus = "status code: " + response.status;
-            console.log(metricReceivedMassFeed);
-            console.log (response);
             console.log("VictoriaMetrics API called: ", clusterUuid," ", responseStatus);
           },
           (error) => {
             const errorStatus = "status code:  " + error;  
             console.log("VictoriaMetrics API error due to unexpoected error: ", clusterUuid, errorStatus)
-          }); 
+          });
+    return responseStatus 
 
 }
 
