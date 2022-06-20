@@ -809,7 +809,7 @@ async function connectQueueMongo() {
 
                     }
 
-                const result = JSON.parse(TotalMsg.result);
+                let result = JSON.parse(TotalMsg.result);
                 TotalMsg="";
                 const itemLength = result.items.length;
                 if (itemLength ==0) 
