@@ -1640,7 +1640,8 @@ async function massUploadMetricReceived(metricReceivedMassFeed, clusterUuid){
           
           
       } catch (error) {
-        next(error);
+        console.log(error);
+        throw error;
       }
 
 }    
