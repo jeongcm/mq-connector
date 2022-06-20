@@ -1596,7 +1596,8 @@ async function massUploadMetricReceived(metricReceivedMassFeed, clusterUuid){
           let massFeedResult1 = await callVM(finalResult1, clusterUuid);
           finalResult1=null;
           if (!massFeedResult1) {
-              return res.sendStatus(500);
+              console.log ("no response from VM API")
+              return (error); 
             }
 
           let newResultMap2 = [];
@@ -1610,7 +1611,8 @@ async function massUploadMetricReceived(metricReceivedMassFeed, clusterUuid){
           let massFeedResult2 = await callVM(finalResult2, clusterUuid);
           finalResult2=null;
           if (!massFeedResult2) {
-              return res.sendStatus(500);
+            console.log ("no response from VM API")  
+            return (error);
             }
 
           console.log( `Bulk Metric Received feed - VM is successfully complete` );
@@ -1632,7 +1634,8 @@ async function massUploadMetricReceived(metricReceivedMassFeed, clusterUuid){
           finalResult = null;
           
           if (!massFeedResult) {
-              return res.sendStatus(500);
+              console.log ("no response from VM API")
+              return (error);
             }
           console.log( `Bulk Metric Received feed - VM is successfully complete` );
           
