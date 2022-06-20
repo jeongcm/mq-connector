@@ -1565,21 +1565,20 @@ function formatter_resource_mongo(i, itemLength, resourceType, cluster_uuid, que
 }
 
 function massUploadMetricReceived(metricReceivedMassFeed, clusterUuid){
-    let result;
-    axios(
-        {
-          method: 'post',
-          url: `http://vm-victoria-metrics-single-server.vm.svc.cluster.local:8428/api/v1/import?extra_label=clusterUuid=${clusterUuid}`,
-          data: metricReceivedMassFeed
-        }).then(async (res) => {
-          console.log(`Success to call VictoriaMetrics API for MetricReceived Feed, status code: ${res.status} `);
-          result = {"response code: ": res.status}  
-        }).catch(error => {
-          console.log(error);
-          throw new HttpException(500, "Unknown error to call VictoriaMetrics api");
-        });
 
-    return result;
+    let url = `http://vm-victoria-metrics-single-server.vm.svc.cluster.local:8428/api/v1/import?extra_label=clusterUuid=${clusterUuid}`
+    axios.post (
+          url, metricReceivedMassFeed, {maxContentLength:Infinity, maxBodyLength: Infinity})
+        .then
+        (
+          (response) => {
+            const responseStatus = "status code: " + response.status;
+            console.log("VictoriaMetrics API called: ", clusterUuid," ", responseStatus);
+          },
+          (error) => {
+            const errorStatus = "status code:  " + error;  
+            console.log("VictoriaMetrics API error due to unexpoected error: ", clusterUuid, errorStatus)
+          }); 
 
 }
 
