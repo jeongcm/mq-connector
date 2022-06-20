@@ -1466,8 +1466,8 @@ async function connectQueueMongo() {
 
         await channel.consume(RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED, (msg) => {
             result = JSON.parse(msg.content.toString());
-            const rabbitmq_message_size = (Buffer.byteLength(msg.content.toString()))/1024/1024;
-            const cluster_uuid = result.cluster_uuid;
+            let rabbitmq_message_size = (Buffer.byteLength(msg.content.toString()))/1024/1024;
+            let cluster_uuid = result.cluster_uuid;
             console.log ("rabbitmq_message_size(mb): ", rabbitmq_message_size);
             console.log ("result status: ", result.status);
             if (result.status != 4) {
@@ -1572,6 +1572,7 @@ async function massUploadMetricReceived(metricReceivedMassFeed, clusterUuid){
         (
           (response) => {
             const responseStatus = "status code: " + response.status;
+            console.log (response);
             console.log("VictoriaMetrics API called: ", clusterUuid," ", responseStatus);
           },
           (error) => {
