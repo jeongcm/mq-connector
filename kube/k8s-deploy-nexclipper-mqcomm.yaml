@@ -27,7 +27,7 @@ data:
   RABBITMQ_SERVER_QUEUE_VIRTUAL_HOST: "nexclipper"
   RABBITMQ_SERVER_URL: "ncmq-rabbitmq.rabbitmq.svc.cluster.local"
   RABBITMQ_SERVER_USER: "nexclipper"
-  MQCOMM_RESOURCE_TARGET_DB: "MONGODB"
+  MQCOMM_RESOURCE_TARGET_DB: "MARIADB"
   MAX_API_BODY_SIZE: 500mb
   NODE_OPTIONS: "--max-old-space-size=8192"
   VM_URL: "http://vm-victoria-metrics-single-server.vm.svc.cluster.local:8428/api/v1/import?extra_label=clusterUuid="
