@@ -160,7 +160,6 @@ async function connectQueue() {
                     for (var i=0; i<itemLength; i++)
                     {
                         // get internal IP address from addresses array and assign to InternalIP variable.
-                        console.log ("Node -started");
                         let internalIpLength = result.items[i].status.addresses.length
                         let internalIp = "";
                         for (var j=0; j<internalIpLength; j++)
@@ -731,6 +730,9 @@ async function connectQueue() {
                 }
             else {
                 console.log("calling metric received mass upload API : " + RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid );
+                //console.log(result);
+
+                //callAPI(API_METRIC_RECEIVED_URL, result, "metric_received")
                 massUploadMetricReceived(result, cluster_uuid)
                 .then
                 (
@@ -747,6 +749,7 @@ async function connectQueue() {
                   })
  
                 }; // end of else
+
         }); // end of msg consume
     } catch (error) {
         console.log(error);
@@ -1557,8 +1560,10 @@ async function massUploadMetricReceived(metricReceivedMassFeed, clusterUuid){
     try {
 
         let receivedData = JSON.parse(metricReceivedMassFeed.result);
-
-        const clusterUuid = metricReceivedMassFeed.cluster_uuid; 
+        const clusterUuid = metricReceivedMassFeed.cluster_uuid;
+        const name = metricReceivedMassFeed.service_name;
+        console.log ("###name####");
+        console.log (name); 
         metricReceivedMassFeed = null;
 
         let receivedMetrics = receivedData.result;
