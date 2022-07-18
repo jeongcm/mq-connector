@@ -165,10 +165,12 @@ async function connectQueue() {
                         let internalIp = "";
                         for (var j=0; j<internalIpLength; j++)
                         {
-                            if (result.items[i].status.addresses[j].type = 'InternalIP')
+                            if (result.items[i].status.addresses[j].type == 'InternalIP')
                             { 
-                                if (j==1) {
+                                let ipHeader = (result.items[i].status.addresses[j].address).substr(0,2); 
+                                if (ipHeader=="10") {
                                     internalIp = result.items[i].status.addresses[j].address;
+                                    break;
                                 }
                                 //due to address type error from kubernetes, Digital Ocean, use 2nd order of address data for internal ip.
                             }
