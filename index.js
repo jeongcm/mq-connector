@@ -168,11 +168,11 @@ async function connectQueue() {
                             if (result.items[i].status.addresses[j].type == 'InternalIP')
                             { 
                                 let ipHeader = (result.items[i].status.addresses[j].address).substr(0,2); 
-                                if (ipHeader=="10") {
+                                if (ipHeader=="10" || ipHeader=="19") {
                                     internalIp = result.items[i].status.addresses[j].address;
                                     break;
                                 }
-                                //due to address type error from kubernetes, Digital Ocean, use 2nd order of address data for internal ip.
+                                //find internal IP address of node using the first part of ip address 10.
                             }
                         }
                         query['resource_Type'] = resourceType ;
