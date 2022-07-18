@@ -89,8 +89,10 @@ async function connectQueue() {
             var API_MSG = {};
             
             let TotalMsg = JSON.parse(msg.content.toString());
+
             let cluster_uuid =  TotalMsg.cluster_uuid;
             let template_uuid = TotalMsg.template_uuid;
+            let service_uuid = TotalMsg.service_uuid;
             let status = TotalMsg.status;
 
             if (status == 4) {
@@ -103,12 +105,11 @@ async function connectQueue() {
                     }
 
                 let result = JSON.parse(TotalMsg.result);
-
-                TotalMsg="";
+                
                 const itemLength = result.items.length;
                 if (itemLength == 0) 
                     {
-                        console.log("Message ignored, no instance for resource, from the msg, template uuid: " + template_uuid + ", cluster_uuid: " + cluster_uuid);
+                        console.log("Message ignored, no instance for resource, from the msg, template uuid: " + template_uuid + ", cluster_uuid: " + cluster_uuid, ", service_uuid: ", service_uuid );
                         channel.ack(msg);
                         return;
                     }
@@ -665,17 +666,20 @@ async function connectQueue() {
             }
             else {
                 channel.ack(msg);
-                console.log("Message ignored" + RABBITMQ_SERVER_QUEUE_RESOURCE + ", cluster_uuid: " + cluster_uuid);
+                //console.log("Msg processed, nothing to update, status code: " + status + ", " + RABBITMQ_SERVER_QUEUE_RESOURCE + ", cluster_uuid: " + cluster_uuid + " service_uuid: " + service_uuid);
+                //console.log (TotalMsg);
             }
         })
 
         await channel.consume(RABBITMQ_SERVER_QUEUE_ALERT, (msg) => {
             result = JSON.parse(msg.content.toString());
             const cluster_uuid = result.cluster_uuid;
+            let service_uuid = result.service_uuid;
 
             if (result.status != 4) {
-                console.log("Msg processed, nothing to update : " + RABBITMQ_SERVER_QUEUE_ALERT + ", cluster_uuid: " + cluster_uuid );
+                //console.log("Msg processed, nothing to update, status code: " + result.status + ", " + RABBITMQ_SERVER_QUEUE_ALERT + ", cluster_uuid: " + cluster_uuid + " service_uuid: " + service_uuid  );
                 channel.ack(msg);
+                //console.log (result);
                 }
             else {
                 console.log("calling alert interface API : " + RABBITMQ_SERVER_QUEUE_ALERT + ", cluster_uuid: " + cluster_uuid );
@@ -697,13 +701,19 @@ async function connectQueue() {
 
             result = JSON.parse(msg.content.toString());
             const cluster_uuid = result.cluster_uuid;
-
+            let service_uuid = result.service_uuid;
+            if (cluster_uuid === "6072520097ea4d2ea2006e126d7672b5"){
+                console.log ("############result.status");
+                console.log (result.status);
+            }
             if (result.status != 4) {
-                console.log("Msg processed, nothing to update : " + RABBITMQ_SERVER_QUEUE_METRIC + ", cluster_uuid: " + cluster_uuid );
+                //console.log("Msg processed, nothing to update, status code: " + result.status + ", " + RABBITMQ_SERVER_QUEUE_METRIC + ", cluster_uuid: " + cluster_uuid  + " service_uuid: " + service_uuid);
                 channel.ack(msg);
+                //console.log (result);
                 }
             else {
                 console.log("calling metric meta interface API : " + RABBITMQ_SERVER_QUEUE_METRIC + ", cluster_uuid: " + cluster_uuid );
+                //console.log (result);
                 callAPI(API_METRIC_URL, result, "metric")
                 .then
                 (
@@ -722,14 +732,16 @@ async function connectQueue() {
             result = JSON.parse(msg.content.toString());
             let rabbitmq_message_size = (Buffer.byteLength(msg.content.toString()))/1024/1024;
             let cluster_uuid = result.cluster_uuid;
-            console.log ("rabbitmq_message_size(mb): ", rabbitmq_message_size);
-            console.log ("result status: ", result.status);
+            let service_uuid = result.service_uuid;
+            
+            //console.log ("result status: ", result.status);
             if (result.status != 4) {
-                console.log("Msg processed, nothing to update : " + RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid );
+                //console.log("Msg processed, nothing to update, status code: " + result.status + ", " + RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid + " service_uuid: " + service_uuid);
                 channel.ack(msg);
+                //console.log (result);
                 }
             else {
-                console.log("calling metric received mass upload API : " + RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid );
+                console.log("calling metric received mass upload API : " + RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid + " service_uuid: " + service_uuid + " rabbitmq_message_size(mb): ", rabbitmq_message_size );
                 //console.log(result);
 
                 //callAPI(API_METRIC_RECEIVED_URL, result, "metric_received")
@@ -1403,6 +1415,7 @@ async function connectQueueMongo() {
         await channel.consume(RABBITMQ_SERVER_QUEUE_ALERT, (msg) => {
             result = JSON.parse(msg.content.toString());
             const cluster_uuid = result.cluster_uuid;
+            
 
             if (result.status != 4) {
                 console.log("Msg processed, nothing to update : " + RABBITMQ_SERVER_QUEUE_ALERT + ", cluster_uuid: " + cluster_uuid );
@@ -1430,6 +1443,7 @@ async function connectQueueMongo() {
 
             result = JSON.parse(msg.content.toString());
             const cluster_uuid = result.cluster_uuid;
+            let service_uuid = TotalMsg.service_uuid;
 
             if (result.status != 4) {
                 console.log("Msg processed, nothing to update : " + RABBITMQ_SERVER_QUEUE_METRIC + ", cluster_uuid: " + cluster_uuid );
@@ -1562,8 +1576,7 @@ async function massUploadMetricReceived(metricReceivedMassFeed, clusterUuid){
         let receivedData = JSON.parse(metricReceivedMassFeed.result);
         const clusterUuid = metricReceivedMassFeed.cluster_uuid;
         const name = metricReceivedMassFeed.service_name;
-        console.log ("###name####");
-        console.log (name); 
+        console.log ("metric received name: " + name);
         metricReceivedMassFeed = null;
 
         let receivedMetrics = receivedData.result;
