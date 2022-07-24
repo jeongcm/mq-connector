@@ -705,10 +705,6 @@ async function connectQueue() {
             result = JSON.parse(msg.content.toString());
             const cluster_uuid = result.cluster_uuid;
             let service_uuid = result.service_uuid;
-            if (cluster_uuid === "6072520097ea4d2ea2006e126d7672b5"){
-                console.log ("############result.status");
-                console.log (result.status);
-            }
             if (result.status != 4) {
                 //console.log("Msg processed, nothing to update, status code: " + result.status + ", " + RABBITMQ_SERVER_QUEUE_METRIC + ", cluster_uuid: " + cluster_uuid  + " service_uuid: " + service_uuid);
                 channel.ack(msg);
