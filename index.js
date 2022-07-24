@@ -669,7 +669,7 @@ async function connectQueue() {
             }
             else {
                 channel.ack(msg);
-                //console.log("Msg processed, nothing to update, status code: " + status + ", " + RABBITMQ_SERVER_QUEUE_RESOURCE + ", cluster_uuid: " + cluster_uuid + " service_uuid: " + service_uuid);
+                console.log("Message ignored " + RABBITMQ_SERVER_QUEUE_RESOURCE + ", status code: " + status + ", cluster_uuid: " + cluster_uuid + ", service_uuid: " + service_uuid);
                 //console.log (TotalMsg);
             }
         })
@@ -768,7 +768,7 @@ async function connectQueue() {
         }); // end of msg consume
     } catch (error) {
         //console.log(error);
-        console.log ("error")
+        console.log ("error", error)
         throw error;
     }
 }
@@ -1506,7 +1506,7 @@ async function connectQueueMongo() {
         }); // end of msg consume
         
     } catch (error) {
-        console.log(error);
+        console.log("error", error);
         throw error;
     }
 }
