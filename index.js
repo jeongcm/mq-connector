@@ -82,6 +82,7 @@ async function connectQueue() {
         await channel.assertQueue(RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED);
 
         await channel.consume(RABBITMQ_SERVER_QUEUE_RESOURCE, (msg) => {
+
             var resourceType;
             var query = {};
             var mergedQuery = {};
@@ -172,7 +173,7 @@ async function connectQueue() {
                                     internalIp = result.items[i].status.addresses[j].address;
                                     break;
                                 }
-                                //find internal IP address of node using the first part of ip address 10.
+                                //find internal IP address of node using the first part of ip address 10 or 192
                             }
                         }
                         query['resource_Type'] = resourceType ;
@@ -766,7 +767,8 @@ async function connectQueue() {
 
         }); // end of msg consume
     } catch (error) {
-        console.log(error);
+        //console.log(error);
+        console.log ("error")
         throw error;
     }
 }
@@ -1410,7 +1412,7 @@ async function connectQueueMongo() {
             }
             else {
                 channel.ack(msg);
-                console.log("Message ignored " + RABBITMQ_SERVER_QUEUE_RESOURCE + ", cluster_uuid: " + cluster_uuid);
+                console.log("Message ignored " + RABBITMQ_SERVER_QUEUE_RESOURCE + ", status code: " + status + ", cluster_uuid: " + cluster_uuid + ", service_uuid: " + service_uuid);
             }
         })
 
@@ -1518,8 +1520,9 @@ async function callAPI(apiURL, apiMsg , resourceType) {
         console.log("API called: ", resourceType, " ", apiURL, " ", responseStatus);
       },
       (error) => {
-        const errorStatus = "status code:  " + error;  
-        console.log("API error due to unexpoected error: ", apiURL, errorStatus);
+        //const errorStatus = "status code:  " + error;  
+        console.log("API error due to unexpoected error: ", apiURL, error);
+        console.log("API error due to unexpoected error: ", apiMsg);
       })
 
 }
@@ -1637,7 +1640,8 @@ async function massUploadMetricReceived(metricReceivedMassFeed, clusterUuid){
           } //end of else 
           
       } catch (error) {
-        console.log(error.response);
+        //console.log(error.response);
+        console.log ("error on metricRecieved");
         throw error;
       }
 
