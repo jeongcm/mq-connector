@@ -1,4 +1,14 @@
 apiVersion: v1
+kind: Namespace
+metadata:
+  name:  nc
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name:  ${APP_IMAGE_NAME}
+---
+apiVersion: v1
 kind: ConfigMap
 metadata:
   name: ${APP_IMAGE_NAME}-configmap
@@ -16,23 +26,22 @@ data:
   API_NAME_METRIC_RECEIVED_POST: "/metricReceivedMassVm"
   API_SERVER_RESOURCE_URL: "http://nexclipper-api.nc.svc.cluster.local"
   API_SERVER_RESOURCE_PORT: "5001"
-  API_NAME_RESOURCE_POST: "/resourceMass"
+  API_NAME_RESOURCE_POST: "/resourceMassMongo"
   MQCOMM_PORT: "4001"
   NODE_EXPORTER_PORT: "9100"
-  RABBITMQ_SERVER_PORT: "5672"
   RABBITMQ_SERVER_QUEUE_ALERT: "nc_alert"
   RABBITMQ_SERVER_QUEUE_METRIC: "nc_metric"
   RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED: "nc_metric_received"
   RABBITMQ_SERVER_QUEUE_RESOURCE: "nc_resource"
   RABBITMQ_SERVER_QUEUE_VIRTUAL_HOST: "nexclipper"
-  RABBITMQ_SERVER_URL: "ncmq-rabbitmq.rabbitmq.svc.cluster.local"
-  RABBITMQ_SERVER_USER: "nexclipper"
-  MQCOMM_RESOURCE_TARGET_DB: "MARIADB"
+  RABBITMQ_PROTOCOL_HOST: "amqps://"
+  RABBITMQ_SERVER_URL: "b-67e9708e-7164-498d-af16-89c6820afdad.mq.eu-central-1.amazonaws.com"
+  RABBITMQ_SERVER_PORT: "5671"
+  MQCOMM_RESOURCE_TARGET_DB: "MONGODB"
   MAX_API_BODY_SIZE: 500mb
   NODE_OPTIONS: "--max-old-space-size=8192"
   VM_URL: "http://vm-victoria-metrics-single-server.vm.svc.cluster.local:8428/api/v1/import?extra_label=clusterUuid="
 
-  
 
 ---
 apiVersion: apps/v1
@@ -45,21 +54,36 @@ spec:
       app: ${APP_IMAGE_NAME}
   template:
     metadata:
+      annotations:
+        vault.hashicorp.com/agent-inject: 'true'
+        vault.hashicorp.com/agent-inject-status: "update"
+        vault.hashicorp.com/role: 'nexclipper-app'
+        vault.hashicorp.com/agent-inject-secret-ncmq-admin-login: 'kv/database/ncmq'
+        vault.hashicorp.com/agent-inject-template-ncmq-admin-login: |
+          {{- with secret "kv/database/ncmq" -}}
+          RABBITMQ_SERVER_USER={{ .Data.data.username }}
+          RABBITMQ_SERVER_PASSWORD={{ .Data.data.password }}
+          {{- end -}}
       labels:
         app: ${APP_IMAGE_NAME}
     spec:
+      serviceAccountName: ${APP_IMAGE_NAME}
       containers:
       - name: ${APP_IMAGE_NAME}
         image: ${IMG_TAG_TO_DEPLOY}
         envFrom:
           - configMapRef:
               name: ${APP_IMAGE_NAME}-configmap
-        env:
-          - name: RABBITMQ_SERVER_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: ncmq-rabbitmq
-                key: rabbitmq-password
+        resources: {}
+        # securityContext:
+        # #   runAsUser: 12345
+        # #   runAsGroup: 23456
+        #   # runAsNonRoot: true
+        #   allowPrivilegeEscalation: false
+        #   readOnlyRootFilesystem: true
+        #   privileged: false
+        #   capabilities:
+        #     drop: [ "ALL" ]
         ports:
         - containerPort: 4001
         livenessProbe:

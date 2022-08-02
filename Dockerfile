@@ -1,34 +1,42 @@
 # Common build stage
 FROM node:lts-alpine as common-build-stage
 
-WORKDIR /usr/src/app
+ENV WORKDIR=/usr/src/app/ \
+    NAME=nexclipper-mqcomm \
+    USER=nexclipperuser \
+    USER_ID=1002 \
+    GROUP=nexclipper 
 
-COPY  ./package.json ./package-lock.json  /usr/src/app/
+WORKDIR ${WORKDIR}
 
+COPY  ./package.json ./package-lock.json  ${WORKDIR}
+
+COPY docker-entrypoint.sh ${WORKDIR}
+
+RUN chmod +x  ${WORKDIR}docker-entrypoint.sh 
+RUN npm ci
+
+COPY . ${WORKDIR}
+
+RUN addgroup ${GROUP} && \
+    adduser -D ${USER} -g ${GROUP} -u ${USER_ID} && \
+    chown -R ${USER}:${GROUP} ${WORKDIR}
+
+USER ${USER}
 
 EXPOSE 4001
 
 ##Development build stage
 FROM common-build-stage as development-build-stage
 
-RUN npm ci
-
-COPY . /usr/src/app/
-
-
 ENV NODE_ENV development
 
-CMD [ "npm", "run", "dev"]
+CMD [ "npm","run","dev" ]
 
 # Production build stage
-# FROM common-build-stage as production-build-stage
+FROM common-build-stage as production-build-stage
 
-# RUN npm ci --only=production
+ENV NODE_ENV production
 
-# COPY . /usr/src/app/
+ENTRYPOINT [ "./docker-entrypoint.sh" ]
 
-# ENTRYPOINT [ "docker-entrypoint.sh" ]
-
-# ENV NODE_ENV production
-
-# CMD [ "npm", "run", "start"]
