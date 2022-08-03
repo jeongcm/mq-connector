@@ -169,8 +169,8 @@ async function connectQueue() {
                         {
                             if (result.items[i].status.addresses[j].type == 'InternalIP')
                             { 
-                                let ipHeader = (result.items[i].status.addresses[j].address).substr(0,2); 
-                                if (ipHeader=="10" || ipHeader=="19") {
+                                let ipHeader = (result.items[i].status.addresses[j].address).substr(0,3); 
+                                if (ipHeader=="10." || ipHeader=="192" || ipHeader=="172" ) {
                                     internalIp = result.items[i].status.addresses[j].address;
                                     break;
                                 }
