@@ -1611,6 +1611,7 @@ async function massUploadMetricReceived(metricReceivedMassFeed, clusterUuid){
           newResultMap2= null;
 
           let massFeedResult2 = await callVM(finalResult2, clusterUuid);
+          console.log(`massFeedResult: ${massFeedResult2.status}, clusterUuid: ${clusterUuid}, name: ${name}`); 
           finalResult2=null;
 
           //console.log( `Bulk Metric Received feed - VM is successfully complete` );
@@ -1629,7 +1630,7 @@ async function massUploadMetricReceived(metricReceivedMassFeed, clusterUuid){
           newResultMap = null;
           
           let massFeedResult = await callVM(finalResult, clusterUuid);
-          console.log("massFeedResult: ", massFeedResult.status); 
+          console.log(`massFeedResult: ${massFeedResult.status}, clusterUuid: ${clusterUuid}, name: ${name}`); 
           finalResult = null;
           //console.log( `Bulk Metric Received feed - VM is successfully complete` );
           
@@ -1638,7 +1639,7 @@ async function massUploadMetricReceived(metricReceivedMassFeed, clusterUuid){
           
       } catch (error) {
         //console.log(error.response);
-        console.log ("error on metricRecieved");
+        console.log (`error on metricRecieved - clusterUuid: ${clusterUuid}`, error);
         throw error;
       }
 
