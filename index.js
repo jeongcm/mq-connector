@@ -663,7 +663,7 @@ async function connectQueue() {
                         mergedQuery = tempQuery; 
                     }
                     API_MSG = JSON.parse(mergedQuery);
-                    console.log (mergedQuery);
+                
                 break;
                 /*
                 case "00000000000000000000000000000028":  // 28, for K8s resource quota  RQ
