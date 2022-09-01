@@ -1599,7 +1599,7 @@ async function callAPI(apiURL, apiMsg , resourceType) {
       (error) => {
         //const errorStatus = "status code:  " + error;  
         console.log("API error due to unexpoected error: ", apiURL, error);
-        console.log("API error due to unexpoected error: ", apiMsg);
+        //console.log("API error due to unexpoected error: ", apiMsg);
       })
 
 }
