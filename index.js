@@ -32,6 +32,10 @@ const API_SERVER_RESOURCE_URL = process.env.API_SERVER_RESOURCE_URL || "http://l
 const API_SERVER_RESOURCE_PORT = process.env.API_SERVER_RESOURCE_PORT || "5001";
 const API_NAME_RESOURCE_POST = process.env.API_NAME_RESOURCE_POST || "/resourceMass";
 
+const API_SERVER_RESOURCE_EVENT_URL = process.env.API_SERVER_RESOURCE_EVENT_URL || "http://localhost";
+const API_SERVER_RESOURCE_EVENT_PORT = process.env.API_SERVER_RESOURCE_EVENT_PORT || "5001";
+const API_NAME_RESOURCE_EVENT_POST = process.env.API_NAME_RESOURCE_EVENT_POST || "/resourceEventMass";
+
 const API_SERVER_METRIC_URL = process.env.API_SERVER_METRIC_URL || "http://localhost";
 const API_SERVER_METRIC_PORT = process.env.API_SERVER_METRIC_PORT || "5001";
 const API_NAME_METRIC_POST = process.env.API_NAME_METRIC_POST || "/metricMetaMass";
@@ -52,6 +56,7 @@ const RabbitOpt = RABBITMQ_PROTOCOL_HOST + RABBITMQ_SERVER_USER + ":" + RABBITMQ
 var channel, connection;
 const connect_string = RabbitOpt + RABBITMQ_SERVER_URL + ":" + RABBITMQ_SERVER_PORT + "/" + RABBITMQ_SERVER_VIRTUAL_HOST;
 const API_RESOURCE_URL = API_SERVER_RESOURCE_URL+":"+API_SERVER_RESOURCE_PORT + API_NAME_RESOURCE_POST;
+const API_RESOURCE_EVENT_URL = API_SERVER_RESOURCE_EVENT_URL+":"+API_SERVER_RESOURCE_EVENT_PORT + API_NAME_RESOURCE_EVENT_POST;
 const API_METRIC_URL = API_SERVER_METRIC_URL+":"+API_SERVER_METRIC_PORT + API_NAME_METRIC_POST;
 const API_METRIC_RECEIVED_URL = API_SERVER_METRIC_RECEIVED_URL+":"+API_SERVER_METRIC_RECEIVED_PORT + API_NAME_METRIC_RECEIVED_POST;
 const API_ALERT_URL = API_SERVER_ALERT_URL+":"+API_SERVER_ALERT_PORT + API_NAME_ALERT_POST;
@@ -702,23 +707,45 @@ async function connectQueue() {
                 default:        
                 } //end of switch
                 result = "";
-                callAPI(API_RESOURCE_URL, API_MSG, resourceType)
-                .then
-                (
-                  (response) => {
-                    channel.ack(msg);  
-                    console.log("MQ message acknowleged: " + resourceType + ", " + RABBITMQ_SERVER_QUEUE_RESOURCE + ", cluster_uuid: " + cluster_uuid );
-                      },
-                  (error) => {
-                    console.log("MQ message un-acknowleged: " + RABBITMQ_SERVER_QUEUE_RESOURCE + ", cluster_uuid: " + cluster_uuid);  
-                    //throw error;
-                  }).catch 
-                  (
-                    (error)=> { 
-                        console.log("MQ message un-acknowleged2: " + RABBITMQ_SERVER_QUEUE_RESOURCE + ", cluster_uuid: " + cluster_uuid); 
+                if (template_uuid === "")
+                    {
+                        callAPI(API_RESOURCE_EVENT_URL, API_MSG, resourceType)
+                        .then
+                        (
+                        (response) => {
+                            channel.ack(msg);  
+                            console.log("MQ message acknowleged: " + resourceType + ", " + RABBITMQ_SERVER_QUEUE_RESOURCE + ", cluster_uuid: " + cluster_uuid );
+                            },
+                        (error) => {
+                            console.log("MQ message un-acknowleged: " + RABBITMQ_SERVER_QUEUE_RESOURCE + ", cluster_uuid: " + cluster_uuid);  
+                            //throw error;
+                        }).catch 
+                        (
+                            (error)=> { 
+                                console.log("MQ message un-acknowleged2: " + RABBITMQ_SERVER_QUEUE_RESOURCE + ", cluster_uuid: " + cluster_uuid); 
+                                //throw error;
+                            }
+                        )
+                    } //end of resource_type = ev
+                else {
+                    callAPI(API_RESOURCE_URL, API_MSG, resourceType)
+                    .then
+                    (
+                    (response) => {
+                        channel.ack(msg);  
+                        console.log("MQ message acknowleged: " + resourceType + ", " + RABBITMQ_SERVER_QUEUE_RESOURCE + ", cluster_uuid: " + cluster_uuid );
+                        },
+                    (error) => {
+                        console.log("MQ message un-acknowleged: " + RABBITMQ_SERVER_QUEUE_RESOURCE + ", cluster_uuid: " + cluster_uuid);  
                         //throw error;
-                    }
-                  )
+                    }).catch 
+                    (
+                        (error)=> { 
+                            console.log("MQ message un-acknowleged2: " + RABBITMQ_SERVER_QUEUE_RESOURCE + ", cluster_uuid: " + cluster_uuid); 
+                            //throw error;
+                        }
+                    )
+                } // end of resource_type - non ev
             }
             else {
                 channel.ack(msg);
