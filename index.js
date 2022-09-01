@@ -707,7 +707,7 @@ async function connectQueue() {
                 default:        
                 } //end of switch
                 result = "";
-                if (template_uuid === "")
+                if (template_uuid === "00000000000000000000000000000008")
                     {
                         callAPI(API_RESOURCE_EVENT_URL, API_MSG, resourceType)
                         .then
