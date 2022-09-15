@@ -59,6 +59,8 @@ spec:
       containers:
       - name: ${APP_IMAGE_NAME}
         image: ${IMG_TAG_TO_DEPLOY}
+        imagePullPolicy: Always
+        resources: {}
         envFrom:
           - configMapRef:
               name: ${APP_IMAGE_NAME}-configmap
