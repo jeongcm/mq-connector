@@ -62,9 +62,6 @@ const API_METRIC_RECEIVED_URL = API_SERVER_METRIC_RECEIVED_URL+":"+API_SERVER_ME
 const API_ALERT_URL = API_SERVER_ALERT_URL+":"+API_SERVER_ALERT_PORT + API_NAME_ALERT_POST;
 const MQCOMM_RESOURCE_TARGET_DB = process.env.MQCOMM_RESOURCE_TARGET_DB;
 const vm_Url = process.env.VM_URL
- 
-
-
 
 if (MQCOMM_RESOURCE_TARGET_DB=="MONGODB") {
     connectQueueMongo() // call connectQueue function
@@ -77,7 +74,7 @@ if (MQCOMM_RESOURCE_TARGET_DB=="MONGODB") {
 
 async function connectQueue() {
     try {
-        var result = "";  
+        var result = "";
         connection = await amqp.connect(connect_string);
         channel = await connection.createChannel();
 
@@ -95,8 +92,7 @@ async function connectQueue() {
             var tempQuery = {};
             var API_MSG = {};
             
-            let TotalMsg = JSON.parse(msg.content.toString());
-
+            let TotalMsg = JSON.parse(msg.content.toString('utf8'));
             let cluster_uuid =  TotalMsg.cluster_uuid;
             let template_uuid = TotalMsg.template_uuid;
             let service_uuid = TotalMsg.service_uuid;
@@ -111,8 +107,9 @@ async function connectQueue() {
                         return;
                     }
 
-                let result = JSON.parse(TotalMsg.result);
-                
+                //let result = JSON.parse(TotalMsg.result);
+                let result = TotalMsg.result;
+
                 const itemLength = result.items.length;
                 if (itemLength == 0) 
                     {
@@ -755,7 +752,7 @@ async function connectQueue() {
         })
 
         await channel.consume(RABBITMQ_SERVER_QUEUE_ALERT, (msg) => {
-            result = JSON.parse(msg.content.toString());
+            result = JSON.parse(msg.content.toString('utf-8'));
             const cluster_uuid = result.cluster_uuid;
             let service_uuid = result.service_uuid;
 
@@ -781,8 +778,8 @@ async function connectQueue() {
         }); // end of msg consume
 
         await channel.consume(RABBITMQ_SERVER_QUEUE_METRIC, (msg) => {
-
-            result = JSON.parse(msg.content.toString());
+            result = JSON.parse(msg.content.toString('utf-8'));
+            //result = msg.content.toString('utf-8');
             const cluster_uuid = result.cluster_uuid;
             let service_uuid = result.service_uuid;
             if (result.status != 4) {
@@ -808,7 +805,7 @@ async function connectQueue() {
         }); // end of msg consume
 
         await channel.consume(RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED, (msg) => {
-            result = JSON.parse(msg.content.toString());
+            result = JSON.parse(msg.content.toString('utf-8'));
             let rabbitmq_message_size = (Buffer.byteLength(msg.content.toString()))/1024/1024;
             let cluster_uuid = result.cluster_uuid;
             let service_uuid = result.service_uuid;
@@ -1655,7 +1652,8 @@ async function massUploadMetricReceived(metricReceivedMassFeed, clusterUuid){
 
     try {
 
-        let receivedData = JSON.parse(metricReceivedMassFeed.result);
+        //let receivedData = JSON.parse(metricReceivedMassFeed.result);
+        let receivedData = metricReceivedMassFeed.result;
         const clusterUuid = metricReceivedMassFeed.cluster_uuid;
         const name = metricReceivedMassFeed.service_name;
         
