@@ -666,7 +666,9 @@ async function connectQueue() {
                         query['resource_Status_Updated_At'] = new Date();
 
                         tempQuery = formatter_resource(i, itemLength, resourceType, cluster_uuid, query, mergedQuery);
-                        mergedQuery = tempQuery; 
+                        mergedQuery = tempQuery;
+                        console.log("event_debug, clusterUuid:", cluster_uuid); 
+                        console.log("event_debug, event_message:", result.items[i].message); 
                     }
                     API_MSG = JSON.parse(mergedQuery);
                 
@@ -739,12 +741,12 @@ async function connectQueue() {
                 result = "";
                 if (template_uuid === "00000000000000000000000000000008")
                     {
-                        callAPI(API_RESOURCE_EVENT_URL, API_MSG, resourceType)
+                        callAPI(API_RESOURCE_EVENT_URL, API_MSG, resourceType, cluster_uuid)
                         .then
                         (
                         (response) => {
                             channel.ack(msg);  
-                            console.log("MQ message acknowleged: " + resourceType + ", " + RABBITMQ_SERVER_QUEUE_RESOURCE + ", cluster_uuid: " + cluster_uuid );
+                            console.log("MQ message acknowleged:" + resourceType + ",cluster_uuid:" + cluster_uuid + ", " + RABBITMQ_SERVER_QUEUE_RESOURCE );
                             },
                         (error) => {
                             console.log("MQ message un-acknowleged: " + RABBITMQ_SERVER_QUEUE_RESOURCE + ", cluster_uuid: " + cluster_uuid);  
@@ -758,7 +760,7 @@ async function connectQueue() {
                         )
                     } //end of resource_type = ev
                 else {
-                    callAPI(API_RESOURCE_URL, API_MSG, resourceType)
+                    callAPI(API_RESOURCE_URL, API_MSG, resourceType, cluster_uuid)
                     .then
                     (
                     (response) => {
@@ -796,7 +798,7 @@ async function connectQueue() {
                 }
             else {
                 console.log("calling alert interface API : " + RABBITMQ_SERVER_QUEUE_ALERT + ", cluster_uuid: " + cluster_uuid );
-                callAPI(API_ALERT_URL, result, "alerts")
+                callAPI(API_ALERT_URL, result, "alerts", cluster_uuid)
                 .then
                 (
                   (response) => {
@@ -823,7 +825,7 @@ async function connectQueue() {
             else {
                 console.log("calling metric meta interface API : " + RABBITMQ_SERVER_QUEUE_METRIC + ", cluster_uuid: " + cluster_uuid );
                 //console.log (result);
-                callAPI(API_METRIC_URL, result, "metric")
+                callAPI(API_METRIC_URL, result, "metric", cluster_uuid)
                 .then
                 (
                   (response) => {
@@ -1534,7 +1536,7 @@ async function connectQueueMongo() {
                 }
             else {
                 console.log("calling alert interface API : " + RABBITMQ_SERVER_QUEUE_ALERT + ", cluster_uuid: " + cluster_uuid );
-                callAPI(API_ALERT_URL, result, "alerts")
+                callAPI(API_ALERT_URL, result, "alerts", cluster_uuid)
                 .then
                 (
                   (response) => {
@@ -1562,7 +1564,7 @@ async function connectQueueMongo() {
                 }
             else {
                 console.log("calling metric meta interface API : " + RABBITMQ_SERVER_QUEUE_METRIC + ", cluster_uuid: " + cluster_uuid );
-                callAPI(API_METRIC_URL, result, "metric")
+                callAPI(API_METRIC_URL, result, "metric", cluster_uuid)
                 .then
                 (
                   (response) => {
@@ -1618,17 +1620,17 @@ async function connectQueueMongo() {
     }
 }
 
-async function callAPI(apiURL, apiMsg , resourceType) {
+async function callAPI(apiURL, apiMsg , resourceType, cluster_uuid) {
     axios.post(apiURL,apiMsg, {maxContentLength:Infinity, maxBodyLength: Infinity})
     .then
     (
       (response) => {
         const responseStatus = "status code: " + response.status;
-        console.log("API called: ", resourceType, " ", apiURL, " ", responseStatus);
+        console.log("API called: ", resourceType, " ", cluster_uuid, " ", apiURL, " ", responseStatus);
       },
       (error) => {
         //const errorStatus = "status code:  " + error;  
-        console.log("API error due to unexpoected error: ", apiURL, error);
+        console.log("API error due to unexpoected error: ", resourceType, " ", cluster_uuid, " ", apiURL, " ", error);
         //console.log("API error due to unexpoected error: ", apiMsg);
       })
 
