@@ -37,9 +37,9 @@ data:
   RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED: "nc_metric_received"
   RABBITMQ_SERVER_QUEUE_RESOURCE: "nc_resource"
   RABBITMQ_SERVER_QUEUE_VIRTUAL_HOST: "nexclipper"
-  RABBITMQ_PROTOCOL_HOST: "amqps://"
-  RABBITMQ_SERVER_URL: "b-67e9708e-7164-498d-af16-89c6820afdad.mq.eu-central-1.amazonaws.com"
-  RABBITMQ_SERVER_PORT: "5671"
+  RABBITMQ_PROTOCOL_HOST: "amqp://"
+  RABBITMQ_SERVER_URL: "ncmq-rabbitmq.ncmq.svc.cluster.local"
+  RABBITMQ_SERVER_PORT: "5672"
   MQCOMM_RESOURCE_TARGET_DB: "MARIADB"
   MAX_API_BODY_SIZE: 500mb
   NODE_OPTIONS: "--max-old-space-size=8192"
@@ -78,16 +78,20 @@ spec:
         envFrom:
           - configMapRef:
               name: ${APP_IMAGE_NAME}-configmap
-        resources: {}
-        # securityContext:
-        # #   runAsUser: 12345
-        # #   runAsGroup: 23456
-        #   # runAsNonRoot: true
-        #   allowPrivilegeEscalation: false
-        #   readOnlyRootFilesystem: true
-        #   privileged: false
-        #   capabilities:
-        #     drop: [ "ALL" ]
+        resources:
+          limits:
+            cpu: 600m
+            memory: 1Gi
+          requests:
+            cpu: 400m
+            memory: 512Mi
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1002
+          capabilities:
+            drop:
+              - SETUID
+              - SETGID
         ports:
         - containerPort: 4001
         livenessProbe:

@@ -60,7 +60,20 @@ spec:
       - name: ${APP_IMAGE_NAME}
         image: ${IMG_TAG_TO_DEPLOY}
         imagePullPolicy: Always
-        resources: {}
+        resources:
+          limits:
+            cpu: 600m
+            memory: 1Gi
+          requests:
+            cpu: 400m
+            memory: 512Mi
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1002
+          capabilities:
+            drop:
+              - SETUID
+              - SETGID
         envFrom:
           - configMapRef:
               name: ${APP_IMAGE_NAME}-configmap
