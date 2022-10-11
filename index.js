@@ -1766,12 +1766,12 @@ async function massUploadMetricReceived(metricReceivedMassFeed, clusterUuid){
 }    
 
 async function callVM (metricReceivedMassFeed, clusterUuid) {
-
+    let result;
     if (VM_OPTION === "SINGLE") {
         const url = vm_Url + clusterUuid;
         console.log (`2-1, calling vm interface: ${url}`); 
         try {
-            await axios.post (url, metricReceivedMassFeed, {maxContentLength:Infinity, maxBodyLength: Infinity})
+            result = await axios.post (url, metricReceivedMassFeed, {maxContentLength:Infinity, maxBodyLength: Infinity})
         } catch (error){
         console.log("error on calling vm api");
         throw error;
@@ -1788,7 +1788,7 @@ async function callVM (metricReceivedMassFeed, clusterUuid) {
           };
         const urlMulti = VM_MULTI_AUTH_URL + clusterUuid;
         try {
-            await axios.post (urlMulti, metricReceivedMassFeed, {maxContentLength:Infinity, maxBodyLength: Infinity}, {auth:{username: customerAccountId, password: customerAccountId}})
+            result = await axios.post (urlMulti, metricReceivedMassFeed, {maxContentLength:Infinity, maxBodyLength: Infinity}, {auth:{username: customerAccountId, password: customerAccountId}})
         } catch (error){
             console.log("error on calling vm api");
             throw error;
@@ -1797,7 +1797,7 @@ async function callVM (metricReceivedMassFeed, clusterUuid) {
         const url = vm_Url + clusterUuid;
         console.log (`2-1, calling vm interface: ${url}`); 
         try {
-            await axios.post (url, metricReceivedMassFeed, {maxContentLength:Infinity, maxBodyLength: Infinity})
+            result = await axios.post (url, metricReceivedMassFeed, {maxContentLength:Infinity, maxBodyLength: Infinity})
         } catch (error){
         console.log("error on calling vm api");
         throw error;
@@ -1813,13 +1813,13 @@ async function callVM (metricReceivedMassFeed, clusterUuid) {
           };
         const urlMulti = VM_MULTI_AUTH_URL + clusterUuid;
         try {
-            await axios.post (urlMulti, metricReceivedMassFeed, {maxContentLength:Infinity, maxBodyLength: Infinity}, {auth:{username: customerAccountId, password: customerAccountId}})
+            result = await axios.post (urlMulti, metricReceivedMassFeed, {maxContentLength:Infinity, maxBodyLength: Infinity}, {auth:{username: customerAccountId, password: customerAccountId}})
         } catch (error){
             console.log("error on calling vm api");
             throw error;
         };
     }
-    return;  
+    return result;  
 }
 
 app.listen(MQCOMM_PORT, () => console.log("NexClipper MQCOMM Server running at port " + MQCOMM_PORT));
