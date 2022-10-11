@@ -671,8 +671,6 @@ async function connectQueue() {
 
                         tempQuery = formatter_resource(i, itemLength, resourceType, cluster_uuid, query, mergedQuery);
                         mergedQuery = tempQuery;
-                        console.log("event_debug, clusterUuid:", cluster_uuid); 
-                        console.log("event_debug, event_message:", result.items[i].message); 
                     }
                     API_MSG = JSON.parse(mergedQuery);
                 
