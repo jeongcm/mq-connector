@@ -1809,7 +1809,6 @@ async function callVM (metricReceivedMassFeed, clusterUuid) {
         let username;
         try {
             const customerAccount = await axios.get (urlCa);
-            console.log(customerAccount);
             username = 'I' + customerAccount.data.data.customerAccountId;
             password = customerAccount.data.data.customerAccountId;
           } catch (error){
