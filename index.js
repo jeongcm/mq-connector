@@ -31,6 +31,7 @@ const RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED = process.env.RABBITMQ_SERVER_QUEUE_
 const API_SERVER_RESOURCE_URL = process.env.API_SERVER_RESOURCE_URL || "http://localhost";
 const API_SERVER_RESOURCE_PORT = process.env.API_SERVER_RESOURCE_PORT || "5001";
 const API_NAME_RESOURCE_POST = process.env.API_NAME_RESOURCE_POST || "/resourceMass";
+const API_NAME_CUSTOMER_ACCOUNT_GET =process.env.API_NAME_CUSTOMER_ACCOUNT_GET || "/customerAccount";
 
 const API_SERVER_RESOURCE_EVENT_URL = process.env.API_SERVER_RESOURCE_EVENT_URL || "http://localhost";
 const API_SERVER_RESOURCE_EVENT_PORT = process.env.API_SERVER_RESOURCE_EVENT_PORT || "5001";
@@ -59,9 +60,12 @@ const API_RESOURCE_URL = API_SERVER_RESOURCE_URL+":"+API_SERVER_RESOURCE_PORT + 
 const API_RESOURCE_EVENT_URL = API_SERVER_RESOURCE_EVENT_URL+":"+API_SERVER_RESOURCE_EVENT_PORT + API_NAME_RESOURCE_EVENT_POST;
 const API_METRIC_URL = API_SERVER_METRIC_URL+":"+API_SERVER_METRIC_PORT + API_NAME_METRIC_POST;
 const API_METRIC_RECEIVED_URL = API_SERVER_METRIC_RECEIVED_URL+":"+API_SERVER_METRIC_RECEIVED_PORT + API_NAME_METRIC_RECEIVED_POST;
+const API_CUSTOMER_ACCOUNT_GET_URL = API_SERVER_RESOURCE_URL+":"+API_SERVER_RESOURCE_PORT + API_NAME_CUSTOMER_ACCOUNT_GET;
 const API_ALERT_URL = API_SERVER_ALERT_URL+":"+API_SERVER_ALERT_PORT + API_NAME_ALERT_POST;
 const MQCOMM_RESOURCE_TARGET_DB = process.env.MQCOMM_RESOURCE_TARGET_DB;
-const vm_Url = process.env.VM_URL
+const vm_Url = process.env.VM_URL;
+const VM_MULTI_AUTH_URL = process.env.VM_MULTI_AUTH_URL;
+const VM_OPTION = process.env.VM_OPTION; //BOTH - both / SINGLE - single-tenant / MULTI - multi-tenant
 
 if (MQCOMM_RESOURCE_TARGET_DB=="MONGODB") {
     connectQueueMongo() // call connectQueue function
@@ -1765,16 +1769,59 @@ async function massUploadMetricReceived(metricReceivedMassFeed, clusterUuid){
 
 async function callVM (metricReceivedMassFeed, clusterUuid) {
 
-    //let url = `http://vm-victoria-metrics-single-server.vm.svc.cluster.local:8428/api/v1/import?extra_label=clusterUuid=${clusterUuid}`; 
-    let url = vm_Url + clusterUuid; 
-    console.log (`2-1, calling vm interface: ${url}`); 
-    try {
-      return axios.post (url, metricReceivedMassFeed, {maxContentLength:Infinity, maxBodyLength: Infinity})
-    } catch (error){
-      console.log("error on calling vm api");
-      throw error;
-    }    
-
+    if (VM_OPTION === "SINGLE") {
+        const url = vm_Url + clusterUuid;
+        console.log (`2-1, calling vm interface: ${url}`); 
+        try {
+            await axios.post (url, metricReceivedMassFeed, {maxContentLength:Infinity, maxBodyLength: Infinity})
+        } catch (error){
+        console.log("error on calling vm api");
+        throw error;
+        };
+    } else if (VM_OPTION === "MULTI") {
+        const urlCa = API_CUSTOMER_ACCOUNT_GET_URL + "/" + clusterUuid;
+        let customerAccountId;
+        try {
+            const customerAccount = await axios.get (urlCa)
+            customerAccountId = customerAccount.customerAccountId;
+          } catch (error){
+            console.log("error on confirming cluster information for metric feed");
+            throw error;
+          };
+        const urlMulti = VM_MULTI_AUTH_URL + clusterUuid;
+        try {
+            await axios.post (urlMulti, metricReceivedMassFeed, {maxContentLength:Infinity, maxBodyLength: Infinity}, {auth:{username: customerAccountId, password: customerAccountId}})
+        } catch (error){
+            console.log("error on calling vm api");
+            throw error;
+        };
+    } else { // BOTH
+        const url = vm_Url + clusterUuid;
+        console.log (`2-1, calling vm interface: ${url}`); 
+        try {
+            await axios.post (url, metricReceivedMassFeed, {maxContentLength:Infinity, maxBodyLength: Infinity})
+        } catch (error){
+        console.log("error on calling vm api");
+        throw error;
+        };
+        const urlCa = API_CUSTOMER_ACCOUNT_GET_URL + "/" + clusterUuid;
+        let customerAccountId;
+        try {
+            const customerAccount = await axios.get (urlCa)
+            customerAccountId = customerAccount.customerAccountId;
+          } catch (error){
+            console.log("error on confirming cluster information for metric feed");
+            throw error;
+          };
+        const urlMulti = VM_MULTI_AUTH_URL + clusterUuid;
+        try {
+            await axios.post (urlMulti, metricReceivedMassFeed, {maxContentLength:Infinity, maxBodyLength: Infinity}, {auth:{username: customerAccountId, password: customerAccountId}})
+        } catch (error){
+            console.log("error on calling vm api");
+            throw error;
+        };
+    }
+    return;  
 }
 
 app.listen(MQCOMM_PORT, () => console.log("NexClipper MQCOMM Server running at port " + MQCOMM_PORT));
