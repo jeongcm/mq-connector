@@ -1803,17 +1803,19 @@ async function callVM (metricReceivedMassFeed, clusterUuid) {
         throw error;
         };
         const urlCa = API_CUSTOMER_ACCOUNT_GET_URL + "/" + clusterUuid;
-        let customerAccountId;
+        let password;
+        let username;
         try {
-            const customerAccount = await axios.get (urlCa)
-            customerAccountId = customerAccount.customerAccountId;
+            const customerAccount = await axios.get (urlCa);
+            username = 'I'+customerAccount.customerAccountId;
+            password = customerAccount.customerAccountId;
           } catch (error){
             console.log("error on confirming cluster information for metric feed");
             throw error;
           };
         const urlMulti = VM_MULTI_AUTH_URL + clusterUuid;
         try {
-            result = await axios.post (urlMulti, metricReceivedMassFeed, {maxContentLength:Infinity, maxBodyLength: Infinity}, {auth:{username: customerAccountId, password: customerAccountId}})
+            result = await axios.post (urlMulti, metricReceivedMassFeed, {maxContentLength:Infinity, maxBodyLength: Infinity}, {auth:{username: username, password: password}})
         } catch (error){
             console.log("error on calling vm api");
             throw error;
