@@ -31,7 +31,7 @@ const RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED = process.env.RABBITMQ_SERVER_QUEUE_
 const API_SERVER_RESOURCE_URL = process.env.API_SERVER_RESOURCE_URL || "http://localhost";
 const API_SERVER_RESOURCE_PORT = process.env.API_SERVER_RESOURCE_PORT || "5001";
 const API_NAME_RESOURCE_POST = process.env.API_NAME_RESOURCE_POST || "/resourceMass";
-const API_NAME_CUSTOMER_ACCOUNT_GET =process.env.API_NAME_CUSTOMER_ACCOUNT_GET || "/customerAccount";
+const API_NAME_CUSTOMER_ACCOUNT_GET =process.env.API_NAME_CUSTOMER_ACCOUNT_GET || "/customerAccount/resourceGroup";
 
 const API_SERVER_RESOURCE_EVENT_URL = process.env.API_SERVER_RESOURCE_EVENT_URL || "http://localhost";
 const API_SERVER_RESOURCE_EVENT_PORT = process.env.API_SERVER_RESOURCE_EVENT_PORT || "5001";
@@ -1805,11 +1805,13 @@ async function callVM (metricReceivedMassFeed, clusterUuid) {
         throw error;
         };
         const urlCa = API_CUSTOMER_ACCOUNT_GET_URL + "/" + clusterUuid;
+        console.log(urlCa);
         let password;
         let username;
         try {
             const customerAccount = await axios.get (urlCa);
-            username = 'I'+customerAccount.customerAccountId;
+            console.log(customerAccount);
+            username = 'I' + customerAccount.customerAccountId;
             password = customerAccount.customerAccountId;
           } catch (error){
             console.log("error on confirming cluster information for metric feed");
