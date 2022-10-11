@@ -1,16 +1,11 @@
 variables:
-  DOCKER_DRIVER: overlay
-  APP_DOCKERFILE_LOCATION: "Dockerfile"
   APP_IMAGE_NAME: "nexclipper-mqcomm"
   APP_VERSION: "0.9.4"
 
 default:
-  services:
-    - docker:dind
   tags:
     - gitlab-runner-k8s
   retry: 2
-  image: docker:latest
 
 cache:
   key: ${APP_IMAGE_NAME}
@@ -23,7 +18,7 @@ stages:
   - stg
 
 code-build:
-  image: node:lts-alpine
+  image: node:16-alpine
   stage: build-code
   script:
     - npm install
@@ -33,17 +28,63 @@ code-build:
   rules:
     - if: $CI_COMMIT_BRANCH == "develop" || $CI_COMMIT_BRANCH == "staging" ||  $CI_COMMIT_BRANCH =~ /\b^(issue|feature|bugfix|improvement).*$\b/
 
-docker-build-dev:
-  stage: dev
-  before_script:
-    - "apk add --no-cache git"
-  variables: 
+docker-build-commit:
+  stage: build-code
+  variables:
     HARBOR_NEXCLIPPER_PROJECT: "nexclipper-dev"
+  image:
+    name: gcr.io/kaniko-project/executor:v1.9.0-debug
+    entrypoint: [""]
+  before_script:
+    - echo "{\"auths\":{\"$HARBOR_URL/$HARBOR_NEXCLIPPER_PROJECT/$APP_IMAGE_NAME\":{\"username\":\"$HARBOR_USER\",\"password\":\"$HARBOR_PASS\"}}}" > /kaniko/.docker/config.json
   script:
     - echo "building docker image for $APP_IMAGE_NAME "
-    - "source /data/scripts/build_v3.sh $APP_IMAGE_NAME"
+    - /kaniko/executor
+      --context "${CI_PROJECT_DIR}"
+      --target "common-build-stage"
+      --dockerfile "${CI_PROJECT_DIR}/Dockerfile"
+      --destination "$HARBOR_URL/$HARBOR_NEXCLIPPER_PROJECT/$APP_IMAGE_NAME:${CI_COMMIT_SHORT_SHA}"
+  needs:
+    - code-build
   rules:
-    - if: $CI_COMMIT_BRANCH == "develop" || $CI_COMMIT_BRANCH =~ /\b^(issue|feature|bugfix|improvement).*$\b/
+    - if: $CI_COMMIT_BRANCH =~ /\b^(issue|feature|bugfix|improvement).*$\b/
+
+deploy-nexclipper-mqcomm-commit:
+  stage: build-code
+  image: repo.nexclipper.io/nexclipper/helm-kubectl:latest
+  variables: 
+    HARBOR_NEXCLIPPER_PROJECT: "nexclipper-dev"
+  before_script:
+    - echo -e "\nLogin to Kubernetes"
+    - source /data/scripts/login-cluster.sh dev
+  script:
+    - "source /data/scripts/deploy.sh dev nc"
+  needs:
+    - job: docker-build-commit
+  rules:
+    - if: $CI_COMMIT_BRANCH =~ /\b^(issue|feature|bugfix|improvement).*$\b/
+      when: manual
+
+docker-build-dev:
+  stage: dev
+  variables:
+    HARBOR_NEXCLIPPER_PROJECT: "nexclipper-dev"
+  image:
+    name: gcr.io/kaniko-project/executor:v1.9.0-debug
+    entrypoint: [""]
+  before_script:
+    - echo "{\"auths\":{\"$HARBOR_URL/$HARBOR_NEXCLIPPER_PROJECT/$APP_IMAGE_NAME\":{\"username\":\"$HARBOR_USER\",\"password\":\"$HARBOR_PASS\"}}}" > /kaniko/.docker/config.json
+  script:
+    - echo "building docker image for $APP_IMAGE_NAME "
+    - /kaniko/executor
+      --context "${CI_PROJECT_DIR}"
+      --target "common-build-stage"
+      --dockerfile "${CI_PROJECT_DIR}/Dockerfile"
+      --destination "$HARBOR_URL/$HARBOR_NEXCLIPPER_PROJECT/$APP_IMAGE_NAME:${APP_VERSION}"
+      --destination "$HARBOR_URL/$HARBOR_NEXCLIPPER_PROJECT/$APP_IMAGE_NAME:latest"
+      --destination "$HARBOR_URL/$HARBOR_NEXCLIPPER_PROJECT/$APP_IMAGE_NAME:${CI_COMMIT_SHORT_SHA}"
+  rules:
+    - if: $CI_COMMIT_BRANCH == "develop"
 
 deploy-nexclipper-mqcomm-dev:
   stage: dev
@@ -54,27 +95,35 @@ deploy-nexclipper-mqcomm-dev:
     - echo -e "\nLogin to Kubernetes"
     - source /data/scripts/login-cluster.sh dev
   script:
-    - "source /data/scripts/deploy_v3.sh dev nc"
+    - "source /data/scripts/deploy.sh dev nc"
   needs:
     - job: docker-build-dev
   rules:
     - if: '$CI_COMMIT_BRANCH == "develop"'
-    - if: $CI_COMMIT_BRANCH =~ /\b^(issue|feature|bugfix|improvement).*$\b/
-      when: manual
   
 
 docker-build-stg:
   stage: stg
-  before_script:
-    - "apk add --no-cache git"
   variables:
-    BUILD_TARGET_STAGE: production-build-stage
     HARBOR_NEXCLIPPER_PROJECT: "nexclipper"
+  image:
+    name: gcr.io/kaniko-project/executor:v1.9.0-debug
+    entrypoint: [""]
+  before_script:
+    - echo "{\"auths\":{\"$HARBOR_URL/$HARBOR_NEXCLIPPER_PROJECT/$APP_IMAGE_NAME\":{\"username\":\"$HARBOR_USER\",\"password\":\"$HARBOR_PASS\"}}}" > /kaniko/.docker/config.json
   script:
     - echo "building docker image for $APP_IMAGE_NAME "
-    - "source /data/scripts/build_v3.sh $APP_IMAGE_NAME"
+    - /kaniko/executor
+      --context "${CI_PROJECT_DIR}"
+      --target "common-build-stage"
+      --dockerfile "${CI_PROJECT_DIR}/Dockerfile"
+      --destination "$HARBOR_URL/$HARBOR_NEXCLIPPER_PROJECT/$APP_IMAGE_NAME:${APP_VERSION}"
+      --destination "$HARBOR_URL/$HARBOR_NEXCLIPPER_PROJECT/$APP_IMAGE_NAME:latest"
+      --destination "$HARBOR_URL/$HARBOR_NEXCLIPPER_PROJECT/$APP_IMAGE_NAME:${CI_COMMIT_SHORT_SHA}"
+  needs:
+    - job: code-build
   rules:
-    - if: $CI_COMMIT_BRANCH == "staging"
+    - if: $CI_COMMIT_BRANCH == "staging" 
 
 deploy-nexclipper-mqcomm-stg:
   stage: stg
@@ -83,9 +132,9 @@ deploy-nexclipper-mqcomm-stg:
     HARBOR_NEXCLIPPER_PROJECT: "nexclipper"
   before_script:
     - echo -e "\nLogin to Kubernetes"
-    - aws eks --region $AWS_DEFAULT_REGION update-kubeconfig --name nxc-prd-01
+    - source /data/scripts/login-cluster.sh stg
   script:
-   - "source /data/scripts/deploy_v3.sh stg nc"
+   - "source /data/scripts/deploy.sh stg nc"
   needs:
     - job: docker-build-stg
   rules:
