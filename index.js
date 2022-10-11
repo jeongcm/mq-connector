@@ -1782,8 +1782,8 @@ async function callVM (metricReceivedMassFeed, clusterUuid) {
         let username;
         try {
             const customerAccount = await axios.get (urlCa)
-            username = 'I'+customerAccount.customerAccountId;
-            password = customerAccount.customerAccountId;
+            username = 'I'+customerAccount.data.data.customerAccountId;
+            password = customerAccount.data.data.customerAccountId;
           } catch (error){
             console.log("error on confirming cluster information for metric feed");
             throw error;
@@ -1811,8 +1811,8 @@ async function callVM (metricReceivedMassFeed, clusterUuid) {
         try {
             const customerAccount = await axios.get (urlCa);
             console.log(customerAccount);
-            username = 'I' + customerAccount.customerAccountId;
-            password = customerAccount.customerAccountId;
+            username = 'I' + customerAccount.data.data.customerAccountId;
+            password = customerAccount.data.data.customerAccountId;
           } catch (error){
             console.log("error on confirming cluster information for metric feed");
             throw error;
