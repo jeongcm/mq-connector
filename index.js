@@ -1805,7 +1805,6 @@ async function callVM (metricReceivedMassFeed, clusterUuid) {
         throw error;
         };
         const urlCa = API_CUSTOMER_ACCOUNT_GET_URL + "/" + clusterUuid;
-        console.log(urlCa);
         let password;
         let username;
         try {
@@ -1820,6 +1819,7 @@ async function callVM (metricReceivedMassFeed, clusterUuid) {
         const urlMulti = VM_MULTI_AUTH_URL + clusterUuid;
         try {
             result = await axios.post (urlMulti, metricReceivedMassFeed, {maxContentLength:Infinity, maxBodyLength: Infinity, auth:{username: username, password: password}})
+            console.log("success on vm multi-tenant")
         } catch (error){
             console.log("error on calling vm api");
             throw error;
