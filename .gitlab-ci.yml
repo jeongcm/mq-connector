@@ -1,6 +1,6 @@
 variables:
   APP_IMAGE_NAME: "nexclipper-mqcomm"
-  APP_VERSION: "0.9.4"
+  APP_VERSION: "0.9.5"
 
 default:
   tags:
