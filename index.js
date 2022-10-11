@@ -1014,7 +1014,9 @@ async function callVM (metricReceivedMassFeed, clusterUuid) {
             result = await axios.post (url, metricReceivedMassFeed, {maxContentLength:Infinity, maxBodyLength: Infinity})
             console.log("VM-single inserted:", result.status)
         } catch (error){
-        console.log("error on calling vm api");
+
+        console.log("error on calling vm api", error);
+        console.log(metricReceivedMassFeed);
         throw error;
         };
         const urlCa = API_CUSTOMER_ACCOUNT_GET_URL + "/" + clusterUuid;
