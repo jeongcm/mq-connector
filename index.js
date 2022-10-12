@@ -944,8 +944,13 @@ async function massUploadMetricReceived(metricReceivedMassFeed, clusterUuid){
           newResultMap1 = null;
           console.log ("final result1:", finalResult1);
           let massFeedResult1 = await callVM(finalResult1, clusterUuid);
+          if (!massFeedResult1 || (massFeedResult1.status != 204)) {
+            console.log("Data Issue1 -----------------", finalResult);
+          }
+
           console.log(`3-1. massFeedResult 1/2: ${massFeedResult1.status}, clusterUuid: ${clusterUuid}, name: ${name}`); 
           finalResult1=null;
+          massFeedResult1= null;
           let newResultMap2 = [];
           secondHalf.map((data)=>{
             const{metric, value} = data;
@@ -955,9 +960,12 @@ async function massUploadMetricReceived(metricReceivedMassFeed, clusterUuid){
           newResultMap2= null;
           console.log ("final result2:", finalResult1);
           let massFeedResult2 = await callVM(finalResult2, clusterUuid);
+          if (!massFeedResult2 || (massFeedResult2.status != 204)) {
+            console.log("Data Issue2 -----------------", finalResult);
+          }
+
           console.log(`3-2, massFeedResult 2/2: ${massFeedResult2.status}, clusterUuid: ${clusterUuid}, name: ${name}`); 
           finalResult2=null;
-          massFeedResult1= null;
           massFeedResult2= null;      
         }
         else {
