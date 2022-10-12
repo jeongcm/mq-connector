@@ -967,6 +967,9 @@ async function massUploadMetricReceived(metricReceivedMassFeed, clusterUuid){
           newResultMap = null;
           let massFeedResult = await callVM(finalResult, clusterUuid);
           console.log(`3. massFeedResult: ${massFeedResult.status}, clusterUuid: ${clusterUuid}, name: ${name}`); 
+          if (!massFeedResult || (massFeedResult.status != 204)) {
+            console.log("Data Issue -----------------", finalResult);
+          }
           finalResult = null;
           massFeedResult= null;
           } //end of else 
@@ -986,7 +989,7 @@ async function callVM (metricReceivedMassFeed, clusterUuid) {
             console.log("VM-single inserted:", result.status)
         } catch (error){
             console.log("error on calling vm api");
-        throw error;
+        //throw error;
         };
     } else if (VM_OPTION === "MULTI") {
         const urlCa = API_CUSTOMER_ACCOUNT_GET_URL + "/" + clusterUuid;
