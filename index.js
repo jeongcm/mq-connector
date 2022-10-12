@@ -984,7 +984,7 @@ async function massUploadMetricReceived(metricReceivedMassFeed, clusterUuid){
           } //end of else 
       } catch (error) {
         console.log (`error on metricRecieved - clusterUuid: ${clusterUuid}`, error);
-        throw error;
+        //throw error;
       }
 }    
 
