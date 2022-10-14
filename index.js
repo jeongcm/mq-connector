@@ -116,7 +116,7 @@ async function connectQueue() {
                     }
                 //let result = JSON.parse(TotalMsg.result);
                 let result = TotalMsg.result;
-
+                let length
                 const itemLength = result.items.length;
                 if (itemLength == 0) 
                     {
@@ -743,26 +743,24 @@ async function connectQueue() {
 
                 break;
 
-                case "PM-TEMPLATE-UUID":  //TODO insert Openstack PM template uuid
-                    resourceType = "PM";
-
-                    for (var i=0; i<itemLength; i++)
+                case "HVLIST-TEMPLATE-UUID":  //TODO insert Openstack HV List template uuid
+                    length = result.hypervisors.length
+                    if (length == 0)
                     {
-                        query['resource_Type'] = resourceType ;
-                        query['resource_Spec'] = result.items[i].spec;
-                        query['resource_Group_Uuid'] = cluster_uuid ;
-                        query['resource_Name'] = result.items[i].metadata.name ;
-                        query['resource_Instance'] = result.items[i].metadata.name ; // TODO: set host ip
-                        // query['resource_Target_Uuid'] = result.items[i].metadata.uid ; // TODO: set Host uuid?
-                        // query['resource_Target_Created_At'] = result.items[i].metadata.creationTimestamp ;
-                        // query['resource_Labels'] = result.items[i].metadata.labels ; //object
-                        // query['resource_Annotations'] = result.items[i].metadata.annotations ; //object
-                        // query['resource_Owner_References'] = result.items[i].metadata.ownerReferences ; //object
-                        // query['resource_Sc_Provisioner'] = result.items[i].provisioner;
-                        // query['resource_Sc_Reclaim_Policy'] = result.items[i].reclaimPolicy;
-                        // query['resource_Sc_Allow_Volume_Expansion'] = result.items[i].allowVolumeExpansion;
-                        // query['resource_Sc_Volume_Binding_Mode'] = result.items[i].volumeBindingMode;
-                        // query['resource_Status'] = result.items[i].status; //object
+                        console.log("Message ignored, no instance for resource, from the msg, template uuid: " + template_uuid + ", cluster_uuid: " + cluster_uuid, ", service_uuid: ", service_uuid );
+                        channel.ack(msg);
+                        return;
+                    }
+                    resourceType = "HV";
+
+                    for (var i=0; i<length; i++)
+                    {
+                        query['resource_Type'] = resourceType;
+                        query['resource_Spec'] = result.hypervisors[i];
+                        query['resource_Group_Uuid'] = cluster_uuid;
+                        query['resource_Name'] = result.hypervisors[i].hypervisor_hostname;
+                        query['resource_Target_Uuid'] = result.hypervisors[i].id;
+                        query['resource_Pod_Phase'] = result.hypervisors[i].status;
                         query['resource_Level1'] = "OS"; //Openstack
                         query['resource_Level2'] = resourceType;
                         query['resource_Level_Type'] = "OX";  //Openstack-Cluster
@@ -779,79 +777,114 @@ async function connectQueue() {
 
                 break;
 
-                case "PJ-TEMPLATE-UUID":  //TODO insert Openstack PJ template uuid
+                case "HV-TEMPLATE-UUID":  //TODO insert Openstack PM template uuid
+                    resourceType = "HV";
+
+                    query['resource_Type'] = resourceType ;
+                    query['resource_Spec'] = result.hypervisor;
+                    query['resource_Group_Uuid'] = cluster_uuid ;
+                    query['resource_Name'] = result.hypervisor.hypervisor_hostname ;
+                    query['resource_Instance'] = result.hypervisor.host_ip ; // TODO: set host ip
+                    query['resource_Target_Uuid'] = result.hypervisor.id ; // TODO: set Host uuid?
+                    query['resource_Pod_Phase'] = result.hypervisor.status; // TODO: set instance status
+                    query['resource_Level1'] = "OS"; //Openstack
+                    query['resource_Level2'] = resourceType;
+                    query['resource_Level_Type'] = "OX";  //Openstack-Cluster
+                    query['resource_Rbac'] = false;
+                    query['resource_Anomaly_Monitor'] = false;
+                    query['resource_Active'] = true;
+
+                    tempQuery = formatter_resource(i, itemLength, resourceType, cluster_uuid, query, mergedQuery);
+                    API_MSG = JSON.parse(tempQuery);
+
+                case "PJLIST-TEMPLATE-UUID":  //TODO insert Openstack PJ List template uuid
+                    length = result.projects.length
+                    if (length === 0)
+                    {
+                        console.log("Message ignored, no instance for resource, from the msg, template uuid: " + template_uuid + ", cluster_uuid: " + cluster_uuid, ", service_uuid: ", service_uuid );
+                        channel.ack(msg);
+                        return;
+                    }
                     resourceType = "PJ";
 
-                    for (var i=0; i<itemLength; i++)
+                    for (var i=0; i<length; i++)
                     {
-                        query['resource_Type'] = resourceType ;
-                        query['resource_Spec'] = result.items[i].spec;
+                        query['resource_Type'] = resourceType;
+                        query['resource_Spec'] = result.projects[i];
                         query['resource_Group_Uuid'] = cluster_uuid ;
-                        query['resource_Group_Uuid'] = cluster_uuid ;
-                        query['resource_Name'] = result.items[i].metadata.name;
-                        query['resource_Description'] = result.items[i].metadata.description; // TODO: set description
-                        // query['resource_Target_Uuid'] = result.items[i].metadata.uid ; // TODO: set PJ UUID
-                        // query['resource_Target_Created_At'] = result.items[i].metadata.creationTimestamp ; // TODO: set PJ create at
-                        // query['resource_Labels'] = result.items[i].metadata.labels ; //object
-                        // query['resource_Annotations'] = result.items[i].metadata.annotations ; //object
-                        // query['resource_Owner_References'] = result.items[i].metadata.ownerReferences ; //object
-                        // query['resource_Sc_Provisioner'] = result.items[i].provisioner;
-                        // query['resource_Sc_Reclaim_Policy'] = result.items[i].reclaimPolicy;
-                        // query['resource_Sc_Allow_Volume_Expansion'] = result.items[i].allowVolumeExpansion;
-                        // query['resource_Sc_Volume_Binding_Mode'] = result.items[i].volumeBindingMode;
-                        // query['resource_Status'] = result.items[i].status; //object
+                        query['resource_Name'] = result.projects[i].name ;
+                        query['resource_Description'] = result.projects[i].description;
+                        query['resource_Target_Uuid'] = result.projects[i].id ;
                         query['resource_Level1'] = "OS"; //Openstack
                         query['resource_Level2'] = resourceType;
                         query['resource_Level_Type'] = "OX";  //Openstack-Cluster
                         query['resource_Rbac'] = false;
                         query['resource_Anomaly_Monitor'] = false;
                         query['resource_Active'] = true;
-                        // query['resource_Status_Updated_At'] = new Date();
 
                         tempQuery = formatter_resource(i, itemLength, resourceType, cluster_uuid, query, mergedQuery);
                         mergedQuery = tempQuery;
                     }
 
                     API_MSG = JSON.parse(mergedQuery);
+
                 break;
 
+                case "VMLIST-TEMPLATE-UUID":  //TODO insert Openstack VM List template uuid
+                    length = result.servers.length
+                    if (length === 0)
+                    {
+                        console.log("Message ignored, no instance for resource, from the msg, template uuid: " + template_uuid + ", cluster_uuid: " + cluster_uuid, ", service_uuid: ", service_uuid );
+                        channel.ack(msg);
+                        return;
+                    }
+                    resourceType = "VM";
+
+                    for (var i=0; i<length; i++)
+                    {
+                        query['resource_Type'] = resourceType;
+                        query['resource_Spec'] = result.servers[i];
+                        query['resource_Group_Uuid'] = cluster_uuid;
+                        query['resource_Name'] = result.servers[i].name;
+                        query['resource_Target_Uuid'] = result.servers[i].id;
+                        query['resource_Level1'] = "OS"; // Openstack
+                        query['resource_Level2'] = "PJ";
+                        query['resource_Level3'] = resourceType;
+                        query['resource_Level_Type'] = "OX";  //Openstack-Cluster
+                        query['resource_Rbac'] = false;
+                        query['resource_Anomaly_Monitor'] = false;
+                        query['resource_Active'] = true;
+
+                        tempQuery = formatter_resource(i, itemLength, resourceType, cluster_uuid, query, mergedQuery);
+                        mergedQuery = tempQuery;
+                    }
+
+                    API_MSG = JSON.parse(mergedQuery);
+
+                break;
                 case "VM-TEMPLATE-UUID":  //TODO insert Openstack VM template uuid
                     resourceType = "VM";
 
-                    for (var i=0; i<itemLength; i++)
-                    {
-                        query['resource_Type'] = resourceType ;
-                        query['resource_Spec'] = result.items[i].spec;
-                        query['resource_Group_Uuid'] = cluster_uuid ;
-                        query['resource_Name'] = result.items[i].metadata.name ;
-                        query['resource_Description'] = result.items[i].metadata.description; // TODO: set description
-                        query['resource_Instance'] = result.items[i].metadata.name ; // TODO: set instance ip addresses(ex. 192.168.0.1, 192.168.0.2)
-                        // query['resource_Target_Uuid'] = result.items[i].metadata.uid ; // TODO: set VM UUID
-                        // query['resource_Target_Created_At'] = result.items[i].metadata.creationTimestamp ; // TODO: set VM Create at
-                        // query['resource_Labels'] = result.items[i].metadata.labels ; //object
-                        // query['resource_Annotations'] = result.items[i].metadata.annotations ; //object
-                        // query['resource_Owner_References'] = result.items[i].metadata.ownerReferences ; //object
-                        // query['resource_Sc_Provisioner'] = result.items[i].provisioner;
-                        // query['resource_Sc_Reclaim_Policy'] = result.items[i].reclaimPolicy;
-                        // query['resource_Sc_Allow_Volume_Expansion'] = result.items[i].allowVolumeExpansion;
-                        // query['resource_Sc_Volume_Binding_Mode'] = result.items[i].volumeBindingMode;
-                        // query['resource_Status'] = result.items[i].status; //object
-                        query['resource_Namespace'] = result.items[i].status.namespace; // TODO: set instance status
-                        query['resource_Pod_Phase'] = result.items[i].status.active; // TODO: set instance status
-                        query['resource_Level1'] = "OS"; // Openstack
-                        query['resource_Level2'] = "PJ";
-                        query['resource_Level2'] = resourceType;
-                        query['resource_Level_Type'] = "OX";  //Openstack-Cluster
-                        query['resource_Rbac'] = false;
-                        query['resource_Anomaly_Monitor'] = false;
-                        query['resource_Active'] = true;
-                        query['resource_Status_Updated_At'] = new Date();
+                    query['resource_Type'] = resourceType;
+                    query['resource_Spec'] = result.server;
+                    query['resource_Group_Uuid'] = cluster_uuid;
+                    query['resource_Name'] = result.server.name;
+                    query['resource_Description'] = result.server.description;
+                    query['resource_Instance'] = result.server.addresses;
+                    query['resource_Target_Uuid'] = result.server.id;
+                    query['resource_Namespace'] = result.server.tenant_id;
+                    query['resource_Pod_Phase'] = result.server.status;
+                    query['resource_Level1'] = "OS"; // Openstack
+                    query['resource_Level2'] = "PJ";
+                    query['resource_Level3'] = resourceType;
+                    query['resource_Level_Type'] = "OX";  //Openstack-Cluster
+                    query['resource_Rbac'] = false;
+                    query['resource_Anomaly_Monitor'] = false;
+                    query['resource_Active'] = true;
 
-                        tempQuery = formatter_resource(i, itemLength, resourceType, cluster_uuid, query, mergedQuery);
-                        mergedQuery = tempQuery;
-                    }
+                    tempQuery = formatter_resource(i, itemLength, resourceType, cluster_uuid, query, mergedQuery);
 
-                    API_MSG = JSON.parse(mergedQuery);
+                    API_MSG = JSON.parse(tempQuery);
                 break;
 
                 default:        
