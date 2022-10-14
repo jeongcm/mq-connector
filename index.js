@@ -836,8 +836,8 @@ async function connectQueue() {
                         // query['resource_Sc_Allow_Volume_Expansion'] = result.items[i].allowVolumeExpansion;
                         // query['resource_Sc_Volume_Binding_Mode'] = result.items[i].volumeBindingMode;
                         // query['resource_Status'] = result.items[i].status; //object
-                        query['resource_Namespace'] = result.items[i].status.Active; // TODO: set instance status
-                        query['resource_Pod_Phase'] = result.items[i].status.Active; // TODO: set instance status
+                        query['resource_Namespace'] = result.items[i].status.namespace; // TODO: set instance status
+                        query['resource_Pod_Phase'] = result.items[i].status.active; // TODO: set instance status
                         query['resource_Level1'] = "OS"; // Openstack
                         query['resource_Level2'] = "PJ";
                         query['resource_Level2'] = resourceType;
