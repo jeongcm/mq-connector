@@ -874,6 +874,7 @@ async function connectQueue() {
                     query['resource_Instance'] = result.server.addresses;
                     query['resource_Target_Uuid'] = result.server.id;
                     query['resource_Namespace'] = result.server.tenant_id;
+                    query['parent_resource_id'] = result.server.host_id;
                     query['resource_Pod_Phase'] = result.server.status;
                     query['resource_Level1'] = "OS"; // Openstack
                     query['resource_Level2'] = "PJ";
