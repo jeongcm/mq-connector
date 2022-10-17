@@ -764,7 +764,7 @@ async function connectQueue() {
                 //         query['resource_Level1'] = "OS"; //Openstack
                 //         query['resource_Level2'] = resourceType;
                 //         query['resource_Level_Type'] = "OX";  //Openstack-Cluster
-                //         query['resource_Rbac'] = false;
+                //         query['resource_Rbac'] = true;
                 //         query['resource_Anomaly_Monitor'] = false;
                 //         query['resource_Active'] = true;
                 //         // query['resource_Status_Updated_At'] = new Date();
@@ -790,7 +790,7 @@ async function connectQueue() {
                 //     query['resource_Level1'] = "OS"; //Openstack
                 //     query['resource_Level2'] = resourceType;
                 //     query['resource_Level_Type'] = "OX";  //Openstack-Cluster
-                //     query['resource_Rbac'] = false;
+                //     query['resource_Rbac'] = true;
                 //     query['resource_Anomaly_Monitor'] = false;
                 //     query['resource_Active'] = true;
                 //
@@ -852,7 +852,7 @@ async function connectQueue() {
                         query['resource_Level3'] = "PM";
                         query['resource_Level4'] = resourceType;
                         query['resource_Level_Type'] = "OX";  //Openstack-Cluster
-                        query['resource_Rbac'] = false;
+                        query['resource_Rbac'] = true;
                         query['resource_Anomaly_Monitor'] = false;
                         query['resource_Active'] = true;
 
@@ -880,7 +880,7 @@ async function connectQueue() {
                     query['resource_Level3'] = "PM";
                     query['resource_Level4'] = resourceType;
                     query['resource_Level_Type'] = "OX";  //Openstack-Cluster
-                    query['resource_Rbac'] = false;
+                    query['resource_Rbac'] = true;
                     query['resource_Anomaly_Monitor'] = false;
                     query['resource_Active'] = true;
 
