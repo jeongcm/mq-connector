@@ -1,6 +1,7 @@
 variables:
   APP_IMAGE_NAME: "nexclipper-mqcomm"
-  APP_VERSION: "0.9.5"
+  APP_VERSION_DEV: "0.9.5"
+  APP_VERSION_STG: "0.9.5"
 
 default:
   tags:
@@ -26,7 +27,7 @@ code-build:
     paths:
       - package-lock.json
   rules:
-    - if: $CI_COMMIT_BRANCH == "develop" || $CI_COMMIT_BRANCH == "staging" ||  $CI_COMMIT_BRANCH =~ /\b^(issue|feature|bugfix|improvement).*$\b/
+    - if: $CI_COMMIT_BRANCH == "develop" || $CI_COMMIT_BRANCH =~ /\b^(issue|feature|bugfix|improvement).*$\b/
 
 docker-build-commit:
   stage: build-code
@@ -48,8 +49,9 @@ docker-build-commit:
     - code-build
   rules:
     - if: $CI_COMMIT_BRANCH =~ /\b^(issue|feature|bugfix|improvement).*$\b/
+      when: manual
 
-deploy-nexclipper-mqcomm-commit:
+deploy-nexclipper-mqcomm-commit-dev:
   stage: build-code
   image: repo.nexclipper.io/nexclipper/helm-kubectl:latest
   variables: 
@@ -58,52 +60,15 @@ deploy-nexclipper-mqcomm-commit:
     - echo -e "\nLogin to Kubernetes"
     - source /data/scripts/login-cluster.sh dev
   script:
-    - "source /data/scripts/deploy.sh dev nc"
+    - "source /data/scripts/deploy.sh dev nc $CI_COMMIT_BRANCH"
   needs:
     - job: docker-build-commit
   rules:
     - if: $CI_COMMIT_BRANCH =~ /\b^(issue|feature|bugfix|improvement).*$\b/
       when: manual
 
-docker-build-dev:
+docker-build-nexclipper-mqcomm:
   stage: dev
-  variables:
-    HARBOR_NEXCLIPPER_PROJECT: "nexclipper-dev"
-  image:
-    name: gcr.io/kaniko-project/executor:v1.9.0-debug
-    entrypoint: [""]
-  before_script:
-    - echo "{\"auths\":{\"$HARBOR_URL/$HARBOR_NEXCLIPPER_PROJECT/$APP_IMAGE_NAME\":{\"username\":\"$HARBOR_USER\",\"password\":\"$HARBOR_PASS\"}}}" > /kaniko/.docker/config.json
-  script:
-    - echo "building docker image for $APP_IMAGE_NAME "
-    - /kaniko/executor
-      --context "${CI_PROJECT_DIR}"
-      --target "common-build-stage"
-      --dockerfile "${CI_PROJECT_DIR}/Dockerfile"
-      --destination "$HARBOR_URL/$HARBOR_NEXCLIPPER_PROJECT/$APP_IMAGE_NAME:${APP_VERSION}"
-      --destination "$HARBOR_URL/$HARBOR_NEXCLIPPER_PROJECT/$APP_IMAGE_NAME:latest"
-      --destination "$HARBOR_URL/$HARBOR_NEXCLIPPER_PROJECT/$APP_IMAGE_NAME:${CI_COMMIT_SHORT_SHA}"
-  rules:
-    - if: $CI_COMMIT_BRANCH == "develop"
-
-deploy-nexclipper-mqcomm-dev:
-  stage: dev
-  image: repo.nexclipper.io/nexclipper/helm-kubectl:latest
-  variables: 
-    HARBOR_NEXCLIPPER_PROJECT: "nexclipper-dev"
-  before_script:
-    - echo -e "\nLogin to Kubernetes"
-    - source /data/scripts/login-cluster.sh dev
-  script:
-    - "source /data/scripts/deploy.sh dev nc"
-  needs:
-    - job: docker-build-dev
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "develop"'
-  
-
-docker-build-stg:
-  stage: stg
   variables:
     HARBOR_NEXCLIPPER_PROJECT: "nexclipper"
   image:
@@ -117,13 +82,27 @@ docker-build-stg:
       --context "${CI_PROJECT_DIR}"
       --target "common-build-stage"
       --dockerfile "${CI_PROJECT_DIR}/Dockerfile"
-      --destination "$HARBOR_URL/$HARBOR_NEXCLIPPER_PROJECT/$APP_IMAGE_NAME:${APP_VERSION}"
+      --destination "$HARBOR_URL/$HARBOR_NEXCLIPPER_PROJECT/$APP_IMAGE_NAME:${APP_VERSION_DEV}"
       --destination "$HARBOR_URL/$HARBOR_NEXCLIPPER_PROJECT/$APP_IMAGE_NAME:latest"
       --destination "$HARBOR_URL/$HARBOR_NEXCLIPPER_PROJECT/$APP_IMAGE_NAME:${CI_COMMIT_SHORT_SHA}"
-  needs:
-    - job: code-build
   rules:
-    - if: $CI_COMMIT_BRANCH == "staging" 
+    - if: $CI_COMMIT_BRANCH == "develop"
+
+deploy-nexclipper-mqcomm-dev:
+  stage: dev
+  image: repo.nexclipper.io/nexclipper/helm-kubectl:latest
+  variables: 
+    HARBOR_NEXCLIPPER_PROJECT: "nexclipper"
+  before_script:
+    - echo -e "\nLogin to Kubernetes"
+    - source /data/scripts/login-cluster.sh dev
+  script:
+    - "source /data/scripts/deploy.sh dev nc ${APP_VERSION_DEV}"
+  needs:
+    - job: docker-build-nexclipper-mqcomm
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "develop"'
+  
 
 deploy-nexclipper-mqcomm-stg:
   stage: stg
@@ -134,8 +113,6 @@ deploy-nexclipper-mqcomm-stg:
     - echo -e "\nLogin to Kubernetes"
     - source /data/scripts/login-cluster.sh stg
   script:
-   - "source /data/scripts/deploy.sh stg nc"
-  needs:
-    - job: docker-build-stg
+   - "source /data/scripts/deploy.sh stg nc ${APP_VERSION_STG}"
   rules:
     - if: $CI_COMMIT_BRANCH == "staging"
