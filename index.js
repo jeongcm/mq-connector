@@ -885,8 +885,7 @@ async function connectQueue() {
                         query['resource_Target_Uuid'] = result.servers[i].id;
                         query['resource_Level1'] = "OS"; // Openstack
                         query['resource_Level2'] = "PJ";
-                        query['resource_Level3'] = "PM";
-                        query['resource_Level4'] = resourceType;
+                        query['resource_Level3'] = resourceType;
                         query['resource_Level_Type'] = "OX";  //Openstack-Cluster
                         query['resource_Rbac'] = true;
                         query['resource_Anomaly_Monitor'] = false;
@@ -914,8 +913,7 @@ async function connectQueue() {
                     query['resource_Pod_Phase'] = result.server.status;
                     query['resource_Level1'] = "OS"; // Openstack
                     query['resource_Level2'] = "PJ";
-                    query['resource_Level3'] = "PM";
-                    query['resource_Level4'] = resourceType;
+                    query['resource_Level3'] = resourceType;
                     query['resource_Level_Type'] = "OX";  //Openstack-Cluster
                     query['resource_Rbac'] = true;
                     query['resource_Anomaly_Monitor'] = false;
