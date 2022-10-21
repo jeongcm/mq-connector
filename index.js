@@ -116,7 +116,7 @@ async function connectQueue() {
                     }
                 //let result = JSON.parse(TotalMsg.result);
                 let result = TotalMsg.result;
-                let length
+                let length = 0;
                 const itemLength = result.items.length;
                 if (itemLength == 0) 
                     {
