@@ -835,8 +835,7 @@ async function connectQueue() {
                 //     break;
                 case "50000000000000000000000000000002":  //TODO insert Openstack PJ List template uuid
                     length = result.projects.length
-                    if (length === 0)
-                    {
+                    if (length === 0) {
                         console.log("Message ignored, no instance for resource, from the msg, template uuid: " + template_uuid + ", cluster_uuid: " + cluster_uuid, ", service_uuid: ", service_uuid );
                         channel.ack(msg);
                         return;
@@ -868,8 +867,7 @@ async function connectQueue() {
 
                 case "50000000000000000000000000000004":  //TODO insert Openstack VM List template uuid
                     length = result.servers.length
-                    if (length === 0)
-                    {
+                    if (length === 0) {
                         console.log("Message ignored, no instance for resource, from the msg, template uuid: " + template_uuid + ", cluster_uuid: " + cluster_uuid, ", service_uuid: ", service_uuid );
                         channel.ack(msg);
                         return;
@@ -882,7 +880,12 @@ async function connectQueue() {
                         query['resource_Spec'] = result.servers[i];
                         query['resource_Group_Uuid'] = cluster_uuid;
                         query['resource_Name'] = result.servers[i].name;
+                        query['resource_Description'] = result.servers[i].description;
+                        query['resource_Instance'] = result.servers[i].addresses;
                         query['resource_Target_Uuid'] = result.servers[i].id;
+                        query['resource_Namespace'] = result.servers[i].tenant_id;
+                        query['parent_resource_id'] = result.servers[i]["OS-EXT-SRV-ATTR:host"];  //Openstack-Cluster
+                        query['resource_Pod_Phase'] = result.servers[i].status;
                         query['resource_Level1'] = "OS"; // Openstack
                         query['resource_Level2'] = "PJ";
                         query['resource_Level3'] = resourceType;
@@ -909,7 +912,7 @@ async function connectQueue() {
                     query['resource_Instance'] = result.server.addresses;
                     query['resource_Target_Uuid'] = result.server.id;
                     query['resource_Namespace'] = result.server.tenant_id;
-                    query['parent_resource_id'] = result.server.host_id;
+                    query['parent_resource_id'] = result.server["OS-EXT-SRV-ATTR:host"];  //Openstack-Cluster
                     query['resource_Pod_Phase'] = result.server.status;
                     query['resource_Level1'] = "OS"; // Openstack
                     query['resource_Level2'] = "PJ";
