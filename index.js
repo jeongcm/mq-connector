@@ -835,6 +835,7 @@ async function connectQueue() {
                         query['resource_Name'] = result.projects[i].name ;
                         query['resource_Description'] = result.projects[i].description;
                         query['resource_Target_Uuid'] = result.projects[i].id ;
+                        query['resource_Target_Created_At'] = null
                         query['resource_Level1'] = "OS"; //Openstack
                         query['resource_Level2'] = resourceType;
                         query['resource_Level_Type'] = "OX";  //Openstack-Cluster
@@ -868,6 +869,7 @@ async function connectQueue() {
                         query['resource_Description'] = result.servers[i].description;
                         query['resource_Instance'] = result.servers[i].addresses;
                         query['resource_Target_Uuid'] = result.servers[i].id;
+                        query['resource_Target_Created_At'] = null
                         query['resource_Namespace'] = result.servers[i].tenant_id;
                         query['parent_resource_id'] = result.servers[i]["OS-EXT-SRV-ATTR:host"];  //Openstack-Cluster
                         query['resource_Pod_Phase'] = result.servers[i].status;
@@ -896,6 +898,7 @@ async function connectQueue() {
                     query['resource_Description'] = result.server.description;
                     query['resource_Instance'] = result.server.addresses;
                     query['resource_Target_Uuid'] = result.server.id;
+                    query['resource_Target_Created_At'] = null
                     query['resource_Namespace'] = result.server.tenant_id;
                     query['parent_resource_id'] = result.server["OS-EXT-SRV-ATTR:host"];  //Openstack-Cluster
                     query['resource_Pod_Phase'] = result.server.status;
