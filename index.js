@@ -115,10 +115,14 @@ async function connectQueue() {
                         return;
                     }
                 //let result = JSON.parse(TotalMsg.result);
+                let itemLength = 0;
                 let result = TotalMsg.result;
                 let length = 0;
-                const itemLength = result.items.length;
-                if (itemLength == 0) 
+                if (template_uuid !== "50000000000000000000000000000002" && template_uuid !== "50000000000000000000000000000004" && template_uuid !== "50000000000000000000000000000003") {
+                    itemLength = result.items.length;
+                }
+
+                if (itemLength == 0)
                     {
                         console.log("Message ignored, no instance for resource, from the msg, template uuid: " + template_uuid + ", cluster_uuid: " + cluster_uuid, ", service_uuid: ", service_uuid );
                         channel.ack(msg);
