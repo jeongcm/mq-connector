@@ -120,14 +120,15 @@ async function connectQueue() {
                 let length = 0;
                 if (template_uuid !== "50000000000000000000000000000002" && template_uuid !== "50000000000000000000000000000004" && template_uuid !== "50000000000000000000000000000003") {
                     itemLength = result.items.length;
-                }
-
-                if (itemLength == 0)
+                    if (itemLength == 0)
                     {
                         console.log("Message ignored, no instance for resource, from the msg, template uuid: " + template_uuid + ", cluster_uuid: " + cluster_uuid, ", service_uuid: ", service_uuid );
                         channel.ack(msg);
                         return;
                     }
+                }
+
+
                 switch (template_uuid) {
                 case "00000000000000000000000000000020":  //20, for K8s services
                         resourceType = "SV";
