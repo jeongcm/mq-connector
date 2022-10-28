@@ -848,7 +848,7 @@ async function connectQueue() {
                         query['resource_Rbac'] = false;
                         query['resource_Anomaly_Monitor'] = false;
                         query['resource_Active'] = true;
-                        if (result.projects[i].status === true) {
+                        if (result.projects[i].enabled) {
                             query['resource_Status'] = "true";
                         } else {
                             query['resource_Status'] = "false";
