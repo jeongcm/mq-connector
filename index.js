@@ -824,7 +824,6 @@ async function connectQueue() {
                 //
                 //     break;
                 case "50000000000000000000000000000002":  //TODO insert Openstack PJ List template uuid
-                    console.log("projects:", result)
                     length = result.projects.length
 
                     if (length === 0) {
@@ -836,12 +835,17 @@ async function connectQueue() {
 
                     for (var i=0; i<length; i++)
                     {
+                        let status = "false"
                         query['resource_Type'] = resourceType;
                         query['resource_Spec'] = result.projects[i];
                         query['resource_Group_Uuid'] = cluster_uuid ;
                         query['resource_Name'] = result.projects[i].name ;
                         query['resource_Description'] = result.projects[i].description;
                         query['resource_Target_Uuid'] = result.projects[i].id ;
+                        if (result.projects[i].status) {
+                            status = "true"
+                        }
+                        query['resource_Status'] = status;
                         query['resource_Target_Created_At'] = null
                         query['resource_Level1'] = "OS"; //Openstack
                         query['resource_Level2'] = resourceType;
@@ -859,7 +863,6 @@ async function connectQueue() {
                 break;
 
                 case "50000000000000000000000000000004":  //TODO insert Openstack VM List template uuid
-                    console.log("vm:", result)
                     length = result.servers.length
                     if (length === 0) {
                         console.log("Message ignored, no instance for resource, from the msg, template uuid: " + template_uuid + ", cluster_uuid: " + cluster_uuid, ", service_uuid: ", service_uuid );
