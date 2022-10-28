@@ -835,17 +835,12 @@ async function connectQueue() {
 
                     for (var i=0; i<length; i++)
                     {
-                        let status = "false"
                         query['resource_Type'] = resourceType;
                         query['resource_Spec'] = result.projects[i];
                         query['resource_Group_Uuid'] = cluster_uuid ;
                         query['resource_Name'] = result.projects[i].name ;
                         query['resource_Description'] = result.projects[i].description;
                         query['resource_Target_Uuid'] = result.projects[i].id ;
-                        if (result.projects[i].status) {
-                            status = "true"
-                        }
-                        query['resource_Status'] = status;
                         query['resource_Target_Created_At'] = null
                         query['resource_Level1'] = "OS"; //Openstack
                         query['resource_Level2'] = resourceType;
@@ -853,7 +848,11 @@ async function connectQueue() {
                         query['resource_Rbac'] = false;
                         query['resource_Anomaly_Monitor'] = false;
                         query['resource_Active'] = true;
-
+                        if (result.projects[i].status === true) {
+                            query['resource_Status'] = "true";
+                        } else {
+                            query['resource_Status'] = "false";
+                        }
                         tempQuery = formatter_resource(i, length, resourceType, cluster_uuid, query, mergedQuery);
                         mergedQuery = tempQuery;
                     }
