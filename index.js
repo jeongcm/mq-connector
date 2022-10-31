@@ -853,6 +853,8 @@ async function connectQueue() {
                         } else {
                             query['resource_Status'] = "false";
                         }
+                        query['resource_Status_Updated_At'] = new Date();
+
                         tempQuery = formatter_resource(i, length, resourceType, cluster_uuid, query, mergedQuery);
                         mergedQuery = tempQuery;
                     }
@@ -887,9 +889,10 @@ async function connectQueue() {
                         query['resource_Level2'] = "PJ";
                         query['resource_Level3'] = resourceType;
                         query['resource_Level_Type'] = "OX";  //Openstack-Cluster
-                        query['resource_Rbac'] = true;
+                        query['resource_Rbac'] = false;
                         query['resource_Anomaly_Monitor'] = false;
                         query['resource_Active'] = true;
+                        query['resource_Status_Updated_At'] = new Date();
 
                         tempQuery = formatter_resource(i, length, resourceType, cluster_uuid, query, mergedQuery);
                         mergedQuery = tempQuery;
@@ -916,9 +919,10 @@ async function connectQueue() {
                     query['resource_Level2'] = "PJ";
                     query['resource_Level3'] = resourceType;
                     query['resource_Level_Type'] = "OX";  //Openstack-Cluster
-                    query['resource_Rbac'] = true;
+                    query['resource_Rbac'] = false;
                     query['resource_Anomaly_Monitor'] = false;
                     query['resource_Active'] = true;
+                    query['resource_Status_Updated_At'] = new Date();
 
                     tempQuery = formatter_resource(0, 0, resourceType, cluster_uuid, query, mergedQuery);
 
