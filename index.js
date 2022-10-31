@@ -107,7 +107,7 @@ async function connectQueue() {
             const service_uuid = TotalMsg.service_uuid;
             let status = TotalMsg.status;
             if (status == 4) {
-                if (!TotalMsg.result)   
+                if (!TotalMsg.result)
                     {
                         console.log("Message ignored, No result in the message.: " + template_uuid + ", cluster_uuid: " + cluster_uuid, ", service_uuid: ", service_uuid);
                         channel.ack(msg);
@@ -115,15 +115,20 @@ async function connectQueue() {
                         return;
                     }
                 //let result = JSON.parse(TotalMsg.result);
+                let itemLength = 0;
                 let result = TotalMsg.result;
                 let length = 0;
-                const itemLength = result.items.length;
-                if (itemLength == 0) 
+                if (template_uuid !== "50000000000000000000000000000002" && template_uuid !== "50000000000000000000000000000004" && template_uuid !== "50000000000000000000000000000003") {
+                    itemLength = result.items.length;
+                    if (itemLength == 0)
                     {
                         console.log("Message ignored, no instance for resource, from the msg, template uuid: " + template_uuid + ", cluster_uuid: " + cluster_uuid, ", service_uuid: ", service_uuid );
                         channel.ack(msg);
                         return;
                     }
+                }
+
+
                 switch (template_uuid) {
                 case "00000000000000000000000000000020":  //20, for K8s services
                         resourceType = "SV";
@@ -135,20 +140,20 @@ async function connectQueue() {
                             for (var j=0; j<resultPortsLength; j++)
                             {
                                 if (result.items[i].spec.ports[j].key = 'port')
-                                { 
+                                {
                                     resultPort = result.items[i].spec.ports[j].port;
                                 }
                             }
                             query['resource_Type'] = resourceType ;
                             query['resource_Spec'] = result.items[i].spec;
-                            query['resource_Group_Uuid'] = cluster_uuid ;  
+                            query['resource_Group_Uuid'] = cluster_uuid ;
                             query['resource_Name'] = result.items[i].metadata.name ;
                             query['resource_Target_Uuid'] = result.items[i].metadata.uid ;
                             query['resource_Target_Created_At'] = result.items[i].metadata.creationTimestamp ;
                             query['resource_Labels'] = result.items[i].metadata.labels ; //object
                             query['resource_Annotations'] = result.items[i].metadata.annotations ; //object
                             query['resource_Owner_References'] = result.items[i].metadata.ownerReferences ; //object
-                            query['resource_Namespace'] = result.items[i].metadata.namespace; 
+                            query['resource_Namespace'] = result.items[i].metadata.namespace;
                             query['resource_Instance'] = result.items[i].spec.clusterIP + ":" + resultPort;
                             query['resource_Status'] = result.items[i].status; //object
                             query['resource_Level1'] = "K8";
@@ -161,9 +166,9 @@ async function connectQueue() {
                             query['resource_Status_Updated_At'] = new Date();
 
                             tempQuery = formatter_resource(i, itemLength, resourceType, cluster_uuid, query, mergedQuery);
-                            mergedQuery = tempQuery;     
+                            mergedQuery = tempQuery;
                         }
-                        API_MSG = JSON.parse(mergedQuery); 
+                        API_MSG = JSON.parse(mergedQuery);
                 break;
 
                 case "00000000000000000000000000000010":  //10, for K8s nodes
@@ -176,8 +181,8 @@ async function connectQueue() {
                         for (var j=0; j<internalIpLength; j++)
                         {
                             if (result.items[i].status.addresses[j].type == 'InternalIP')
-                            { 
-                                let ipHeader = (result.items[i].status.addresses[j].address).substr(0,3); 
+                            {
+                                let ipHeader = (result.items[i].status.addresses[j].address).substr(0,3);
                                 if (ipHeader=="10." || ipHeader=="192" || ipHeader=="172" ) {
                                     internalIp = result.items[i].status.addresses[j].address;
                                     break;
@@ -187,7 +192,7 @@ async function connectQueue() {
                         }
                         query['resource_Type'] = resourceType ;
                         query['resource_Spec'] = result.items[i].spec;
-                        query['resource_Group_Uuid'] = cluster_uuid ;  
+                        query['resource_Group_Uuid'] = cluster_uuid ;
                         query['resource_Name'] = result.items[i].metadata.name ;
                         query['resource_Target_Uuid'] = result.items[i].metadata.uid ;
                         query['resource_Target_Created_At'] = result.items[i].metadata.creationTimestamp ;
@@ -204,17 +209,17 @@ async function connectQueue() {
                         query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
                         tempQuery = formatter_resource(i, itemLength, resourceType, cluster_uuid, query, mergedQuery);
-                        mergedQuery = tempQuery; 
+                        mergedQuery = tempQuery;
                     }
-                    API_MSG = JSON.parse(mergedQuery); 
+                    API_MSG = JSON.parse(mergedQuery);
                 break;
 
                 case "00000000000000000000000000000004":  //04, for K8s namespaces
                     resourceType = "NS";
                     for (var i=0; i<itemLength; i++)
                     {
-                        query['resource_Type'] = resourceType ;   
-                        query['resource_Group_Uuid'] = cluster_uuid ;  
+                        query['resource_Type'] = resourceType ;
+                        query['resource_Group_Uuid'] = cluster_uuid ;
                         query['resource_Name'] = result.items[i].metadata.name ;
                         query['resource_Target_Uuid'] = result.items[i].metadata.uid ;
                         query['resource_Target_Created_At'] = result.items[i].metadata.creationTimestamp ;
@@ -232,9 +237,9 @@ async function connectQueue() {
                         query['resource_Status_Updated_At'] = new Date();
 
                         tempQuery = formatter_resource(i, itemLength, resourceType, cluster_uuid, query, mergedQuery);
-                        mergedQuery = tempQuery; 
+                        mergedQuery = tempQuery;
                     }
-                    API_MSG = JSON.parse(mergedQuery); 
+                    API_MSG = JSON.parse(mergedQuery);
                 break;
 
                 case "00000000000000000000000000000002":  //02, for K8s pods
@@ -243,14 +248,14 @@ async function connectQueue() {
                     {
                         query['resource_Type'] = resourceType ;
                         query['resource_Spec'] = result.items[i].spec;
-                        query['resource_Group_Uuid'] = cluster_uuid ;  
+                        query['resource_Group_Uuid'] = cluster_uuid ;
                         query['resource_Name'] = result.items[i].metadata.name ;
                         query['resource_Target_Uuid'] = result.items[i].metadata.uid ;
                         query['resource_Target_Created_At'] = result.items[i].metadata.creationTimestamp ;
                         query['resource_Labels'] = result.items[i].metadata.labels ; //object
                         query['resource_Annotations'] = result.items[i].metadata.annotations ; //object
                         query['resource_Owner_References'] = result.items[i].metadata.ownerReferences ; //object
-                        query['resource_Namespace'] = result.items[i].metadata.namespace; 
+                        query['resource_Namespace'] = result.items[i].metadata.namespace;
                         query['resource_Instance'] = result.items[i].status.podIP;
                         query['resource_Pod_Phase'] = result.items[i].status.phase;
                         query['resource_Pod_Container'] = result.items[i].spec.containers; //array
@@ -266,9 +271,9 @@ async function connectQueue() {
                         query['resource_Status_Updated_At'] = new Date();
 
                         tempQuery = formatter_resource(i, itemLength, resourceType, cluster_uuid, query, mergedQuery);
-                        mergedQuery = tempQuery; 
+                        mergedQuery = tempQuery;
                     }
-                    API_MSG = JSON.parse(mergedQuery); 
+                    API_MSG = JSON.parse(mergedQuery);
                 break;
 
                 case "00000000000000000000000000001002":  //1002, for K8s deployment
@@ -277,14 +282,14 @@ async function connectQueue() {
                     {
                         query['resource_Type'] = resourceType ;
                         query['resource_Spec'] = result.items[i].spec;
-                        query['resource_Group_Uuid'] = cluster_uuid ;  
+                        query['resource_Group_Uuid'] = cluster_uuid ;
                         query['resource_Name'] = result.items[i].metadata.name ;
                         query['resource_Target_Uuid'] = result.items[i].metadata.uid ;
                         query['resource_Target_Created_At'] = result.items[i].metadata.creationTimestamp ;
                         query['resource_Labels'] = result.items[i].metadata.labels ; //object
                         query['resource_Annotations'] = result.items[i].metadata.annotations ; //object
                         query['resource_Owner_References'] = result.items[i].metadata.ownerReferences ; //object
-                        query['resource_Namespace'] = result.items[i].metadata.namespace; 
+                        query['resource_Namespace'] = result.items[i].metadata.namespace;
                         query['resource_Match_Labels'] = result.items[i].spec.selector.matchLabels; //object
                         query['resource_Status'] = result.items[i].status; //object
                         query['resource_Level1'] = "K8"; //k8s
@@ -298,9 +303,9 @@ async function connectQueue() {
                         query['resource_Status_Updated_At'] = new Date();
 
                         tempQuery = formatter_resource(i, itemLength, resourceType, cluster_uuid, query, mergedQuery);
-                        mergedQuery = tempQuery; 
+                        mergedQuery = tempQuery;
                     }
-                    API_MSG = JSON.parse(mergedQuery); 
+                    API_MSG = JSON.parse(mergedQuery);
                 break;
 
                 case "00000000000000000000000000001004":  //1004, for K8s statefulset
@@ -309,15 +314,15 @@ async function connectQueue() {
                     {
                         query['resource_Type'] = resourceType ;
                         query['resource_Spec'] = result.items[i].spec;
-                        query['resource_Group_Uuid'] = cluster_uuid ;  
+                        query['resource_Group_Uuid'] = cluster_uuid ;
                         query['resource_Name'] = result.items[i].metadata.name ;
                         query['resource_Target_Uuid'] = result.items[i].metadata.uid ;
                         query['resource_Target_Created_At'] = result.items[i].metadata.creationTimestamp ;
                         query['resource_Labels'] = result.items[i].metadata.labels ; //object
                         query['resource_Annotations'] = result.items[i].metadata.annotations ; //object
                         query['resource_Owner_References'] = result.items[i].metadata.ownerReferences ; //object
-                        query['resource_Namespace'] = result.items[i].metadata.namespace; 
-                        query['resource_Sts_Replicas'] = result.items[i].spec.replicas; 
+                        query['resource_Namespace'] = result.items[i].metadata.namespace;
+                        query['resource_Sts_Replicas'] = result.items[i].spec.replicas;
                         query['resource_Sts_Volume_Claim_Templates'] = result.items[i].spec.volumeClaimTemplates; //array
                         query['resource_Match_Labels'] = result.items[i].spec.selector.matchLabels;
                         query['resource_Status'] = result.items[i].status; //object
@@ -332,9 +337,9 @@ async function connectQueue() {
                         query['resource_Status_Updated_At'] = new Date();
 
                         tempQuery = formatter_resource(i, itemLength, resourceType, cluster_uuid, query, mergedQuery);
-                        mergedQuery = tempQuery; 
+                        mergedQuery = tempQuery;
                     }
-                    API_MSG = JSON.parse(mergedQuery); 
+                    API_MSG = JSON.parse(mergedQuery);
                    // console.log(API_MSG);
                 break;
 
@@ -344,14 +349,14 @@ async function connectQueue() {
                     {
                         query['resource_Type'] = resourceType ;
                         query['resource_Spec'] = result.items[i].spec;
-                        query['resource_Group_Uuid'] = cluster_uuid ;  
+                        query['resource_Group_Uuid'] = cluster_uuid ;
                         query['resource_Name'] = result.items[i].metadata.name ;
                         query['resource_Target_Uuid'] = result.items[i].metadata.uid ;
                         query['resource_Target_Created_At'] = result.items[i].metadata.creationTimestamp ;
                         query['resource_Labels'] = result.items[i].metadata.labels ; //object
                         query['resource_Annotations'] = result.items[i].metadata.annotations ; //object
                         query['resource_Owner_References'] = result.items[i].metadata.ownerReferences ; //object
-                        query['resource_Namespace'] = result.items[i].metadata.namespace; 
+                        query['resource_Namespace'] = result.items[i].metadata.namespace;
                         query['resource_Match_Labels'] = result.items[i].spec.selector.matchLabels; //object
                         query['resource_Status'] = result.items[i].status; //object
                         query['resource_Level1'] = "K8"; //k8s
@@ -365,9 +370,9 @@ async function connectQueue() {
                         query['resource_Status_Updated_At'] = new Date();
 
                         tempQuery = formatter_resource(i, itemLength, resourceType, cluster_uuid, query, mergedQuery);
-                        mergedQuery = tempQuery; 
+                        mergedQuery = tempQuery;
                     }
-                    API_MSG = JSON.parse(mergedQuery); 
+                    API_MSG = JSON.parse(mergedQuery);
                 break;
 
                 case "00000000000000000000000000001008":  //1008, for K8s replicaset
@@ -377,7 +382,7 @@ async function connectQueue() {
                     {
                         query['resource_Type'] = resourceType ;
                         query['resource_Spec'] = result.items[i].spec;
-                        query['resource_Group_Uuid'] = cluster_uuid ;  
+                        query['resource_Group_Uuid'] = cluster_uuid ;
                         query['resource_Name'] = result.items[i].metadata.name ;
                         query['resource_Target_Uuid'] = result.items[i].metadata.uid ;
                         query['resource_Target_Created_At'] = result.items[i].metadata.creationTimestamp ;
@@ -399,9 +404,9 @@ async function connectQueue() {
                         query['resource_Status_Updated_At'] = new Date();
 
                         tempQuery = formatter_resource(i, itemLength, resourceType, cluster_uuid, query, mergedQuery);
-                        mergedQuery = tempQuery; 
+                        mergedQuery = tempQuery;
                     }
-                    API_MSG = JSON.parse(mergedQuery); 
+                    API_MSG = JSON.parse(mergedQuery);
                     break;
 
                 case "00000000000000000000000000000018":  //18, for K8s pvc
@@ -411,7 +416,7 @@ async function connectQueue() {
                     {
                         query['resource_Type'] = resourceType ;
                         query['resource_Spec'] = result.items[i].spec;
-                        query['resource_Group_Uuid'] = cluster_uuid ;  
+                        query['resource_Group_Uuid'] = cluster_uuid ;
                         query['resource_Name'] = result.items[i].metadata.name ;
                         query['resource_Target_Uuid'] = result.items[i].metadata.uid ;
                         query['resource_Target_Created_At'] = result.items[i].metadata.creationTimestamp ;
@@ -436,7 +441,7 @@ async function connectQueue() {
                         tempQuery = formatter_resource(i, itemLength, resourceType, cluster_uuid, query, mergedQuery);
                         mergedQuery = tempQuery;
                     }
-                    API_MSG = JSON.parse(mergedQuery); 
+                    API_MSG = JSON.parse(mergedQuery);
                 break;
 
                 case "00000000000000000000000000000014":  //14, for K8s secret
@@ -445,7 +450,7 @@ async function connectQueue() {
                     {
                         query['resource_Type'] = resourceType ;
                         query['resource_Spec'] = result.items[i].spec;
-                        query['resource_Group_Uuid'] = cluster_uuid ;  
+                        query['resource_Group_Uuid'] = cluster_uuid ;
                         query['resource_Name'] = result.items[i].metadata.name ;
                         query['resource_Target_Uuid'] = result.items[i].metadata.uid ;
                         query['resource_Target_Created_At'] = result.items[i].metadata.creationTimestamp ;
@@ -463,9 +468,9 @@ async function connectQueue() {
                         query['resource_Status_Updated_At'] = new Date();
 
                         tempQuery = formatter_resource(i, itemLength, resourceType, cluster_uuid, query, mergedQuery);
-                        mergedQuery = tempQuery; 
+                        mergedQuery = tempQuery;
                     }
-                    API_MSG = JSON.parse(mergedQuery); 
+                    API_MSG = JSON.parse(mergedQuery);
                 break;
 
                 case "00000000000000000000000000000016":  //16, for K8s endpoint
@@ -474,7 +479,7 @@ async function connectQueue() {
                     {
                         query['resource_Type'] = resourceType ;
                         query['resource_Spec'] = result.items[i].spec;
-                        query['resource_Group_Uuid'] = cluster_uuid ;  
+                        query['resource_Group_Uuid'] = cluster_uuid ;
                         query['resource_Name'] = result.items[i].metadata.name ;
                         query['resource_Target_Uuid'] = result.items[i].metadata.uid ;
                         query['resource_Target_Created_At'] = result.items[i].metadata.creationTimestamp ;
@@ -493,9 +498,9 @@ async function connectQueue() {
                         query['resource_Status_Updated_At'] = new Date();
 
                         tempQuery = formatter_resource(i, itemLength, resourceType, cluster_uuid, query, mergedQuery);
-                        mergedQuery = tempQuery; 
+                        mergedQuery = tempQuery;
                     }
-                    API_MSG = JSON.parse(mergedQuery); 
+                    API_MSG = JSON.parse(mergedQuery);
 
                 break;
 
@@ -505,7 +510,7 @@ async function connectQueue() {
                     {
                         query['resource_Type'] = resourceType ;
                         query['resource_Spec'] = result.items[i].spec;
-                        query['resource_Group_Uuid'] = cluster_uuid ;  
+                        query['resource_Group_Uuid'] = cluster_uuid ;
                         query['resource_Name'] = result.items[i].metadata.name ;
                         query['resource_Target_Uuid'] = result.items[i].metadata.uid ;
                         query['resource_Target_Created_At'] = result.items[i].metadata.creationTimestamp ;
@@ -524,11 +529,11 @@ async function connectQueue() {
                         query['resource_Status_Updated_At'] = new Date();
 
                         tempQuery = formatter_resource(i, itemLength, resourceType, cluster_uuid, query, mergedQuery);
-                        mergedQuery = tempQuery; 
-    
+                        mergedQuery = tempQuery;
+
                     }
 
-                    API_MSG = JSON.parse(mergedQuery); 
+                    API_MSG = JSON.parse(mergedQuery);
 
                 break;
 
@@ -538,7 +543,7 @@ async function connectQueue() {
                     {
                         query['resource_Type'] = resourceType ;
                         query['resource_Spec'] = result.items[i].spec;
-                        query['resource_Group_Uuid'] = cluster_uuid ;  
+                        query['resource_Group_Uuid'] = cluster_uuid ;
                         query['resource_Name'] = result.items[i].metadata.name ;
                         query['resource_Target_Uuid'] = result.items[i].metadata.uid ;
                         query['resource_Target_Created_At'] = result.items[i].metadata.creationTimestamp ;
@@ -547,7 +552,7 @@ async function connectQueue() {
                         query['resource_Owner_References'] = result.items[i].metadata.ownerReferences ; //object
                         query['resource_Namespace'] = result.items[i].metadata.namespace;
                         query['resource_Status'] = result.items[i].status; //object
-                        query['resource_Ingress_Class'] = result.items[i].spec.ingressClassName; 
+                        query['resource_Ingress_Class'] = result.items[i].spec.ingressClassName;
                         query['resource_Ingress_Rules'] = result.items[i].spec.rules; //array
                         query['resource_Level1'] = "K8"; //k8s
                         query['resource_Level2'] = "NS"; //Namespace
@@ -559,27 +564,27 @@ async function connectQueue() {
                         query['resource_Status_Updated_At'] = new Date();
 
                         tempQuery = formatter_resource(i, itemLength, resourceType, cluster_uuid, query, mergedQuery);
-                        mergedQuery = tempQuery; 
+                        mergedQuery = tempQuery;
                     }
-                    API_MSG = JSON.parse(mergedQuery); 
+                    API_MSG = JSON.parse(mergedQuery);
 
                 break;
 
                 case "00000000000000000000000000000012":  //12, for K8s PV
 
-                    resourceType = "PV";    
+                    resourceType = "PV";
                     for (var i=0; i<itemLength; i++)
                     {
                         query['resource_Type'] = resourceType ;
                         query['resource_Spec'] = result.items[i].spec;
-                        query['resource_Group_Uuid'] = cluster_uuid ;  
+                        query['resource_Group_Uuid'] = cluster_uuid ;
                         query['resource_Name'] = result.items[i].metadata.name ;
                         query['resource_Target_Uuid'] = result.items[i].metadata.uid ;
                         query['resource_Target_Created_At'] = result.items[i].metadata.creationTimestamp ;
                         query['resource_Labels'] = result.items[i].metadata.labels ; //object
                         query['resource_Annotations'] = result.items[i].metadata.annotations ; //object
                         query['resource_Owner_References'] = result.items[i].metadata.ownerReferences ; //object
-                        query['resource_Pv_Storage'] = result.items[i].spec.capacity.storage; 
+                        query['resource_Pv_Storage'] = result.items[i].spec.capacity.storage;
                         query['resource_Pv_Claim_Ref'] = result.items[i].spec.claimRef; //object
                         query['resource_Pv_Storage_Class_Name'] = result.items[i].spec.storageClassName;
                         query['resource_Pv_Volume_Mode'] = result.items[i].spec.volumeMode;
@@ -593,29 +598,29 @@ async function connectQueue() {
                         query['resource_Status_Updated_At'] = new Date();
 
                         tempQuery = formatter_resource(i, itemLength, resourceType, cluster_uuid, query, mergedQuery);
-                        mergedQuery = tempQuery; 
-    
+                        mergedQuery = tempQuery;
+
                     }
 
-                    API_MSG = JSON.parse(mergedQuery); 
+                    API_MSG = JSON.parse(mergedQuery);
 
                 break;
 
                 case "00000000000000000000000000003002":  //3002, for K8s storage class
                     resourceType = "SC";
-                    
+
                     for (var i=0; i<itemLength; i++)
                         {
                             query['resource_Type'] = resourceType ;
                             query['resource_Spec'] = result.items[i].spec;
-                            query['resource_Group_Uuid'] = cluster_uuid ;  
+                            query['resource_Group_Uuid'] = cluster_uuid ;
                             query['resource_Name'] = result.items[i].metadata.name ;
                             query['resource_Target_Uuid'] = result.items[i].metadata.uid ;
                             query['resource_Target_Created_At'] = result.items[i].metadata.creationTimestamp ;
                             query['resource_Labels'] = result.items[i].metadata.labels ; //object
                             query['resource_Annotations'] = result.items[i].metadata.annotations ; //object
                             query['resource_Owner_References'] = result.items[i].metadata.ownerReferences ; //object
-                            query['resource_Sc_Provisioner'] = result.items[i].provisioner; 
+                            query['resource_Sc_Provisioner'] = result.items[i].provisioner;
                             query['resource_Sc_Reclaim_Policy'] = result.items[i].reclaimPolicy;
                             query['resource_Sc_Allow_Volume_Expansion'] = result.items[i].allowVolumeExpansion;
                             query['resource_Sc_Volume_Binding_Mode'] = result.items[i].volumeBindingMode;
@@ -629,10 +634,10 @@ async function connectQueue() {
                             query['resource_Status_Updated_At'] = new Date();
 
                             tempQuery = formatter_resource(i, itemLength, resourceType, cluster_uuid, query, mergedQuery);
-                            mergedQuery = tempQuery; 
+                            mergedQuery = tempQuery;
                         }
 
-                        API_MSG = JSON.parse(mergedQuery); 
+                        API_MSG = JSON.parse(mergedQuery);
 
 
                 break;
@@ -643,7 +648,7 @@ async function connectQueue() {
                     {
                         query['resource_Type'] = resourceType ;
                         query['resource_Spec'] = result.items[i].spec;
-                        query['resource_Group_Uuid'] = cluster_uuid ;  
+                        query['resource_Group_Uuid'] = cluster_uuid ;
                         query['resource_Name'] = result.items[i].metadata.name ;
                         query['resource_Namespace'] = result.items[i].metadata.namespace;
                         query['resource_Target_Uuid'] = result.items[i].metadata.uid ;
@@ -676,7 +681,7 @@ async function connectQueue() {
                         mergedQuery = tempQuery;
                     }
                     API_MSG = JSON.parse(mergedQuery);
-                
+
                 break;
 
                 case "00000000000000000000000000005002":  // 5002, for K8s Job
@@ -685,7 +690,7 @@ async function connectQueue() {
                     {
                         query['resource_Type'] = resourceType ;
                         query['resource_Spec'] = result.items[i].spec;
-                        query['resource_Group_Uuid'] = cluster_uuid ;  
+                        query['resource_Group_Uuid'] = cluster_uuid ;
                         query['resource_Name'] = result.items[i].metadata.name ;
                         query['resource_Target_Uuid'] = result.items[i].metadata.uid ;
                         query['resource_Target_Created_At'] = result.items[i].metadata.creationTimestamp ;
@@ -705,7 +710,7 @@ async function connectQueue() {
                         query['resource_Status_Updated_At'] = new Date();
 
                         tempQuery = formatter_resource(i, itemLength, resourceType, cluster_uuid, query, mergedQuery);
-                        mergedQuery = tempQuery; 
+                        mergedQuery = tempQuery;
                     }
                     API_MSG = JSON.parse(mergedQuery);
 
@@ -717,7 +722,7 @@ async function connectQueue() {
                     {
                         query['resource_Type'] = resourceType ;
                         query['resource_Spec'] = result.items[i].spec;
-                        query['resource_Group_Uuid'] = cluster_uuid ;  
+                        query['resource_Group_Uuid'] = cluster_uuid ;
                         query['resource_Name'] = result.items[i].metadata.name ;
                         query['resource_Target_Uuid'] = result.items[i].metadata.uid ;
                         query['resource_Target_Created_At'] = result.items[i].metadata.creationTimestamp ;
@@ -737,7 +742,7 @@ async function connectQueue() {
                         query['resource_Status_Updated_At'] = new Date();
 
                         tempQuery = formatter_resource(i, itemLength, resourceType, cluster_uuid, query, mergedQuery);
-                        mergedQuery = tempQuery; 
+                        mergedQuery = tempQuery;
                     }
                     API_MSG = JSON.parse(mergedQuery);
 
@@ -794,30 +799,15 @@ async function connectQueue() {
                 //     query['resource_Anomaly_Monitor'] = false;
                 //     query['resource_Active'] = true;
                 //
-                //     tempQuery = formatter_resource(i, itemLength, resourceType, cluster_uuid, query, mergedQuery);
+                //     tempQuery = formatter_resource(i, length, resourceType, cluster_uuid, query, mergedQuery);
                 //     API_MSG = JSON.parse(tempQuery);
                 // case "PMLIST-TEMPLATE-UUID":  //TODO insert Openstack PM template uuid
-                //     resourceType = "PM";
-                //     console.log("------------------------------------------------------------------------")
-                //     console.log("PM LIST message: ", result)
-                //     console.log("------------------------------------------------------------------------")
-                //     for (var i=0; i<itemLength; i++)
+                //     length = result.projects.length
+                //     for (var i=0; i<length; i++)
                 //     {
                 //         query['resource_Type'] = resourceType ;
-                //         // query['resource_Spec'] = result.items[i].spec;
+                //         query['resource_Spec'] = result.items[i].spec;
                 //         query['resource_Group_Uuid'] = cluster_uuid ;
-                //         // query['resource_Name'] = result.items[i].metadata.name ;
-                //         // query['resource_Instance'] = result.items[i].metadata.name ; // TODO: set host ip
-                //         // query['resource_Target_Uuid'] = result.items[i].metadata.uid ; // TODO: set Host uuid?
-                //         // query['resource_Target_Created_At'] = result.items[i].metadata.creationTimestamp ;
-                //         // query['resource_Labels'] = result.items[i].metadata.labels ; //object
-                //         // query['resource_Annotations'] = result.items[i].metadata.annotations ; //object
-                //         // query['resource_Owner_References'] = result.items[i].metadata.ownerReferences ; //object
-                //         // query['resource_Sc_Provisioner'] = result.items[i].provisioner;
-                //         // query['resource_Sc_Reclaim_Policy'] = result.items[i].reclaimPolicy;
-                //         // query['resource_Sc_Allow_Volume_Expansion'] = result.items[i].allowVolumeExpansion;
-                //         // query['resource_Sc_Volume_Binding_Mode'] = result.items[i].volumeBindingMode;
-                //         // query['resource_Status'] = result.items[i].status; //object
                 //         query['resource_Level1'] = "OS"; //Openstack
                 //         query['resource_Level2'] = resourceType;
                 //         query['resource_Level_Type'] = "OX";  //Openstack-Cluster
@@ -826,7 +816,7 @@ async function connectQueue() {
                 //         query['resource_Active'] = true;
                 //         // query['resource_Status_Updated_At'] = new Date();
                 //
-                //         tempQuery = formatter_resource(i, itemLength, resourceType, cluster_uuid, query, mergedQuery);
+                //         tempQuery = formatter_resource(i, length, resourceType, cluster_uuid, query, mergedQuery);
                 //         mergedQuery = tempQuery;
                 //     }
                 //
@@ -835,6 +825,7 @@ async function connectQueue() {
                 //     break;
                 case "50000000000000000000000000000002":  //TODO insert Openstack PJ List template uuid
                     length = result.projects.length
+
                     if (length === 0) {
                         console.log("Message ignored, no instance for resource, from the msg, template uuid: " + template_uuid + ", cluster_uuid: " + cluster_uuid, ", service_uuid: ", service_uuid );
                         channel.ack(msg);
@@ -850,14 +841,21 @@ async function connectQueue() {
                         query['resource_Name'] = result.projects[i].name ;
                         query['resource_Description'] = result.projects[i].description;
                         query['resource_Target_Uuid'] = result.projects[i].id ;
+                        query['resource_Target_Created_At'] = null
                         query['resource_Level1'] = "OS"; //Openstack
                         query['resource_Level2'] = resourceType;
                         query['resource_Level_Type'] = "OX";  //Openstack-Cluster
                         query['resource_Rbac'] = false;
                         query['resource_Anomaly_Monitor'] = false;
                         query['resource_Active'] = true;
+                        if (result.projects[i].enabled) {
+                            query['resource_Status'] = "true";
+                        } else {
+                            query['resource_Status'] = "false";
+                        }
+                        query['resource_Status_Updated_At'] = new Date();
 
-                        tempQuery = formatter_resource(i, itemLength, resourceType, cluster_uuid, query, mergedQuery);
+                        tempQuery = formatter_resource(i, length, resourceType, cluster_uuid, query, mergedQuery);
                         mergedQuery = tempQuery;
                     }
 
@@ -883,18 +881,20 @@ async function connectQueue() {
                         query['resource_Description'] = result.servers[i].description;
                         query['resource_Instance'] = result.servers[i].addresses;
                         query['resource_Target_Uuid'] = result.servers[i].id;
+                        query['resource_Target_Created_At'] = result.servers[i].created;
                         query['resource_Namespace'] = result.servers[i].tenant_id;
-                        query['parent_resource_id'] = result.servers[i]["OS-EXT-SRV-ATTR:host"];  //Openstack-Cluster
+                        query['parent_Resource_Id'] = result.servers[i]["OS-EXT-SRV-ATTR:host"];  //Openstack-Cluster
                         query['resource_Pod_Phase'] = result.servers[i].status;
                         query['resource_Level1'] = "OS"; // Openstack
                         query['resource_Level2'] = "PJ";
                         query['resource_Level3'] = resourceType;
                         query['resource_Level_Type'] = "OX";  //Openstack-Cluster
-                        query['resource_Rbac'] = true;
+                        query['resource_Rbac'] = false;
                         query['resource_Anomaly_Monitor'] = false;
                         query['resource_Active'] = true;
+                        query['resource_Status_Updated_At'] = new Date();
 
-                        tempQuery = formatter_resource(i, itemLength, resourceType, cluster_uuid, query, mergedQuery);
+                        tempQuery = formatter_resource(i, length, resourceType, cluster_uuid, query, mergedQuery);
                         mergedQuery = tempQuery;
                     }
 
@@ -911,23 +911,25 @@ async function connectQueue() {
                     query['resource_Description'] = result.server.description;
                     query['resource_Instance'] = result.server.addresses;
                     query['resource_Target_Uuid'] = result.server.id;
+                    query['resource_Target_Created_At'] = result.server.created;
                     query['resource_Namespace'] = result.server.tenant_id;
-                    query['parent_resource_id'] = result.server["OS-EXT-SRV-ATTR:host"];  //Openstack-Cluster
+                    query['parent_Resource_Id'] = result.server["OS-EXT-SRV-ATTR:host"];  //Openstack-Cluster
                     query['resource_Pod_Phase'] = result.server.status;
                     query['resource_Level1'] = "OS"; // Openstack
                     query['resource_Level2'] = "PJ";
                     query['resource_Level3'] = resourceType;
                     query['resource_Level_Type'] = "OX";  //Openstack-Cluster
-                    query['resource_Rbac'] = true;
+                    query['resource_Rbac'] = false;
                     query['resource_Anomaly_Monitor'] = false;
                     query['resource_Active'] = true;
+                    query['resource_Status_Updated_At'] = new Date();
 
-                    tempQuery = formatter_resource(i, itemLength, resourceType, cluster_uuid, query, mergedQuery);
+                    tempQuery = formatter_resource(0, 0, resourceType, cluster_uuid, query, mergedQuery);
 
                     API_MSG = JSON.parse(tempQuery);
                 break;
 
-                default:        
+                default:
                 } //end of switch
                 result = "";
                 if (template_uuid === "00000000000000000000000000000008")
@@ -936,16 +938,16 @@ async function connectQueue() {
                         .then
                         (
                         (response) => {
-                            channel.ack(msg);  
+                            channel.ack(msg);
                             console.log("MQ message acknowleged:" + resourceType + ",cluster_uuid:" + cluster_uuid + ", " + RABBITMQ_SERVER_QUEUE_RESOURCE );
                             },
                         (error) => {
-                            console.log("MQ message un-acknowleged: " + RABBITMQ_SERVER_QUEUE_RESOURCE + ", cluster_uuid: " + cluster_uuid);  
+                            console.log("MQ message un-acknowleged: " + RABBITMQ_SERVER_QUEUE_RESOURCE + ", cluster_uuid: " + cluster_uuid);
                             //throw error;
-                        }).catch 
+                        }).catch
                         (
-                            (error)=> { 
-                                console.log("MQ message un-acknowleged2: " + RABBITMQ_SERVER_QUEUE_RESOURCE + ", cluster_uuid: " + cluster_uuid); 
+                            (error)=> {
+                                console.log("MQ message un-acknowleged2: " + RABBITMQ_SERVER_QUEUE_RESOURCE + ", cluster_uuid: " + cluster_uuid);
                                 //throw error;
                             }
                         )
@@ -958,16 +960,16 @@ async function connectQueue() {
                     .then
                     (
                     (response) => {
-                        channel.ack(msg);  
+                        channel.ack(msg);
                         console.log("MQ message acknowleged: " + resourceType + ", " + RABBITMQ_SERVER_QUEUE_RESOURCE + ", cluster_uuid: " + cluster_uuid );
                         },
                     (error) => {
-                        console.log("MQ message un-acknowleged: " + RABBITMQ_SERVER_QUEUE_RESOURCE + ", cluster_uuid: " + cluster_uuid);  
+                        console.log("MQ message un-acknowleged: " + RABBITMQ_SERVER_QUEUE_RESOURCE + ", cluster_uuid: " + cluster_uuid);
                         //throw error;
-                    }).catch 
+                    }).catch
                     (
-                        (error)=> { 
-                            console.log("MQ message un-acknowleged2: " + RABBITMQ_SERVER_QUEUE_RESOURCE + ", cluster_uuid: " + cluster_uuid); 
+                        (error)=> {
+                            console.log("MQ message un-acknowleged2: " + RABBITMQ_SERVER_QUEUE_RESOURCE + ", cluster_uuid: " + cluster_uuid);
                             //throw error;
                         }
                     )
