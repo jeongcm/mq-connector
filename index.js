@@ -1,6 +1,8 @@
 const dontenv = require('dotenv');
 dontenv.config();
 const amqp = require("amqplib");
+const compression = require('compression');
+const bodyParser = require('body-parser');
 const axios = require('axios');
 const express = require("express");
 const MAX_API_BODY_SIZE = process.env.MAX_API_BODY_SIZE || "500mb"; 
@@ -10,11 +12,13 @@ require( 'console-stamp' )( console, {
   } );
 
 const app = express();
-app.use(express.json( {limit: MAX_API_BODY_SIZE} ));
-app.use(express.urlencoded( {limit: MAX_API_BODY_SIZE} ));
+app.use(bodyParser.json( {limit: MAX_API_BODY_SIZE} ));
+app.use(bodyParser.urlencoded( {limit: MAX_API_BODY_SIZE} ));
+app.use(compression());
 app.get('/health', (req, res)=>{
     res.send ("health check passed");
 });
+
 
 const MQCOMM_PORT = process.env.MQCOMM_PORT || 4001;
 //const MQCOMM_HEALTH_PORT = process.env.MQCOMM_HEALTH_PORT || 4012;
