@@ -1,6 +1,6 @@
 {
   "name": "nexclipper-mqcomm",
-  "version": "0.9.7",
+  "version": "0.9.8",
   "main": "index.js",
   "scripts": {
     "dev": "cross-env NODE_ENV=production nodemon index.js",

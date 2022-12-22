@@ -1,6 +1,6 @@
 const dontenv = require('dotenv');
 dontenv.config();
-const amqp = require("amqplib");
+const amqp= require("amqplib");
 const compression = require('compression');
 const bodyParser = require('body-parser');
 const axios = require('axios');
@@ -58,7 +58,7 @@ const RABBITMQ_SERVER_VIRTUAL_HOST = process.env.RABBITMQ_SERVER_VIRTUAL_HOST ||
 const RabbitOpt = RABBITMQ_PROTOCOL_HOST + RABBITMQ_SERVER_USER + ":" + RABBITMQ_SERVER_PASSWORD + "@";
 
 var channel, connection;
-const connect_string = RabbitOpt + RABBITMQ_SERVER_URL + ":" + RABBITMQ_SERVER_PORT + "/" + RABBITMQ_SERVER_VIRTUAL_HOST;
+const connect_string = RabbitOpt + RABBITMQ_SERVER_URL + ":" + RABBITMQ_SERVER_PORT + "/" + RABBITMQ_SERVER_VIRTUAL_HOST + "?heartbeat=180";
 const API_RESOURCE_URL = API_SERVER_RESOURCE_URL+":"+API_SERVER_RESOURCE_PORT + API_NAME_RESOURCE_POST;
 const API_RESOURCE_EVENT_URL = API_SERVER_RESOURCE_EVENT_URL+":"+API_SERVER_RESOURCE_EVENT_PORT + API_NAME_RESOURCE_EVENT_POST;
 const API_METRIC_URL = API_SERVER_METRIC_URL+":"+API_SERVER_METRIC_PORT + API_NAME_METRIC_POST;
@@ -158,6 +158,7 @@ async function connectQueue() {
                             query['resource_Level1'] = "K8";
                             query['resource_Level2'] = "NS";
                             query['resource_Level3'] = resourceType;
+                            query['resource_Level4'] = resourceType;                            
                             query['resource_Level_Type'] = "KS";
                             query['resource_Rbac'] = true;
                             query['resource_Anomaly_Monitor'] = true;
@@ -202,6 +203,7 @@ async function connectQueue() {
                         query['resource_Status'] = result.items[i].status; //object
                         query['resource_Level1'] = "K8";
                         query['resource_Level2'] = resourceType;
+                        query['resource_Level4'] = resourceType;                                                    
                         query['resource_Level_Type'] = "KN";
                         query['resource_Rbac'] = false;
                         query['resource_Anomaly_Monitor'] = false;
@@ -263,6 +265,7 @@ async function connectQueue() {
                         query['resource_Level1'] = "K8"; //k8s
                         query['resource_Level2'] = "ND"; //Node
                         query['resource_Level3'] = resourceType; //Pod
+                        query['resource_Level4'] = resourceType; //for MetricOps                                                   
                         query['resource_Level_Type'] = "KN";  //K8s-Nodes-Pods
                         query['resource_Rbac'] = false;
                         query['resource_Anomaly_Monitor'] = true;
@@ -295,7 +298,7 @@ async function connectQueue() {
                         query['resource_Level1'] = "K8"; //k8s
                         query['resource_Level2'] = "NS"; //Namespace
                         query['resource_Level3'] = resourceType; //Deployment
-                        query['resource_Level4'] = "WL"; //Workload
+                        query['resource_Level4'] = "WL"; //Workload / MetricOps
                         query['resource_Level_Type'] = "KS";  //K8s-Namespaces-Services
                         query['resource_Rbac'] = false;
                         query['resource_Anomaly_Monitor'] = false;
@@ -329,7 +332,7 @@ async function connectQueue() {
                         query['resource_Level1'] = "K8"; //k8s
                         query['resource_Level2'] = "NS"; //Namespace
                         query['resource_Level3'] = resourceType; //Deployment
-                        query['resource_Level4'] = "WL"; //Workload
+                        query['resource_Level4'] = "WL"; //Workload //MetricOps
                         query['resource_Level_Type'] = "KS";  //K8s-Namespaces-Services
                         query['resource_Rbac'] = false;
                         query['resource_Anomaly_Monitor'] = false;
@@ -362,7 +365,7 @@ async function connectQueue() {
                         query['resource_Level1'] = "K8"; //k8s
                         query['resource_Level2'] = "NS"; //Namespace
                         query['resource_Level3'] = resourceType; //Deployment
-                        query['resource_Level4'] = "WL"; //Workload
+                        query['resource_Level4'] = "WL"; //Workload // MetricOps
                         query['resource_Level_Type'] = "KS";  //K8s-Namespaces-Services
                         query['resource_Rbac'] = false;
                         query['resource_Anomaly_Monitor'] = false;
@@ -396,7 +399,7 @@ async function connectQueue() {
                         query['resource_Level1'] = "K8"; //k8s
                         query['resource_Level2'] = "NS"; //Namespace
                         query['resource_Level3'] = resourceType; //Replicaset
-                        query['resource_Level4'] = "WL"; //Workload
+                        query['resource_Level4'] = "WL"; //Workload // MetricOps
                         query['resource_Level_Type'] = "KS";  //K8s-Namespaces-Services
                         query['resource_Rbac'] = false;
                         query['resource_Anomaly_Monitor'] = false;
@@ -432,6 +435,7 @@ async function connectQueue() {
                         query['resource_Level1'] = "K8"; //k8s
                         query['resource_Level2'] = "NS"; //Namespace
                         query['resource_Level3'] = resourceType; //Persistent Volume Claim
+                        query['resource_Level4'] = resourceType; //for MetricOps                         
                         query['resource_Level_Type'] = "KS";  //K8s-Namespaces-Services
                         query['resource_Rbac'] = false;
                         query['resource_Anomaly_Monitor'] = false;
@@ -557,6 +561,7 @@ async function connectQueue() {
                         query['resource_Level1'] = "K8"; //k8s
                         query['resource_Level2'] = "NS"; //Namespace
                         query['resource_Level3'] = resourceType; //Ingress
+                        query['resource_Level4'] = resourceType; //for MetricOps                        
                         query['resource_Level_Type'] = "KS";  //K8s-Namespaces-Services
                         query['resource_Rbac'] = false;
                         query['resource_Anomaly_Monitor'] = false;
@@ -591,6 +596,7 @@ async function connectQueue() {
                         query['resource_Status'] = result.items[i].status; //object
                         query['resource_Level1'] = "K8"; //k8s
                         query['resource_Level2'] = resourceType;
+                        query['resource_Level4'] = resourceType; //for MetricOps
                         query['resource_Level_Type'] = "KC";  //K8s-Cluster
                         query['resource_Rbac'] = false;
                         query['resource_Anomaly_Monitor'] = false;
@@ -702,7 +708,7 @@ async function connectQueue() {
                         query['resource_Level1'] = "K8"; //k8s
                         query['resource_Level2'] = "NS"; //Namespace
                         query['resource_Level3'] = resourceType; //JO
-                        query['resource_Level4'] = "WL"; //Workload
+                        query['resource_Level4'] = "WL"; //Workload // MetricOps
                         query['resource_Level_Type'] = "KS";  //K8s-Namespaces-Services
                         query['resource_Rbac'] = false;
                         query['resource_Anomaly_Monitor'] = false;
