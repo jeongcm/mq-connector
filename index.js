@@ -964,9 +964,6 @@ async function connectQueue() {
                         )
                     } //end of resource_type = ev
                 else {
-                    console.log("------------------------------------------------------------------------")
-                    console.log("API message: ", API_MSG)
-                    console.log("------------------------------------------------------------------------")
                     callAPI(API_RESOURCE_URL, API_MSG, resourceType, cluster_uuid)
                     .then
                     (
