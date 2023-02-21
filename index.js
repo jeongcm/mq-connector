@@ -52,8 +52,8 @@ const API_SERVER_ALERT_URL = process.env.API_SERVER_ALERT_URL || "http://localho
 const API_SERVER_ALERT_PORT = process.env.API_SERVER_ALERT_PORT || "5001";
 const API_NAME_ALERT_POST = process.env.API_NAME_ALERT_POST || "/alertMass";
 
-const RABBITMQ_SERVER_USER = process.env.RABBITMQ_SERVER_USER || "nexclipper";
-const RABBITMQ_SERVER_PASSWORD = process.env.RABBITMQ_SERVER_PASSWORD || "nexclipper";
+const RABBITMQ_SERVER_USER = process.env.RABBITMQ_SERVER_USER || "claion";
+const RABBITMQ_SERVER_PASSWORD = process.env.RABBITMQ_SERVER_PASSWORD || "claion";
 const RABBITMQ_SERVER_VIRTUAL_HOST = process.env.RABBITMQ_SERVER_VIRTUAL_HOST || "nexclipper";
 const RabbitOpt = RABBITMQ_PROTOCOL_HOST + RABBITMQ_SERVER_USER + ":" + RABBITMQ_SERVER_PASSWORD + "@";
 
