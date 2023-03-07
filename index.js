@@ -277,7 +277,7 @@ async function connectQueue() {
                         query['resource_Anomaly_Monitor'] = true;
                         query['resource_Active'] = true;
                         query['resource_Status_Updated_At'] = new Date();
-                        query['resource_App'] = result.items[i].metadata.labels["app.kubernetes.io/name"] || result.items[i].metadata.labels.app || result.items[i].metadata.labels["k8s-app"] || result.items[i].metadata.labels.name || ''; //array
+                        query['resource_App'] = result.items[i].metadata.labels?.["app.kubernetes.io/name"] || result.items[i].metadata.labels?.app || result.items[i].metadata.labels?.["k8s-app"] || result.items[i].metadata.labels?.name || ''; //array
                         //console.log('app---------',query['resource_App'] + query['resource_Name'] );
                         tempQuery = formatter_resource(i, itemLength, resourceType, cluster_uuid, query, mergedQuery);
                         mergedQuery = tempQuery;
