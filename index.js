@@ -370,7 +370,6 @@ async function connectQueue() {
                         query['resource_Namespace'] = result.items[i].metadata.namespace;
                         query['resource_Match_Labels'] = result.items[i].spec.selector.matchLabels; //object
                         query['resource_Status'] = result.items[i].status; //object
-                        query['resource_Replicas'] = result.items[i].spec.replicas;
                         query['resource_Level1'] = "K8"; //k8s
                         query['resource_Level2'] = "NS"; //Namespace
                         query['resource_Level3'] = resourceType; //Deployment
