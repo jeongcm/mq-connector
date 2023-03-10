@@ -51,6 +51,7 @@ kind: Deployment
 metadata:
   name: ${APP_IMAGE_NAME}
 spec:
+  revisionHistoryLimit: 0 # Default to 10 if not specified
   selector:
     matchLabels:
       app: ${APP_IMAGE_NAME}
