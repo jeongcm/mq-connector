@@ -26,7 +26,7 @@ const NODE_EXPORTER_PORT = process.env.NODE_EXPORTER_PORT || 9100 ;
 const RABBITMQ_PROTOCOL_HOST = process.env.RABBITMQ_PROTOCOL_HOST || "amqp://"
 const RABBITMQ_SERVER_URL = process.env.RABBITMQ_SERVER_URL || "localhost";
 const RABBITMQ_SERVER_PORT = process.env.RABBITMQ_SERVER_PORT || 5672;
-const RABBITMQ_SERVER_QUEUE_RESOURCE = process.env.RABBITMQ_SERVER_QUEUE_RESOURCE || "cp_resource";
+const RABBITMQ_SERVER_QUEUE_RESOURCE = process.env.RABBITMQ_SERVER_QUEUE_RESOURCE || "co_resource";
 const RABBITMQ_SERVER_QUEUE_ALERT = process.env.RABBITMQ_SERVER_QUEUE_ALERT || "co_alert";
 const RABBITMQ_SERVER_QUEUE_METRIC = process.env.RABBITMQ_SERVER_QUEUE_METRIC || "co_metric";
 const RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED = process.env.RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED || "co_metric_received";
@@ -66,9 +66,9 @@ const API_METRIC_URL = API_SERVER_METRIC_URL+":"+API_SERVER_METRIC_PORT + API_NA
 const API_CUSTOMER_ACCOUNT_GET_URL = API_SERVER_RESOURCE_URL+":"+API_SERVER_RESOURCE_PORT + API_NAME_CUSTOMER_ACCOUNT_GET;
 const API_ALERT_URL = API_SERVER_ALERT_URL+":"+API_SERVER_ALERT_PORT + API_NAME_ALERT_POST;
 //const MQCOMM_RESOURCE_TARGET_DB = process.env.MQCOMM_RESOURCE_TARGET_DB;
-const vm_Url = process.env.VM_URL;
+const vm_Url = process.env.VM_URL || 'http://olly-dev-vm.claion.io';
 const VM_MULTI_AUTH_URL = process.env.VM_MULTI_AUTH_URL;
-const VM_OPTION = process.env.VM_OPTION; //BOTH - both / SINGLE - single-tenant / MULTI - multi-tenant
+const VM_OPTION = process.env.VM_OPTION || "SINGLE"; //BOTH - both / SINGLE - single-tenant / MULTI - multi-tenant
 
 process.stdin.resume();//so the program will not close instantly
 function exitHandler(options, exitCode) {
@@ -1078,6 +1078,9 @@ async function connectQueue() {
 
         }); // end of msg consume
     } catch (error) {
+        await channel.cancel()
+        await channel.close()
+        await connection.close()
         console.log ("error", error)
         throw error;
     }
