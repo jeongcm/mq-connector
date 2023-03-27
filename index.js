@@ -74,7 +74,12 @@ process.stdin.resume();//so the program will not close instantly
 function exitHandler(options, exitCode) {
     if (options.cleanup) console.log('clean');
     if (exitCode || exitCode === 0) console.log(exitCode);
-    if (options.exit) process.exit();
+    if (options.exit) {
+        channel.cancel()
+        channel.close()
+        connection.close()
+        process.exit(0)
+    };
 }
 //do something when app is closing
 process.on('exit', exitHandler.bind(null,{cleanup:true}));
@@ -85,6 +90,7 @@ process.on('SIGUSR1', exitHandler.bind(null, {exit:true}));
 process.on('SIGUSR2', exitHandler.bind(null, {exit:true}));
 //catches uncaught exceptions
 process.on('uncaughtException', exitHandler.bind(null, {exit:true}));
+process.on('SIGTERM', exitHandler.bind(null, {exit:true}));
 
 
 connectQueue()
@@ -1078,9 +1084,6 @@ async function connectQueue() {
 
         }); // end of msg consume
     } catch (error) {
-        await channel.cancel()
-        await channel.close()
-        await connection.close()
         console.log ("error", error)
         throw error;
     }
