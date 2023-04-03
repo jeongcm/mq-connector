@@ -30,6 +30,7 @@ const RABBITMQ_SERVER_QUEUE_RESOURCE = process.env.RABBITMQ_SERVER_QUEUE_RESOURC
 const RABBITMQ_SERVER_QUEUE_ALERT = process.env.RABBITMQ_SERVER_QUEUE_ALERT || "co_alert";
 const RABBITMQ_SERVER_QUEUE_METRIC = process.env.RABBITMQ_SERVER_QUEUE_METRIC || "co_metric";
 const RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED = process.env.RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED || "co_metric_received";
+const RABBITMQ_SERVER_QUEUE_RESOURCE_NCP = process.env.RABBITMQ_SERVER_QUEUE_RESOURCE_NCP || "ops_resource";
 
 const API_SERVER_RESOURCE_URL = process.env.API_SERVER_RESOURCE_URL || "http://localhost";
 const API_SERVER_RESOURCE_PORT = process.env.API_SERVER_RESOURCE_PORT || "5001";
@@ -105,6 +106,7 @@ async function connectQueue() {
         await channel.assertQueue(RABBITMQ_SERVER_QUEUE_ALERT);
         await channel.assertQueue(RABBITMQ_SERVER_QUEUE_METRIC);
         await channel.assertQueue(RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED);
+        await channel.assertQueue(RABBITMQ_SERVER_QUEUE_RESOURCE_NCP);
         await channel.consume(RABBITMQ_SERVER_QUEUE_RESOURCE, (msg) => {
             var resourceType;
             var query = {};
@@ -1083,6 +1085,74 @@ async function connectQueue() {
                 }; // end of else
 
         }); // end of msg consume
+        await channel.consume(RABBITMQ_SERVER_QUEUE_RESOURCE_NCP, (msg) => {
+            let totalMsg = JSON.parse(msg.content.toString('utf-8'));
+            let resourceType;
+            let query = {};
+            let mergedQuery = {};
+            let tempQuery = {};
+            const rabbitmq_message_size = (Buffer.byteLength(msg.content.toString()))/1024/1024;
+            const cluster_uuid = result.cluster_uuid;
+            const service_uuid = result.service_uuid;
+            let API_MSG = {};
+            if (totalMsg.status !== 4) {
+                console.log("Msg processed, nothing to update, status code: " + result.status + ", " + RABBITMQ_SERVER_QUEUE_RESOURCE_NCP + ", cluster_uuid: " + cluster_uuid + " service_uuid: " + service_uuid);
+                channel.ack(msg);
+                return
+                //console.log (result);
+            }
+
+            if (!totalMsg.result)
+            {
+                console.log("Message ignored, No result in the message.: " + template_uuid + ", cluster_uuid: " + cluster_uuid, ", service_uuid: ", service_uuid);
+                channel.ack(msg);
+                totalMsg="";
+                return;
+            }
+            let result = TotalMsg.result;
+            let itemLength = result.items.length;
+
+            //let result = JSON.parse(TotalMsg.result);
+            switch (template_uuid) {
+            case "":
+                resourceType = "";
+                for (var i=0; i<itemLength; i++)
+                {
+                    tempQuery = {};
+                    // get port number from port array and assign to resultPort variable.
+                    query['resource_Type'] = "";
+                    query['resource_Spec'] = "";
+                    query['resource_Group_Uuid'] = "";
+                    query['resource_Name'] = "";
+                    query['resource_Target_Uuid'] = "";
+                    query['resource_Target_Created_At'] = "";
+                    query['resource_Labels'] = "";
+                    query['resource_Annotations'] = "";
+                    query['resource_Owner_References'] = "";
+                    query['resource_Namespace'] = "";
+                    query['resource_Instance'] = "";
+                    query['resource_Status'] = "";
+                    query['resource_Level1'] = "";
+                    query['resource_Level2'] = "";
+                    query['resource_Level3'] = "";
+                    query['resource_Level4'] = "";
+                    query['resource_Level_Type'] = "";
+                    query['resource_Rbac'] = "";
+                    query['resource_Anomaly_Monitor'] = "";
+                    query['resource_Active'] = "";
+                    query['resource_Status_Updated_At'] = "";
+
+                    tempQuery = formatter_resource(i, itemLength, resourceType, cluster_uuid, query, mergedQuery);
+                    mergedQuery = tempQuery;
+                }
+                API_MSG = JSON.parse(mergedQuery);
+            break;
+            case "ncp_metric_template_uuid":
+                // it will be input to
+                massUploadNcpMetrics(totalMsg, cluster_uuid)
+                break;
+            }
+        }); // end of msg consume
     } catch (error) {
         console.log ("error", error)
         throw error;
@@ -1194,7 +1264,43 @@ async function massUploadMetricReceived(metricReceivedMassFeed, clusterUuid){
         console.log (`error on metricRecieved - clusterUuid: ${clusterUuid}`, error);
         //throw error;
       }
-}    
+}
+
+async function massUploadNcpMetrics(ncpMetricResult, clusterUuid){
+
+    try {
+        // 1. get response for ncp metric result
+        // 2. make metric object by paylod in response data
+        // 3. input vm with newResultMap
+
+        //let receivedData = JSON.parse(metricReceivedMassFeed.result);
+        let receivedData = ncpMetricResult.result;
+        const clusterUuid = ncpMetricResult.cluster_uuid;
+        const name = ncpMetricResult.service_name;
+        ncpMetricResult = null;
+        let receivedMetrics = receivedData.result;
+        receivedData = null;
+        console.log (`2. metric received name: ${name}, message size: ${message_size_mb}` );
+
+        let newResultMap = [];
+        receivedMetrics.map((data)=>{
+            const{metric, value} = data;
+            newResultMap.push(JSON.stringify({metric, values: [parseFloat(value[1])], timestamps:[value[0]]}))
+        });
+        let finalResult = (newResultMap).join("\n")
+        newResultMap = null;
+        let massFeedResult = await callVM(finalResult, clusterUuid);
+        console.log(`3. massFeedResult: ${massFeedResult.status}, clusterUuid: ${clusterUuid}, name: ${name}`);
+        if (!massFeedResult || (massFeedResult.status != 204)) {
+            console.log("Data Issue -----------------", finalResult);
+        }
+        finalResult = null;
+        massFeedResult= null;
+    } catch (error) {
+        console.log (`error on metricRecieved - clusterUuid: ${clusterUuid}`, error);
+        //throw error;
+    }
+}
 
 async function callVM (metricReceivedMassFeed, clusterUuid) {
     let result;
