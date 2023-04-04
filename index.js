@@ -1088,10 +1088,8 @@ async function connectQueue() {
 
         await channel.consume(RABBITMQ_SERVER_QUEUE_RESOURCE_NCP, (msg) => {
             let totalMsg = JSON.parse(msg.content.toString('utf-8'));
-            let resourceType;
             const cluster_uuid = totalMsg.cluster_uuid;
             const service_uuid = totalMsg.service_uuid;
-            let API_MSG;
             if (totalMsg.status !== 4) {
                 console.log("Msg processed, nothing to update, status code: " + totalMsg.status + ", " + RABBITMQ_SERVER_QUEUE_RESOURCE_NCP + ", cluster_uuid: " + cluster_uuid + " service_uuid: " + service_uuid);
                 channel.ack(msg);
