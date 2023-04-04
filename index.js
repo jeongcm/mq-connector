@@ -1092,11 +1092,11 @@ async function connectQueue() {
             let mergedQuery = {};
             let tempQuery = {};
             const rabbitmq_message_size = (Buffer.byteLength(msg.content.toString()))/1024/1024;
-            const cluster_uuid = result.cluster_uuid;
-            const service_uuid = result.service_uuid;
+            const cluster_uuid = totalMsg.cluster_uuid;
+            const service_uuid = totalMsg.service_uuid;
             let API_MSG = {};
             if (totalMsg.status !== 4) {
-                console.log("Msg processed, nothing to update, status code: " + result.status + ", " + RABBITMQ_SERVER_QUEUE_RESOURCE_NCP + ", cluster_uuid: " + cluster_uuid + " service_uuid: " + service_uuid);
+                console.log("Msg processed, nothing to update, status code: " + totalMsg.status + ", " + RABBITMQ_SERVER_QUEUE_RESOURCE_NCP + ", cluster_uuid: " + cluster_uuid + " service_uuid: " + service_uuid);
                 channel.ack(msg);
                 return
                 //console.log (result);
@@ -1106,11 +1106,11 @@ async function connectQueue() {
             {
                 console.log("Message ignored, No result in the message.: " + template_uuid + ", cluster_uuid: " + cluster_uuid, ", service_uuid: ", service_uuid);
                 channel.ack(msg);
-                totalMsg="";
                 return;
             }
-            let result = TotalMsg.result;
-            let itemLength = result.items.length;
+
+            result = TotalMsg.result;
+            let itemLength = totalMsg.items.length;
 
             //let result = JSON.parse(TotalMsg.result);
             switch (template_uuid) {
@@ -1266,18 +1266,21 @@ async function massUploadMetricReceived(metricReceivedMassFeed, clusterUuid){
       }
 }
 
-async function massUploadNcpMetrics(ncpMetricResult, clusterUuid){
+async function massUploadNcpMetrics(ncpMetricResult, clusterUuid) {
 
     try {
         // 1. get response for ncp metric result
         // 2. make metric object by paylod in response data
-        // 3. input vm with newResultMap
-
-        //let receivedData = JSON.parse(metricReceivedMassFeed.result);
-        let receivedData = ncpMetricResult.result;
+        // 3. metric name have a prefix name ncp_XXX
+        // 4. input vm with newResultMap
+        let receivedData = JSON.parse(metricReceivedMassFeed.result);
+        // let receivedData = ncpMetricResult.result;
         const clusterUuid = ncpMetricResult.cluster_uuid;
         const name = ncpMetricResult.service_name;
         ncpMetricResult = null;
+
+
+
         let receivedMetrics = receivedData.result;
         receivedData = null;
         console.log (`2. metric received name: ${name}, message size: ${message_size_mb}` );
