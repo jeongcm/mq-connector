@@ -31,6 +31,7 @@ const RABBITMQ_SERVER_QUEUE_ALERT = process.env.RABBITMQ_SERVER_QUEUE_ALERT || "
 const RABBITMQ_SERVER_QUEUE_METRIC = process.env.RABBITMQ_SERVER_QUEUE_METRIC || "co_metric";
 const RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED = process.env.RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED || "co_metric_received";
 const RABBITMQ_SERVER_QUEUE_RESOURCE_NCP = process.env.RABBITMQ_SERVER_QUEUE_RESOURCE_NCP || "ops_resource";
+const RABBITMQ_SERVER_QUEUE_METRIC_NCP = process.env.RABBITMQ_SERVER_QUEUE_METRIC_NCP || "ops_metric";
 
 const API_SERVER_RESOURCE_URL = process.env.API_SERVER_RESOURCE_URL || "http://localhost";
 const API_SERVER_RESOURCE_PORT = process.env.API_SERVER_RESOURCE_PORT || "5001";
@@ -107,6 +108,7 @@ async function connectQueue() {
         await channel.assertQueue(RABBITMQ_SERVER_QUEUE_METRIC);
         await channel.assertQueue(RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED);
         await channel.assertQueue(RABBITMQ_SERVER_QUEUE_RESOURCE_NCP);
+        await channel.assertQueue(RABBITMQ_SERVER_QUEUE_METRIC_NCP);
         await channel.consume(RABBITMQ_SERVER_QUEUE_RESOURCE, (msg) => {
             var resourceType;
             var query = {};
@@ -1137,18 +1139,18 @@ async function connectQueue() {
             }
             else {
                 const name = totalMsg.service_name;
-                console.log("1. calling metric received mass upload API : " + RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid + " service_uuid: " + service_uuid + " rabbitmq_message_size(mb): " + rabbitmq_message_size + " service_name: " + name  );
+                console.log("1. calling metric received mass upload API : " + RABBITMQ_SERVER_QUEUE_METRIC_NCP + ", cluster_uuid: " + cluster_uuid + " service_uuid: " + service_uuid + " rabbitmq_message_size(mb): " + rabbitmq_message_size + " service_name: " + name  );
                 massUploadNcpMetrics(totalMsg, cluster_uuid)
                     .then
                     (
                         (response) => {
                             channel.ack(msg);
                             totalMsg = "";
-                            console.log("4. MQ message acknowleged: " + RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid + ", Msg Size (MB): " + rabbitmq_message_size + " service_name: " + name);
+                            console.log("4. MQ message acknowleged: " + RABBITMQ_SERVER_QUEUE_METRIC_NCP + ", cluster_uuid: " + cluster_uuid + ", Msg Size (MB): " + rabbitmq_message_size + " service_name: " + name);
                         },
                         (error) => {
                             channel.ack(msg);
-                            console.log("4. MQ message un-acknowleged: ",RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid + ", Msg Size (MB): " + rabbitmq_message_size + " service_name: " + name);
+                            console.log("4. MQ message un-acknowleged: ",RABBITMQ_SERVER_QUEUE_METRIC_NCP + ", cluster_uuid: " + cluster_uuid + ", Msg Size (MB): " + rabbitmq_message_size + " service_name: " + name);
                             totalMsg = "";
                             console.log(error);
                         })
