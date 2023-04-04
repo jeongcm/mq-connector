@@ -54,9 +54,9 @@ const API_SERVER_ALERT_URL = process.env.API_SERVER_ALERT_URL || "http://localho
 const API_SERVER_ALERT_PORT = process.env.API_SERVER_ALERT_PORT || "5001";
 const API_NAME_ALERT_POST = process.env.API_NAME_ALERT_POST || "/alertMass";
 
-const RABBITMQ_SERVER_USER = process.env.RABBITMQ_SERVER_USER || "claion";
-const RABBITMQ_SERVER_PASSWORD = process.env.RABBITMQ_SERVER_PASSWORD || "claion";
-const RABBITMQ_SERVER_VIRTUAL_HOST = process.env.RABBITMQ_SERVER_VIRTUAL_HOST || "claion";
+const RABBITMQ_SERVER_USER = process.env.RABBITMQ_SERVER_USER || "user";
+const RABBITMQ_SERVER_PASSWORD = process.env.RABBITMQ_SERVER_PASSWORD || "cwlO0jDx99Io9fZQ";
+const RABBITMQ_SERVER_VIRTUAL_HOST = process.env.RABBITMQ_SERVER_VIRTUAL_HOST || "/";
 const RabbitOpt = RABBITMQ_PROTOCOL_HOST + RABBITMQ_SERVER_USER + ":" + RABBITMQ_SERVER_PASSWORD + "@";
 
 var channel, connection;
@@ -151,13 +151,14 @@ async function connectQueue() {
                         for (var i=0; i<itemLength; i++)
                         {
                             tempQuery = {};
+                            let resultPort = 0
                             // get port number from port array and assign to resultPort variable.
                             let resultPortsLength = result.items[i].spec.ports.length
                             for (var j=0; j<resultPortsLength; j++)
                             {
-                                if (result.items[i].spec.ports[j].key = 'port')
+                                if (result.items[i].spec.ports[j].key === 'port')
                                 {
-                                    let resultPort = result.items[i].spec.ports[j].port;
+                                    resultPort = result.items[i].spec.ports[j].port;
                                 }
                             }
                             query['resource_Type'] = resourceType ;
