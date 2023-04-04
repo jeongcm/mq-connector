@@ -1091,6 +1091,7 @@ async function connectQueue() {
             let query = {};
             let mergedQuery = {};
             let tempQuery = {};
+            let resultLength = 0
             const rabbitmq_message_size = (Buffer.byteLength(msg.content.toString()))/1024/1024;
             const cluster_uuid = totalMsg.cluster_uuid;
             const service_uuid = totalMsg.service_uuid;
@@ -1110,41 +1111,41 @@ async function connectQueue() {
             }
 
             result = TotalMsg.result;
-            let itemLength = totalMsg.items.length;
 
             //let result = JSON.parse(TotalMsg.result);
             switch (template_uuid) {
-            case "":
-                resourceType = "";
-                for (var i=0; i<itemLength; i++)
-                {
-                    tempQuery = {};
-                    // get port number from port array and assign to resultPort variable.
-                    query['resource_Type'] = "";
-                    query['resource_Spec'] = "";
-                    query['resource_Group_Uuid'] = "";
-                    query['resource_Name'] = "";
-                    query['resource_Target_Uuid'] = "";
-                    query['resource_Target_Created_At'] = "";
-                    query['resource_Labels'] = "";
-                    query['resource_Annotations'] = "";
-                    query['resource_Owner_References'] = "";
-                    query['resource_Namespace'] = "";
-                    query['resource_Instance'] = "";
-                    query['resource_Status'] = "";
-                    query['resource_Level1'] = "";
-                    query['resource_Level2'] = "";
-                    query['resource_Level3'] = "";
-                    query['resource_Level4'] = "";
-                    query['resource_Level_Type'] = "";
-                    query['resource_Rbac'] = "";
-                    query['resource_Anomaly_Monitor'] = "";
-                    query['resource_Active'] = "";
-                    query['resource_Status_Updated_At'] = "";
 
-                    tempQuery = formatter_resource(i, itemLength, resourceType, cluster_uuid, query, mergedQuery);
+            // get region list
+            case "70000000000000000000000000000001":
+                resourceType = "RG";
+                resultLength = result.getRegionListResponse?.regionList?.length
+                for (let region of result.regionList) {
+                    query['resource_Type'] = resourceType;
+                    query['resource_Spec'] = region;
+                    query['resource_Group_Uuid'] = cluster_uuid;
+                    query['resource_Name'] = region.regionName;
+                    query['resource_Description'] = "";
+                    // query['resource_Instance'] = result.servers[i].addresses;
+                    query['resource_Target_Uuid'] = "";
+                    query['resource_Target_Created_At'] = new Date();
+                    // query['resource_Namespace'] = result.servers[i].tenant_id;
+                    // query['parent_Resource_Id'] = result.servers[i]["OS-EXT-SRV-ATTR:host"];  //Openstack-Cluster
+                    // query['resource_Status'] = result.servers[i].status;
+                    query['resource_Level1'] = "NCP"; // Openstack
+                    query['resource_Level2'] = resourceType;
+                    // query['resource_Level3'] = "";
+                    query['resource_Level_Type'] = "NX";  //Openstack-Cluster
+                    query['resource_Rbac'] = false;
+                    query['resource_Anomaly_Monitor'] = false;
+                    query['resource_Active'] = true;
+                    query['resource_Status_Updated_At'] = new Date();
+
+                    tempQuery = formatter_resource(i, length, resourceType, cluster_uuid, query, mergedQuery);
                     mergedQuery = tempQuery;
                 }
+
+
+                API_MSG = JSON.parse(mergedQuery);
                 API_MSG = JSON.parse(mergedQuery);
             break;
             case "ncp_metric_template_uuid":
