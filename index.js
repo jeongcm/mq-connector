@@ -1241,8 +1241,7 @@ async function massUploadMetricReceived(metricReceivedMassFeed, clusterUuid){
           });
           let finalResult2 = (newResultMap2).join("\n")
           newResultMap2= null;
-            console.log("finalResult2:", finalResult1)
-            let massFeedResult2 = await callVM(finalResult2, clusterUuid);
+          let massFeedResult2 = await callVM(finalResult2, clusterUuid);
           if (!massFeedResult2 || (massFeedResult2.status != 204)) {
             console.log("Data Issue2 -----------------", finalResult);
           }
@@ -1259,7 +1258,6 @@ async function massUploadMetricReceived(metricReceivedMassFeed, clusterUuid){
           });
           let finalResult = (newResultMap).join("\n")
           newResultMap = null;
-          console.log(`finalResult: ${finalResult}`)
           let massFeedResult = await callVM(finalResult, clusterUuid);
           console.log(`3. massFeedResult: ${massFeedResult.status}, clusterUuid: ${clusterUuid}, name: ${name}`); 
           if (!massFeedResult || (massFeedResult.status != 204)) {
