@@ -1,9 +1,7 @@
-
-
 function getResourceQuery(result, clusterUuid) {
     let resourceType;
     let query = {};
-    let mergedQuery;
+    let mergedQuery = {};
     let tempQuery = {};
     let resultLength = 0
 
@@ -13,9 +11,9 @@ function getResourceQuery(result, clusterUuid) {
         resultLength = result.getRegionListResponse?.regionList?.length
         for (let i = 0; i < resultLength; i ++) {
             query['resource_Type'] = resourceType;
-            query['resource_Spec'] = result.regionList;
+            query['resource_Spec'] = result.regionList[i];
             query['resource_Group_Uuid'] = clusterUuid;
-            query['resource_Name'] = result.regionList.regionName;
+            query['resource_Name'] = result.regionList[i].regionName;
             query['resource_Description'] = "";
             // query['resource_Instance'] = result.servers[i].addresses;
             query['resource_Target_Uuid'] = "";
