@@ -1,12 +1,24 @@
-import dotenv from 'dotenv';
-dotenv.config();
+const dontenv = require('dotenv');
+dontenv.config();
+const amqp= require("amqplib");
+const compression = require('compression');
+const bodyParser = require('body-parser');
+const axios = require('axios');
+const express = require("express");
+const MAX_API_BODY_SIZE = process.env.MAX_API_BODY_SIZE || "500mb";
 
-import amqp from 'amqplib';
-import axios from "axios";
-import express from 'express';
-import {getResourceQuery} from "./src/resource/ncp/resource.js";
+require( 'console-stamp' )( console, {
+    format: '(console).yellow :date().green.underline :label(7)'
+  } );
 
 const app = express();
+app.use(bodyParser.json( {limit: MAX_API_BODY_SIZE} ));
+app.use(bodyParser.urlencoded( {limit: MAX_API_BODY_SIZE} ));
+app.use(compression());
+app.get('/health', (req, res)=>{
+    res.send ("health check passed");
+});
+
 
 const MQCOMM_PORT = process.env.MQCOMM_PORT || 4001;
 //const MQCOMM_HEALTH_PORT = process.env.MQCOMM_HEALTH_PORT || 4012;
@@ -60,11 +72,34 @@ const vm_Url = process.env.VM_URL || 'http://olly-dev-vm.claion.io';
 const VM_MULTI_AUTH_URL = process.env.VM_MULTI_AUTH_URL;
 const VM_OPTION = process.env.VM_OPTION || "SINGLE"; //BOTH - both / SINGLE - single-tenant / MULTI - multi-tenant
 
+process.stdin.resume();//so the program will not close instantly
+function exitHandler(options, exitCode) {
+    if (options.cleanup) console.log('clean');
+    if (exitCode || exitCode === 0) console.log(exitCode);
+    if (options.exit) {
+        channel.cancel()
+        channel.close()
+        connection.close()
+        process.exit(0)
+    };
+}
+//do something when app is closing
+process.on('exit', exitHandler.bind(null,{cleanup:true}));
+//catches ctrl+c event
+process.on('SIGINT', exitHandler.bind(null, {exit:true}));
+// catches "kill pid" (for example: nodemon restart)
+process.on('SIGUSR1', exitHandler.bind(null, {exit:true}));
+process.on('SIGUSR2', exitHandler.bind(null, {exit:true}));
+//catches uncaught exceptions
+process.on('uncaughtException', exitHandler.bind(null, {exit:true}));
+process.on('SIGTERM', exitHandler.bind(null, {exit:true}));
+
+
 connectQueue()
 
 async function connectQueue() {
     try {
-        var totalMsg = "";
+        var result = "";
         connection = await amqp.connect(connect_string);
         channel = await connection.createChannel();
         // connect to RABBITMQ_SERVER_QUEUE_NAME, create one if doesnot exist already
@@ -116,12 +151,11 @@ async function connectQueue() {
                         for (var i=0; i<itemLength; i++)
                         {
                             tempQuery = {};
-                            let resultPort = 0
                             // get port number from port array and assign to resultPort variable.
-                            let resultPortsLength = result.items[i].spec.ports.length
+                            resultPortsLength = result.items[i].spec.ports.length
                             for (var j=0; j<resultPortsLength; j++)
                             {
-                                if (result.items[i].spec.ports[j].key === 'port')
+                                if (result.items[i].spec.ports[j].key = 'port')
                                 {
                                     resultPort = result.items[i].spec.ports[j].port;
                                 }
@@ -970,18 +1004,18 @@ async function connectQueue() {
         })
 
         await channel.consume(RABBITMQ_SERVER_QUEUE_ALERT, (msg) => {
-            totalMsg = JSON.parse(msg.content.toString('utf-8'));
-            const cluster_uuid = totalMsg.cluster_uuid;
-            let service_uuid = totalMsg.service_uuid;
+            result = JSON.parse(msg.content.toString('utf-8'));
+            const cluster_uuid = result.cluster_uuid;
+            let service_uuid = result.service_uuid;
 
-            if (totalMsg.status != 4) {
+            if (result.status != 4) {
                 //console.log("Msg processed, nothing to update, status code: " + result.status + ", " + RABBITMQ_SERVER_QUEUE_ALERT + ", cluster_uuid: " + cluster_uuid + " service_uuid: " + service_uuid  );
                 channel.ack(msg);
                 //console.log (result);
                 }
             else {
                 console.log("calling alert interface API : " + RABBITMQ_SERVER_QUEUE_ALERT + ", cluster_uuid: " + cluster_uuid );
-                callAPI(API_ALERT_URL, totalMsg, "alerts", cluster_uuid)
+                callAPI(API_ALERT_URL, result, "alerts", cluster_uuid)
                 .then
                 (
                   (response) => {
@@ -996,11 +1030,11 @@ async function connectQueue() {
         }); // end of msg consume
 
         await channel.consume(RABBITMQ_SERVER_QUEUE_METRIC, (msg) => {
-            totalMsg = JSON.parse(msg.content.toString('utf-8'));
+            result = JSON.parse(msg.content.toString('utf-8'));
             //result = msg.content.toString('utf-8');
-            const cluster_uuid = totalMsg.cluster_uuid;
-            let service_uuid = totalMsg.service_uuid;
-            if (totalMsg.status != 4) {
+            const cluster_uuid = result.cluster_uuid;
+            let service_uuid = result.service_uuid;
+            if (result.status != 4) {
                 //console.log("Msg processed, nothing to update, status code: " + result.status + ", " + RABBITMQ_SERVER_QUEUE_METRIC + ", cluster_uuid: " + cluster_uuid  + " service_uuid: " + service_uuid);
                 channel.ack(msg);
                 //console.log (result);
@@ -1008,7 +1042,7 @@ async function connectQueue() {
             else {
                 console.log("calling metric meta interface API : " + RABBITMQ_SERVER_QUEUE_METRIC + ", cluster_uuid: " + cluster_uuid );
                 //console.log (result);
-                callAPI(API_METRIC_URL, totalMsg, "metric", cluster_uuid)
+                callAPI(API_METRIC_URL, result, "metric", cluster_uuid)
                 .then
                 (
                   (response) => {
@@ -1023,31 +1057,31 @@ async function connectQueue() {
         }); // end of msg consume
 
         await channel.consume(RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED, (msg) => {
-            totalMsg = JSON.parse(msg.content.toString('utf-8'));
+            result = JSON.parse(msg.content.toString('utf-8'));
             const rabbitmq_message_size = (Buffer.byteLength(msg.content.toString()))/1024/1024;
-            const cluster_uuid = totalMsg.cluster_uuid;
-            const service_uuid = totalMsg.service_uuid;
+            const cluster_uuid = result.cluster_uuid;
+            const service_uuid = result.service_uuid;
         
-            if (totalMsg.status != 4) {
+            if (result.status != 4) {
                 //console.log("Msg processed, nothing to update, status code: " + result.status + ", " + RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid + " service_uuid: " + service_uuid);
                 channel.ack(msg);
                 //console.log (result);
                 }
             else {
-                const name = totalMsg.service_name;
+                const name = result.service_name;
                 console.log("1. calling metric received mass upload API : " + RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid + " service_uuid: " + service_uuid + " rabbitmq_message_size(mb): " + rabbitmq_message_size + " service_name: " + name  );
-                massUploadMetricReceived(totalMsg, cluster_uuid)
+                massUploadMetricReceived(result, cluster_uuid)
                 .then
                 (
                   (response) => {
                     channel.ack(msg);
-                    totalMsg = "";
+                    result = "";
                     console.log("4. MQ message acknowleged: " + RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid + ", Msg Size (MB): " + rabbitmq_message_size + " service_name: " + name);  
                       },
                   (error) => {
                     channel.ack(msg);  
                     console.log("4. MQ message un-acknowleged: ",RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid + ", Msg Size (MB): " + rabbitmq_message_size + " service_name: " + name);  
-                    totalMsg = "";
+                    result = "";
                     console.log(error);
                   })
 
@@ -1207,7 +1241,8 @@ async function massUploadMetricReceived(metricReceivedMassFeed, clusterUuid){
           });
           let finalResult2 = (newResultMap2).join("\n")
           newResultMap2= null;
-          let massFeedResult2 = await callVM(finalResult2, clusterUuid);
+            console.log("finalResult2:", finalResult1)
+            let massFeedResult2 = await callVM(finalResult2, clusterUuid);
           if (!massFeedResult2 || (massFeedResult2.status != 204)) {
             console.log("Data Issue2 -----------------", finalResult);
           }
@@ -1224,6 +1259,7 @@ async function massUploadMetricReceived(metricReceivedMassFeed, clusterUuid){
           });
           let finalResult = (newResultMap).join("\n")
           newResultMap = null;
+          console.log(`finalResult: ${finalResult}`)
           let massFeedResult = await callVM(finalResult, clusterUuid);
           console.log(`3. massFeedResult: ${massFeedResult.status}, clusterUuid: ${clusterUuid}, name: ${name}`); 
           if (!massFeedResult || (massFeedResult.status != 204)) {
@@ -1344,24 +1380,44 @@ async function callVM (metricReceivedMassFeed, clusterUuid) {
     return result;
 }
 
-process.stdin.resume();//so the program will not close instantly
-function exitHandler(options, exitCode) {
-    if (options.cleanup) console.log('clean');
-    if (exitCode || exitCode === 0) console.log(exitCode);
-    if (options.exit) {
-        process.exit(0)
-    };
-}
-//do something when app is closing
-process.on('exit', exitHandler.bind(null,{cleanup:true}));
-//catches ctrl+c event
-process.on('SIGINT', exitHandler.bind(null, {exit:true}));
-// catches "kill pid" (for example: nodemon restart)
-process.on('SIGUSR1', exitHandler.bind(null, {exit:true}));
-process.on('SIGUSR2', exitHandler.bind(null, {exit:true}));
-//catches uncaught exceptions
-process.on('uncaughtException', exitHandler.bind(null, {exit:true}));
-process.on('SIGTERM', exitHandler.bind(null, {exit:true}));
+function getResourceQuery(result, clusterUuid) {
+    let resourceType;
+    let query = {};
+    let mergedQuery = {};
+    let tempQuery = {};
+    let resultLength = 0
 
+    switch (result.templateUuid) {
+        case "70000000000000000000000000000001":
+            resourceType = "RG";
+            resultLength = result.getRegionListResponse?.regionList?.length
+            for (let i = 0; i < resultLength; i ++) {
+                query['resource_Type'] = resourceType;
+                query['resource_Spec'] = result.regionList[i];
+                query['resource_Group_Uuid'] = clusterUuid;
+                query['resource_Name'] = result.regionList[i].regionName;
+                query['resource_Description'] = "";
+                // query['resource_Instance'] = result.servers[i].addresses;
+                query['resource_Target_Uuid'] = "";
+                query['resource_Target_Created_At'] = new Date();
+                // query['resource_Namespace'] = result.servers[i].tenant_id;
+                // query['parent_Resource_Id'] = result.servers[i]["OS-EXT-SRV-ATTR:host"];  //Openstack-Cluster
+                // query['resource_Status'] = result.servers[i].status;
+                query['resource_Level1'] = "NCP"; // Openstack
+                query['resource_Level2'] = resourceType;
+                // query['resource_Level3'] = "";
+                query['resource_Level_Type'] = "NX";  //Openstack-Cluster
+                query['resource_Rbac'] = false;
+                query['resource_Anomaly_Monitor'] = false;
+                query['resource_Active'] = true;
+                query['resource_Status_Updated_At'] = new Date();
+
+                tempQuery = formatter_resource(i, length, resourceType, clusterUuid, query, mergedQuery);
+                mergedQuery = tempQuery;
+            }
+    }
+
+    return { message: JSON.parse(mergedQuery), resourceType: resourceType };
+}
 
 app.listen(MQCOMM_PORT, () => console.log("NexClipper MQCOMM Server running at port " + MQCOMM_PORT));

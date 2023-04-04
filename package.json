@@ -1,5 +1,4 @@
 {
-  "type": "module",
   "name": "nexclipper-mqcomm",
   "version": "0.9.8",
   "main": "index.js",
