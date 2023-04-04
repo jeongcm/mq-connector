@@ -12,8 +12,8 @@ const MAX_API_BODY_SIZE = process.env.MAX_API_BODY_SIZE || "500mb";
 import consoleStamp from "console-stamp";
 
 const app = express();
-app.use(bodyParser.json( {limit: MAX_API_BODY_SIZE} ));
-app.use(bodyParser.urlencoded( {limit: MAX_API_BODY_SIZE} ));
+app.use(express.json( {limit: MAX_API_BODY_SIZE} ));
+app.use(express.urlencoded( {limit: MAX_API_BODY_SIZE} ));
 app.use(compression());
 app.get('/health', (req, res)=>{
     res.send ("health check passed");
@@ -152,12 +152,12 @@ async function connectQueue() {
                         {
                             tempQuery = {};
                             // get port number from port array and assign to resultPort variable.
-                            resultPortsLength = result.items[i].spec.ports.length
+                            let resultPortsLength = result.items[i].spec.ports.length
                             for (var j=0; j<resultPortsLength; j++)
                             {
                                 if (result.items[i].spec.ports[j].key = 'port')
                                 {
-                                    resultPort = result.items[i].spec.ports[j].port;
+                                    let resultPort = result.items[i].spec.ports[j].port;
                                 }
                             }
                             query['resource_Type'] = resourceType ;
