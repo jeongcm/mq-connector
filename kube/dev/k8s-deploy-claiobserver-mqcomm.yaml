@@ -35,6 +35,7 @@ data:
   RABBITMQ_SERVER_QUEUE_VIRTUAL_HOST: "claion"
   RABBITMQ_SERVER_URL: "ncmq-rabbitmq.rabbitmq.svc.cluster.local"
   RABBITMQ_SERVER_USER: "claion"
+  RABBITMQ_SERVER_PASSWORD: "claion"
   MQCOMM_RESOURCE_TARGET_DB: "MARIADB"
   MAX_API_BODY_SIZE: 500mb
   NODE_OPTIONS: "--max-old-space-size=8192"
