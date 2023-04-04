@@ -98,7 +98,7 @@ connectQueue()
 
 async function connectQueue() {
     try {
-        var result = "";
+        var totalMsg = "";
         connection = await amqp.connect(connect_string);
         channel = await connection.createChannel();
         // connect to RABBITMQ_SERVER_QUEUE_NAME, create one if doesnot exist already
@@ -1001,18 +1001,18 @@ async function connectQueue() {
         })
 
         await channel.consume(RABBITMQ_SERVER_QUEUE_ALERT, (msg) => {
-            result = JSON.parse(msg.content.toString('utf-8'));
-            const cluster_uuid = result.cluster_uuid;
-            let service_uuid = result.service_uuid;
+            totalMsg = JSON.parse(msg.content.toString('utf-8'));
+            const cluster_uuid = totalMsg.cluster_uuid;
+            let service_uuid = totalMsg.service_uuid;
 
-            if (result.status != 4) {
+            if (totalMsg.status != 4) {
                 //console.log("Msg processed, nothing to update, status code: " + result.status + ", " + RABBITMQ_SERVER_QUEUE_ALERT + ", cluster_uuid: " + cluster_uuid + " service_uuid: " + service_uuid  );
                 channel.ack(msg);
                 //console.log (result);
                 }
             else {
                 console.log("calling alert interface API : " + RABBITMQ_SERVER_QUEUE_ALERT + ", cluster_uuid: " + cluster_uuid );
-                callAPI(API_ALERT_URL, result, "alerts", cluster_uuid)
+                callAPI(API_ALERT_URL, totalMsg, "alerts", cluster_uuid)
                 .then
                 (
                   (response) => {
@@ -1027,11 +1027,11 @@ async function connectQueue() {
         }); // end of msg consume
 
         await channel.consume(RABBITMQ_SERVER_QUEUE_METRIC, (msg) => {
-            result = JSON.parse(msg.content.toString('utf-8'));
+            totalMsg = JSON.parse(msg.content.toString('utf-8'));
             //result = msg.content.toString('utf-8');
-            const cluster_uuid = result.cluster_uuid;
-            let service_uuid = result.service_uuid;
-            if (result.status != 4) {
+            const cluster_uuid = totalMsg.cluster_uuid;
+            let service_uuid = totalMsg.service_uuid;
+            if (totalMsg.status != 4) {
                 //console.log("Msg processed, nothing to update, status code: " + result.status + ", " + RABBITMQ_SERVER_QUEUE_METRIC + ", cluster_uuid: " + cluster_uuid  + " service_uuid: " + service_uuid);
                 channel.ack(msg);
                 //console.log (result);
@@ -1039,7 +1039,7 @@ async function connectQueue() {
             else {
                 console.log("calling metric meta interface API : " + RABBITMQ_SERVER_QUEUE_METRIC + ", cluster_uuid: " + cluster_uuid );
                 //console.log (result);
-                callAPI(API_METRIC_URL, result, "metric", cluster_uuid)
+                callAPI(API_METRIC_URL, totalMsg, "metric", cluster_uuid)
                 .then
                 (
                   (response) => {
@@ -1054,48 +1054,44 @@ async function connectQueue() {
         }); // end of msg consume
 
         await channel.consume(RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED, (msg) => {
-            result = JSON.parse(msg.content.toString('utf-8'));
+            totalMsg = JSON.parse(msg.content.toString('utf-8'));
             const rabbitmq_message_size = (Buffer.byteLength(msg.content.toString()))/1024/1024;
-            const cluster_uuid = result.cluster_uuid;
-            const service_uuid = result.service_uuid;
+            const cluster_uuid = totalMsg.cluster_uuid;
+            const service_uuid = totalMsg.service_uuid;
         
-            if (result.status != 4) {
+            if (totalMsg.status != 4) {
                 //console.log("Msg processed, nothing to update, status code: " + result.status + ", " + RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid + " service_uuid: " + service_uuid);
                 channel.ack(msg);
                 //console.log (result);
                 }
             else {
-                const name = result.service_name;
+                const name = totalMsg.service_name;
                 console.log("1. calling metric received mass upload API : " + RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid + " service_uuid: " + service_uuid + " rabbitmq_message_size(mb): " + rabbitmq_message_size + " service_name: " + name  );
-                massUploadMetricReceived(result, cluster_uuid)
+                massUploadMetricReceived(totalMsg, cluster_uuid)
                 .then
                 (
                   (response) => {
                     channel.ack(msg);
-                    result = "";                    
+                    totalMsg = "";
                     console.log("4. MQ message acknowleged: " + RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid + ", Msg Size (MB): " + rabbitmq_message_size + " service_name: " + name);  
                       },
                   (error) => {
                     channel.ack(msg);  
                     console.log("4. MQ message un-acknowleged: ",RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid + ", Msg Size (MB): " + rabbitmq_message_size + " service_name: " + name);  
-                    result = "";
+                    totalMsg = "";
                     console.log(error);
                   })
 
                 }; // end of else
 
-        }); // end of msg consume
+        });
+
         await channel.consume(RABBITMQ_SERVER_QUEUE_RESOURCE_NCP, (msg) => {
             let totalMsg = JSON.parse(msg.content.toString('utf-8'));
             let resourceType;
-            let query = {};
-            let mergedQuery = {};
-            let tempQuery = {};
-            let resultLength = 0
-            const rabbitmq_message_size = (Buffer.byteLength(msg.content.toString()))/1024/1024;
             const cluster_uuid = totalMsg.cluster_uuid;
             const service_uuid = totalMsg.service_uuid;
-            let API_MSG = {};
+            let API_MSG;
             if (totalMsg.status !== 4) {
                 console.log("Msg processed, nothing to update, status code: " + totalMsg.status + ", " + RABBITMQ_SERVER_QUEUE_RESOURCE_NCP + ", cluster_uuid: " + cluster_uuid + " service_uuid: " + service_uuid);
                 channel.ack(msg);
@@ -1110,49 +1106,57 @@ async function connectQueue() {
                 return;
             }
 
-            result = TotalMsg.result;
-
-            //let result = JSON.parse(TotalMsg.result);
-            switch (template_uuid) {
-
-            // get region list
-            case "70000000000000000000000000000001":
-                resourceType = "RG";
-                resultLength = result.getRegionListResponse?.regionList?.length
-                for (let region of result.regionList) {
-                    query['resource_Type'] = resourceType;
-                    query['resource_Spec'] = region;
-                    query['resource_Group_Uuid'] = cluster_uuid;
-                    query['resource_Name'] = region.regionName;
-                    query['resource_Description'] = "";
-                    // query['resource_Instance'] = result.servers[i].addresses;
-                    query['resource_Target_Uuid'] = "";
-                    query['resource_Target_Created_At'] = new Date();
-                    // query['resource_Namespace'] = result.servers[i].tenant_id;
-                    // query['parent_Resource_Id'] = result.servers[i]["OS-EXT-SRV-ATTR:host"];  //Openstack-Cluster
-                    // query['resource_Status'] = result.servers[i].status;
-                    query['resource_Level1'] = "NCP"; // Openstack
-                    query['resource_Level2'] = resourceType;
-                    // query['resource_Level3'] = "";
-                    query['resource_Level_Type'] = "NX";  //Openstack-Cluster
-                    query['resource_Rbac'] = false;
-                    query['resource_Anomaly_Monitor'] = false;
-                    query['resource_Active'] = true;
-                    query['resource_Status_Updated_At'] = new Date();
-
-                    tempQuery = formatter_resource(i, length, resourceType, cluster_uuid, query, mergedQuery);
-                    mergedQuery = tempQuery;
+            totalMsg = getResourceQuery(totalMsg.result, cluster_uuid)
+            callAPI(API_RESOURCE_URL, totalMsg.message, totalMsg.resourceType, cluster_uuid)
+                .then
+                (
+                    (response) => {
+                        channel.ack(msg);
+                        console.log("MQ message acknowleged: " + totalMsg.resourceType + ", " + RABBITMQ_SERVER_QUEUE_RESOURCE_NCP + ", cluster_uuid: " + cluster_uuid );
+                    },
+                    (error) => {
+                        console.log("MQ message un-acknowleged: " + RABBITMQ_SERVER_QUEUE_RESOURCE_NCP + ", cluster_uuid: " + cluster_uuid);
+                        //throw error;
+                    }).catch
+            (
+                (error)=> {
+                    console.log("MQ message un-acknowleged2: " + RABBITMQ_SERVER_QUEUE_RESOURCE_NCP + ", cluster_uuid: " + cluster_uuid);
+                    //throw error;
                 }
+            )
+        });
 
+        await channel.consume(RABBITMQ_SERVER_QUEUE_METRIC_NCP, (msg) => {
+            totalMsg = JSON.parse(msg.content.toString('utf-8'));
+            const rabbitmq_message_size = (Buffer.byteLength(msg.content.toString()))/1024/1024;
+            const cluster_uuid = totalMsg.cluster_uuid;
+            const service_uuid = totalMsg.service_uuid;
 
-                API_MSG = JSON.parse(mergedQuery);
-                API_MSG = JSON.parse(mergedQuery);
-            break;
-            case "ncp_metric_template_uuid":
-                // it will be input to
-                massUploadNcpMetrics(totalMsg, cluster_uuid)
-                break;
+            if (totalMsg.status !== 4) {
+                //console.log("Msg processed, nothing to update, status code: " + result.status + ", " + RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid + " service_uuid: " + service_uuid);
+                channel.ack(msg);
+                //console.log (result);
             }
+            else {
+                const name = totalMsg.service_name;
+                console.log("1. calling metric received mass upload API : " + RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid + " service_uuid: " + service_uuid + " rabbitmq_message_size(mb): " + rabbitmq_message_size + " service_name: " + name  );
+                massUploadNcpMetrics(totalMsg, cluster_uuid)
+                    .then
+                    (
+                        (response) => {
+                            channel.ack(msg);
+                            totalMsg = "";
+                            console.log("4. MQ message acknowleged: " + RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid + ", Msg Size (MB): " + rabbitmq_message_size + " service_name: " + name);
+                        },
+                        (error) => {
+                            channel.ack(msg);
+                            console.log("4. MQ message un-acknowleged: ",RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid + ", Msg Size (MB): " + rabbitmq_message_size + " service_name: " + name);
+                            totalMsg = "";
+                            console.log(error);
+                        })
+
+            }; // end of else
+
         }); // end of msg consume
     } catch (error) {
         console.log ("error", error)
