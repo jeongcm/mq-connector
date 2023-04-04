@@ -2,17 +2,11 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import amqp from 'amqplib';
-import compression from 'compression';
-import bodyParser from "body-parser";
 import axios from "axios";
 import express from 'express';
 import {getResourceQuery} from "./src/resource/ncp/resource.js";
-const MAX_API_BODY_SIZE = process.env.MAX_API_BODY_SIZE || "500mb";
-
-import consoleStamp from "console-stamp";
 
 const app = express();
-
 
 const MQCOMM_PORT = process.env.MQCOMM_PORT || 4001;
 //const MQCOMM_HEALTH_PORT = process.env.MQCOMM_HEALTH_PORT || 4012;
