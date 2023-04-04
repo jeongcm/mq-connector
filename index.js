@@ -12,12 +12,6 @@ const MAX_API_BODY_SIZE = process.env.MAX_API_BODY_SIZE || "500mb";
 import consoleStamp from "console-stamp";
 
 const app = express();
-app.use(express.json( {limit: MAX_API_BODY_SIZE} ));
-app.use(express.urlencoded( {limit: MAX_API_BODY_SIZE} ));
-app.use(compression());
-app.get('/health', (req, res)=>{
-    res.send ("health check passed");
-});
 
 
 const MQCOMM_PORT = process.env.MQCOMM_PORT || 4001;
@@ -71,29 +65,6 @@ const API_ALERT_URL = API_SERVER_ALERT_URL+":"+API_SERVER_ALERT_PORT + API_NAME_
 const vm_Url = process.env.VM_URL || 'http://olly-dev-vm.claion.io';
 const VM_MULTI_AUTH_URL = process.env.VM_MULTI_AUTH_URL;
 const VM_OPTION = process.env.VM_OPTION || "SINGLE"; //BOTH - both / SINGLE - single-tenant / MULTI - multi-tenant
-
-process.stdin.resume();//so the program will not close instantly
-function exitHandler(options, exitCode) {
-    if (options.cleanup) console.log('clean');
-    if (exitCode || exitCode === 0) console.log(exitCode);
-    if (options.exit) {
-        channel.cancel()
-        channel.close()
-        connection.close()
-        process.exit(0)
-    };
-}
-//do something when app is closing
-process.on('exit', exitHandler.bind(null,{cleanup:true}));
-//catches ctrl+c event
-process.on('SIGINT', exitHandler.bind(null, {exit:true}));
-// catches "kill pid" (for example: nodemon restart)
-process.on('SIGUSR1', exitHandler.bind(null, {exit:true}));
-process.on('SIGUSR2', exitHandler.bind(null, {exit:true}));
-//catches uncaught exceptions
-process.on('uncaughtException', exitHandler.bind(null, {exit:true}));
-process.on('SIGTERM', exitHandler.bind(null, {exit:true}));
-
 
 connectQueue()
 
@@ -1378,5 +1349,25 @@ async function callVM (metricReceivedMassFeed, clusterUuid) {
     }
     return result;
 }
+
+process.stdin.resume();//so the program will not close instantly
+function exitHandler(options, exitCode) {
+    if (options.cleanup) console.log('clean');
+    if (exitCode || exitCode === 0) console.log(exitCode);
+    if (options.exit) {
+        process.exit(0)
+    };
+}
+//do something when app is closing
+process.on('exit', exitHandler.bind(null,{cleanup:true}));
+//catches ctrl+c event
+process.on('SIGINT', exitHandler.bind(null, {exit:true}));
+// catches "kill pid" (for example: nodemon restart)
+process.on('SIGUSR1', exitHandler.bind(null, {exit:true}));
+process.on('SIGUSR2', exitHandler.bind(null, {exit:true}));
+//catches uncaught exceptions
+process.on('uncaughtException', exitHandler.bind(null, {exit:true}));
+process.on('SIGTERM', exitHandler.bind(null, {exit:true}));
+
 
 app.listen(MQCOMM_PORT, () => console.log("NexClipper MQCOMM Server running at port " + MQCOMM_PORT));
