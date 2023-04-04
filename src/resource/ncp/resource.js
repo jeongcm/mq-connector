@@ -1,4 +1,4 @@
-function getResourceQuery(result, clusterUuid) {
+export function getResourceQuery(result, clusterUuid) {
     let resourceType;
     let query = {};
     let mergedQuery = {};

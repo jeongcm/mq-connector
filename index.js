@@ -5,6 +5,7 @@ const compression = require('compression');
 const bodyParser = require('body-parser');
 const axios = require('axios');
 const express = require("express");
+const {getResourceQuery} = require("./src/resource/ncp/resource");
 const MAX_API_BODY_SIZE = process.env.MAX_API_BODY_SIZE || "500mb"; 
 
 require( 'console-stamp' )( console, {
@@ -108,6 +109,7 @@ async function connectQueue() {
         await channel.assertQueue(RABBITMQ_SERVER_QUEUE_METRIC);
         await channel.assertQueue(RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED);
         await channel.assertQueue(RABBITMQ_SERVER_QUEUE_RESOURCE_NCP);
+
         await channel.assertQueue(RABBITMQ_SERVER_QUEUE_METRIC_NCP);
         await channel.consume(RABBITMQ_SERVER_QUEUE_RESOURCE, (msg) => {
             var resourceType;
