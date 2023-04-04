@@ -1106,13 +1106,13 @@ async function connectQueue() {
                 return;
             }
 
-            totalMsg = getResourceQuery(totalMsg.result, cluster_uuid)
-            callAPI(API_RESOURCE_URL, totalMsg.message, totalMsg.resourceType, cluster_uuid)
+            let result = getResourceQuery(totalMsg.result, cluster_uuid)
+            callAPI(API_RESOURCE_URL, result.message, result.resourceType, cluster_uuid)
                 .then
                 (
                     (response) => {
                         channel.ack(msg);
-                        console.log("MQ message acknowleged: " + totalMsg.resourceType + ", " + RABBITMQ_SERVER_QUEUE_RESOURCE_NCP + ", cluster_uuid: " + cluster_uuid );
+                        console.log("MQ message acknowleged: " + result.resourceType + ", " + RABBITMQ_SERVER_QUEUE_RESOURCE_NCP + ", cluster_uuid: " + cluster_uuid );
                     },
                     (error) => {
                         console.log("MQ message un-acknowleged: " + RABBITMQ_SERVER_QUEUE_RESOURCE_NCP + ", cluster_uuid: " + cluster_uuid);
