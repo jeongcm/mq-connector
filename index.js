@@ -1,16 +1,15 @@
-const dontenv = require('dotenv');
-dontenv.config();
-const amqp= require("amqplib");
-const compression = require('compression');
-const bodyParser = require('body-parser');
-const axios = require('axios');
-const express = require("express");
-const {getResourceQuery} = require("./src/resource/ncp/resource");
-const MAX_API_BODY_SIZE = process.env.MAX_API_BODY_SIZE || "500mb"; 
+import dotenv from 'dotenv';
+dotenv.config();
 
-require( 'console-stamp' )( console, {
-    format: '(console).yellow :date().green.underline :label(7)'
-  } );
+import amqp from 'amqplib';
+import compression from 'compression';
+import bodyParser from "body-parser";
+import axios from "axios";
+import express from 'express';
+import {getResourceQuery} from "./src/resource/ncp/resource.js";
+const MAX_API_BODY_SIZE = process.env.MAX_API_BODY_SIZE || "500mb";
+
+import consoleStamp from "console-stamp";
 
 const app = express();
 app.use(bodyParser.json( {limit: MAX_API_BODY_SIZE} ));
