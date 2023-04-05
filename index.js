@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
 import amqp from 'amqplib';
+import bodyParser from "body-parser";
 import compression from 'compression';
 import axios from "axios";
 import express from "express";
@@ -9,10 +10,9 @@ import {getResourceQuery} from "./src/resource/ncp/resource.js";
 const MAX_API_BODY_SIZE = process.env.MAX_API_BODY_SIZE || "500mb";
 const app = express()
 
-app.use(express.json( {limit: MAX_API_BODY_SIZE} ));
-app.use(express.urlencoded( {limit: MAX_API_BODY_SIZE} ));
+app.use(bodyParser.json( {limit: MAX_API_BODY_SIZE} ));
+app.use(bodyParser.urlencoded( {limit: MAX_API_BODY_SIZE, extended: true} ));
 app.use(compression());
-
 
 const MQCOMM_PORT = process.env.MQCOMM_PORT || 4001;
 //const MQCOMM_HEALTH_PORT = process.env.MQCOMM_HEALTH_PORT || 4012;
@@ -37,7 +37,7 @@ const API_SERVER_RESOURCE_EVENT_PORT = process.env.API_SERVER_RESOURCE_EVENT_POR
 const API_NAME_RESOURCE_EVENT_POST = process.env.API_NAME_RESOURCE_EVENT_POST || "/resourceEventMass";
 
 const API_SERVER_METRIC_URL = process.env.API_SERVER_METRIC_URL || "http://olly-dev-connect.claion.io";
-const API_SERVER_METRIC_PORT = process.env.API_SERVER_METRIC_PORT || "5001";
+const API_SERVER_METRIC_PORT = process.env.API_SERVER_METRIC_PORT || "8081";
 const API_NAME_METRIC_POST = process.env.API_NAME_METRIC_POST || "/metricMetaMass";
 
 //const API_SERVER_METRIC_RECEIVED_URL = process.env.API_SERVER_METRIC_RECEIVED_URL || "http://localhost";
@@ -45,8 +45,8 @@ const API_NAME_METRIC_POST = process.env.API_NAME_METRIC_POST || "/metricMetaMas
 //const API_NAME_METRIC_RECEIVED_POST = process.env.API_NAME_METRIC_RECEIVED_POST || "/metricReceivedMass";
 
 const API_SERVER_ALERT_URL = process.env.API_SERVER_ALERT_URL || "http://olly-dev-connect.claion.io";
-const API_SERVER_ALERT_PORT = process.env.API_SERVER_ALERT_PORT || "5001";
-const API_NAME_ALERT_POST = process.env.API_NAME_ALERT_POST || "/alertMass";
+const API_SERVER_ALERT_PORT = process.env.API_SERVER_ALERT_PORT || "8081";
+const API_NAME_ALERT_POST = process.env.API_NAME_ALERT_POST || "/service/alert_rule";
 
 const RABBITMQ_SERVER_USER = process.env.RABBITMQ_SERVER_USER || "claion";
 const RABBITMQ_SERVER_PASSWORD = process.env.RABBITMQ_SERVER_PASSWORD || "claion";
@@ -55,14 +55,14 @@ const RabbitOpt = RABBITMQ_PROTOCOL_HOST + RABBITMQ_SERVER_USER + ":" + RABBITMQ
 
 let channel, connection;
 const connect_string = RabbitOpt + RABBITMQ_SERVER_URL + ":" + RABBITMQ_SERVER_PORT + "/" + RABBITMQ_SERVER_VIRTUAL_HOST + "?heartbeat=180";
-const API_RESOURCE_URL = API_SERVER_RESOURCE_URL + API_NAME_RESOURCE_POST;
-const API_RESOURCE_EVENT_URL = API_SERVER_RESOURCE_EVENT_URL + API_NAME_RESOURCE_EVENT_POST;
-const API_METRIC_URL = API_SERVER_METRIC_URL + API_NAME_METRIC_POST;
+const API_RESOURCE_URL = API_SERVER_RESOURCE_URL+":"+API_SERVER_RESOURCE_PORT + API_NAME_RESOURCE_POST;
+const API_RESOURCE_EVENT_URL = API_SERVER_RESOURCE_EVENT_URL+":"+API_SERVER_RESOURCE_EVENT_PORT + API_NAME_RESOURCE_EVENT_POST;
+const API_METRIC_URL = API_SERVER_METRIC_URL+":"+API_SERVER_METRIC_PORT + API_NAME_METRIC_POST;
 //const API_METRIC_RECEIVED_URL = API_SERVER_METRIC_RECEIVED_URL+":"+API_SERVER_METRIC_RECEIVED_PORT + API_NAME_METRIC_RECEIVED_POST;
-const API_CUSTOMER_ACCOUNT_GET_URL = API_SERVER_RESOURCE_URL+API_NAME_CUSTOMER_ACCOUNT_GET;
-const API_ALERT_URL = API_SERVER_ALERT_URL + API_NAME_ALERT_POST;
+const API_CUSTOMER_ACCOUNT_GET_URL = API_SERVER_RESOURCE_URL+":"+API_SERVER_RESOURCE_PORT + API_NAME_CUSTOMER_ACCOUNT_GET;
+const API_ALERT_URL = API_SERVER_ALERT_URL+":"+API_SERVER_ALERT_PORT + API_NAME_ALERT_POST;
 //const MQCOMM_RESOURCE_TARGET_DB = process.env.MQCOMM_RESOURCE_TARGET_DB;
-const vm_Url = process.env.VM_URL || 'http://olly-dev-vm.claion.io';
+const vm_Url = process.env.VM_URL || 'http://olly-dev-vm.claion.io:8428/api/v1/import?extra_label=clusterUuid=';
 const VM_MULTI_AUTH_URL = process.env.VM_MULTI_AUTH_URL;
 const VM_OPTION = process.env.VM_OPTION || "SINGLE"; //BOTH - both / SINGLE - single-tenant / MULTI - multi-tenant
 
@@ -1053,38 +1053,38 @@ async function connectQueue() {
                 };
         }); // end of msg consume
 
-        // await channel.consume(RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED, (msg) => {
-        //     result = JSON.parse(msg.content.toString('utf-8'));
-        //     const rabbitmq_message_size = (Buffer.byteLength(msg.content.toString()))/1024/1024;
-        //     const cluster_uuid = result.cluster_uuid;
-        //     const service_uuid = result.service_uuid;
-        //
-        //     if (result.status != 4) {
-        //         //console.log("Msg processed, nothing to update, status code: " + result.status + ", " + RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid + " service_uuid: " + service_uuid);
-        //         channel.ack(msg);
-        //         //console.log (result);
-        //         }
-        //     else {
-        //         const name = result.service_name;
-        //         console.log("1. calling metric received mass upload API : " + RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid + " service_uuid: " + service_uuid + " rabbitmq_message_size(mb): " + rabbitmq_message_size + " service_name: " + name  );
-        //         massUploadMetricReceived(result, cluster_uuid)
-        //         .then
-        //         (
-        //           (response) => {
-        //             channel.ack(msg);
-        //             result = "";
-        //             console.log("4. MQ message acknowleged: " + RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid + ", Msg Size (MB): " + rabbitmq_message_size + " service_name: " + name);
-        //               },
-        //           (error) => {
-        //             channel.ack(msg);
-        //             console.log("4. MQ message un-acknowleged: ",RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid + ", Msg Size (MB): " + rabbitmq_message_size + " service_name: " + name);
-        //             result = "";
-        //             console.log(error);
-        //           })
-        //
-        //         }; // end of else
-        //
-        // });
+        await channel.consume(RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED, (msg) => {
+            result = JSON.parse(msg.content.toString('utf-8'));
+            const rabbitmq_message_size = (Buffer.byteLength(msg.content.toString()))/1024/1024;
+            const cluster_uuid = result.cluster_uuid;
+            const service_uuid = result.service_uuid;
+
+            if (result.status != 4) {
+                //console.log("Msg processed, nothing to update, status code: " + result.status + ", " + RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid + " service_uuid: " + service_uuid);
+                channel.ack(msg);
+                //console.log (result);
+                }
+            else {
+                const name = result.service_name;
+                console.log("1. calling metric received mass upload API : " + RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid + " service_uuid: " + service_uuid + " rabbitmq_message_size(mb): " + rabbitmq_message_size + " service_name: " + name  );
+                massUploadMetricReceived(result, cluster_uuid)
+                .then
+                (
+                  (response) => {
+                    channel.ack(msg);
+                    result = "";
+                    console.log("4. MQ message acknowleged: " + RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid + ", Msg Size (MB): " + rabbitmq_message_size + " service_name: " + name);
+                      },
+                  (error) => {
+                    channel.ack(msg);
+                    console.log("4. MQ message un-acknowleged: ",RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid + ", Msg Size (MB): " + rabbitmq_message_size + " service_name: " + name);
+                    result = "";
+                    console.log(error);
+                  })
+
+                }; // end of else
+
+        });
 
         await channel.consume(RABBITMQ_SERVER_QUEUE_RESOURCE_NCP, async (msg) => {
             try {
@@ -1235,7 +1235,7 @@ async function massUploadMetricReceived(metricReceivedMassFeed, clusterUuid){
           newResultMap1 = null;
           let massFeedResult1 = await callVM(finalResult1, clusterUuid);
           if (!massFeedResult1 || (massFeedResult1?.status !== 204)) {
-            console.log("Data Issue1 -----------------", finalResult1);
+            // console.log("Data Issue1 -----------------", finalResult1);
           }
 
           console.log(`3-1. massFeedResult 1/2: ${massFeedResult1?.status}, clusterUuid: ${clusterUuid}, name: ${name}`);
@@ -1250,7 +1250,7 @@ async function massUploadMetricReceived(metricReceivedMassFeed, clusterUuid){
           newResultMap2= null;
           let massFeedResult2 = await callVM(finalResult2, clusterUuid);
           if (!massFeedResult2 || (massFeedResult2?.status !== 204)) {
-            console.log("Data Issue2 -----------------", finalResult2);
+            // console.log("Data Issue2 -----------------", finalResult2);
           }
 
           console.log(`3-2, massFeedResult 2/2: ${massFeedResult2?.status}, clusterUuid: ${clusterUuid}, name: ${name}`);
@@ -1268,7 +1268,7 @@ async function massUploadMetricReceived(metricReceivedMassFeed, clusterUuid){
           let massFeedResult = await callVM(finalResult, clusterUuid);
           console.log(`3. massFeedResult: ${massFeedResult?.status}, clusterUuid: ${clusterUuid}, name: ${name}`);
           if (!massFeedResult || (massFeedResult?.status !== 204)) {
-            console.log("Data Issue -----------------", finalResult);
+            // console.log("Data Issue -----------------", finalResult);
           }
           finalResult = null;
           massFeedResult= null;
