@@ -70,7 +70,12 @@ process.stdin.resume();//so the program will not close instantly
 function exitHandler(options, exitCode) {
     if (options.cleanup) console.log('clean');
     if (exitCode || exitCode === 0) console.log(exitCode);
-    if (options.exit) process.exit(0)
+    if (options.exit) {
+        channel.cancel()
+        channel.close()
+        connection.close()ch
+        process.exit(0)
+    }
 }
 //do something when app is closing
 process.on('exit', exitHandler.bind(null,{cleanup:true, exit:true}));
@@ -98,6 +103,20 @@ async function connectQueue() {
         await channel.assertQueue(RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED);
         await channel.assertQueue(RABBITMQ_SERVER_QUEUE_RESOURCE_NCP);
         await channel.assertQueue(RABBITMQ_SERVER_QUEUE_METRIC_NCP);
+        connection.on('error', function(err) {
+            console.error('[AMQP] error', err.message);
+        });
+        connection.on('close', function() {
+            console.log('[AMQP] closed');
+            // Channel 닫기
+            channel.close(function (err) {
+                console.log('[AMQP] channel closed');
+                // 연결 닫기
+                connection.close(function (err) {
+                    console.log('[AMQP] connection closed');
+                });
+            });
+        });
 
         await channel.consume(RABBITMQ_SERVER_QUEUE_RESOURCE, async (msg) => {
             try {
