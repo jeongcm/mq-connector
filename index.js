@@ -73,7 +73,7 @@ function exitHandler(options, exitCode) {
     if (options.exit) {
         channel.cancel()
         channel.close()
-        connection.close()ch
+        connection.close()
         process.exit(0)
     }
 }
