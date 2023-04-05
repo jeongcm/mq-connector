@@ -1,3 +1,5 @@
+import {v1}  from 'uuid';
+
 export async function getResourceQuery(totalMsg, clusterUuid) {
     let resourceType;
     let query = {};
@@ -17,7 +19,7 @@ export async function getResourceQuery(totalMsg, clusterUuid) {
                 query['resource_Name'] = result.getRegionListResponse?.regionList[i]?.regionName;
                 query['resource_Description'] = "";
                 // query['resource_Instance'] = result.servers[i].addresses;
-                query['resource_Target_Uuid'] = "";
+                query['resource_Target_Uuid'] = v1(); // new generate target uuid
                 query['resource_Target_Created_At'] = new Date();
                 // query['resource_Namespace'] = result.servers[i].tenant_id;
                 // query['parent_Resource_Id'] = result.servers[i]["OS-EXT-SRV-ATTR:host"];  //Openstack-Cluster
@@ -35,7 +37,7 @@ export async function getResourceQuery(totalMsg, clusterUuid) {
                 mergedQuery = tempQuery;
             }
     }
-    return { message: JSON.parse(mergedQuery), resourceType: resourceType };
+    return { message: mergedQuery, resourceType: resourceType };
 }
 
 function formatter_resource(i, itemLength, resourceType, cluster_uuid, query, mergedQuery) {

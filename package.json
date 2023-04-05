@@ -19,7 +19,10 @@
     "console-stamp": "^3.0.5",
     "dotenv": "^16.0.1",
     "express": "^4.17.3",
-    "install": "^0.13.0"
+    "install": "^0.13.0",
+    "uuid": "^8.3.2",
+    "winston": "^3.8.2",
+    "winston-daily-rotate-file": "^4.7.1"
   },
   "devDependencies": {
     "cross-env": "^7.0.3",
