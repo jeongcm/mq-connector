@@ -13,6 +13,9 @@ const app = express()
 app.use(bodyParser.json( {limit: MAX_API_BODY_SIZE} ));
 app.use(bodyParser.urlencoded( {limit: MAX_API_BODY_SIZE, extended: true} ));
 app.use(compression());
+app.get('/health', (req, res)=>{
+    res.send ("health check passed");
+});
 
 const MQCOMM_PORT = process.env.MQCOMM_PORT || 4001;
 //const MQCOMM_HEALTH_PORT = process.env.MQCOMM_HEALTH_PORT || 4012;
