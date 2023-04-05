@@ -1248,11 +1248,11 @@ async function massUploadMetricReceived(metricReceivedMassFeed, clusterUuid){
           let finalResult1 = (newResultMap1).join("\n")
           newResultMap1 = null;
           let massFeedResult1 = await callVM(finalResult1, clusterUuid);
-          if (!massFeedResult1 || (massFeedResult1.status != 204)) {
-            console.log("Data Issue1 -----------------", finalResult);
+          if (!massFeedResult1 || (massFeedResult1?.status !== 204)) {
+            console.log("Data Issue1 -----------------", finalResult1);
           }
 
-          console.log(`3-1. massFeedResult 1/2: ${massFeedResult1.status}, clusterUuid: ${clusterUuid}, name: ${name}`); 
+          console.log(`3-1. massFeedResult 1/2: ${massFeedResult1?.status}, clusterUuid: ${clusterUuid}, name: ${name}`);
           finalResult1=null;
           massFeedResult1= null;
           let newResultMap2 = [];
@@ -1263,11 +1263,11 @@ async function massUploadMetricReceived(metricReceivedMassFeed, clusterUuid){
           let finalResult2 = (newResultMap2).join("\n")
           newResultMap2= null;
           let massFeedResult2 = await callVM(finalResult2, clusterUuid);
-          if (!massFeedResult2 || (massFeedResult2.status != 204)) {
-            console.log("Data Issue2 -----------------", finalResult);
+          if (!massFeedResult2 || (massFeedResult2?.status !== 204)) {
+            console.log("Data Issue2 -----------------", finalResult2);
           }
 
-          console.log(`3-2, massFeedResult 2/2: ${massFeedResult2.status}, clusterUuid: ${clusterUuid}, name: ${name}`); 
+          console.log(`3-2, massFeedResult 2/2: ${massFeedResult2?.status}, clusterUuid: ${clusterUuid}, name: ${name}`);
           finalResult2=null;
           massFeedResult2= null;      
         }
@@ -1280,8 +1280,8 @@ async function massUploadMetricReceived(metricReceivedMassFeed, clusterUuid){
           let finalResult = (newResultMap).join("\n")
           newResultMap = null;
           let massFeedResult = await callVM(finalResult, clusterUuid);
-          console.log(`3. massFeedResult: ${massFeedResult.status}, clusterUuid: ${clusterUuid}, name: ${name}`); 
-          if (!massFeedResult || (massFeedResult.status != 204)) {
+          console.log(`3. massFeedResult: ${massFeedResult?.status}, clusterUuid: ${clusterUuid}, name: ${name}`);
+          if (!massFeedResult || (massFeedResult?.status !== 204)) {
             console.log("Data Issue -----------------", finalResult);
           }
           finalResult = null;
