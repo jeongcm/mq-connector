@@ -35,7 +35,7 @@ export async function getResourceQuery(totalMsg, clusterUuid) {
                 mergedQuery = tempQuery;
             }
     }
-    return { message: mergedQuery, resourceType: resourceType };
+    return { message: JSON.parse(mergedQuery), resourceType: resourceType };
 }
 
 function formatter_resource(i, itemLength, resourceType, cluster_uuid, query, mergedQuery) {
