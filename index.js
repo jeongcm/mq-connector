@@ -1104,11 +1104,12 @@ async function connectQueue() {
 
         });
 
-        await channel.consume(RABBITMQ_SERVER_QUEUE_RESOURCE_NCP, (msg) => {
+        await channel.consume(RABBITMQ_SERVER_QUEUE_RESOURCE_NCP, async (msg) => {
             try {
                 let totalMsg = JSON.parse(msg.content.toString('utf-8'));
                 const cluster_uuid = totalMsg.cluster_uuid;
                 const service_uuid = totalMsg.service_uuid;
+                console.log(totalMsg.status)
                 if (totalMsg.status !== 4) {
                     console.log("Msg processed, nothing to update, status code: " + totalMsg.status + ", " + RABBITMQ_SERVER_QUEUE_RESOURCE_NCP + ", cluster_uuid: " + cluster_uuid + " service_uuid: " + service_uuid);
                     channel.ack(msg);
@@ -1116,31 +1117,30 @@ async function connectQueue() {
                     //console.log (result);
                 }
 
-                if (!totalMsg.result)
-                {
+                if (!totalMsg.result) {
                     console.log("Message ignored, No result in the message.: " + template_uuid + ", cluster_uuid: " + cluster_uuid, ", service_uuid: ", service_uuid);
                     channel.ack(msg);
                     return;
                 }
 
-                let result = getResourceQuery(totalMsg.result, cluster_uuid)
+                let result = await getResourceQuery(totalMsg, cluster_uuid)
                 callAPI(API_RESOURCE_URL, result.message, result.resourceType, cluster_uuid)
                     .then
                     (
                         (response) => {
                             channel.ack(msg);
-                            console.log("MQ message acknowleged: " + result.resourceType + ", " + RABBITMQ_SERVER_QUEUE_RESOURCE_NCP + ", cluster_uuid: " + cluster_uuid );
+                            console.log("MQ message acknowleged: " + result.resourceType + ", " + RABBITMQ_SERVER_QUEUE_RESOURCE_NCP + ", cluster_uuid: " + cluster_uuid);
                         },
                         (error) => {
                             console.log("MQ message un-acknowleged: " + RABBITMQ_SERVER_QUEUE_RESOURCE_NCP + ", cluster_uuid: " + cluster_uuid);
                             //throw error;
                         }).catch
-                (
-                    (error)=> {
-                        console.log("MQ message un-acknowleged2: " + RABBITMQ_SERVER_QUEUE_RESOURCE_NCP + ", cluster_uuid: " + cluster_uuid);
-                        //throw error;
-                    }
-                )
+                    (
+                        (error) => {
+                            console.log("MQ message un-acknowleged2: " + RABBITMQ_SERVER_QUEUE_RESOURCE_NCP + ", cluster_uuid: " + cluster_uuid);
+                            //throw error;
+                        }
+                    )
             } catch (err) {
                 console.error(err);
                 channel.nack(msg, false, false);
@@ -1404,22 +1404,23 @@ async function callVM (metricReceivedMassFeed, clusterUuid) {
     return result;
 }
 
-function getResourceQuery(result, clusterUuid) {
+async function getResourceQuery(totalMsg, clusterUuid) {
     let resourceType;
     let query = {};
     let mergedQuery = {};
     let tempQuery = {};
     let resultLength = 0
 
-    switch (result.templateUuid) {
+    let result = totalMsg.result
+    switch (totalMsg.template_uuid) {
         case "70000000000000000000000000000001":
             resourceType = "RG";
             resultLength = result.getRegionListResponse?.regionList?.length
             for (let i = 0; i < resultLength; i ++) {
                 query['resource_Type'] = resourceType;
-                query['resource_Spec'] = result.regionList[i];
+                query['resource_Spec'] = result.getRegionListResponse?.regionList[i];
                 query['resource_Group_Uuid'] = clusterUuid;
-                query['resource_Name'] = result.regionList[i].regionName;
+                query['resource_Name'] = result.getRegionListResponse?.regionList[i]?.regionName;
                 query['resource_Description'] = "";
                 // query['resource_Instance'] = result.servers[i].addresses;
                 query['resource_Target_Uuid'] = "";
@@ -1440,8 +1441,7 @@ function getResourceQuery(result, clusterUuid) {
                 mergedQuery = tempQuery;
             }
     }
-
-    return { message: JSON.parse(mergedQuery), resourceType: resourceType };
+    return { message: mergedQuery, resourceType: resourceType };
 }
 
 app.listen(MQCOMM_PORT, () => console.log("NexClipper MQCOMM Server running at port " + MQCOMM_PORT));
