@@ -1,24 +1,12 @@
-const dontenv = require('dotenv');
-dontenv.config();
-const amqp= require("amqplib");
-const compression = require('compression');
-const bodyParser = require('body-parser');
-const axios = require('axios');
-const express = require("express");
-const MAX_API_BODY_SIZE = process.env.MAX_API_BODY_SIZE || "500mb";
+import dotenv from 'dotenv';
+dotenv.config();
+import amqp from 'amqplib';
 
-require( 'console-stamp' )( console, {
-    format: '(console).yellow :date().green.underline :label(7)'
-  } );
+import axios from "axios";
+import express from "express";
+import {getResourceQuery} from "./src/resource/ncp/resource.js";
 
-const app = express();
-app.use(bodyParser.json( {limit: MAX_API_BODY_SIZE} ));
-app.use(bodyParser.urlencoded( {limit: MAX_API_BODY_SIZE} ));
-app.use(compression());
-app.get('/health', (req, res)=>{
-    res.send ("health check passed");
-});
-
+const app = express()
 
 const MQCOMM_PORT = process.env.MQCOMM_PORT || 4001;
 //const MQCOMM_HEALTH_PORT = process.env.MQCOMM_HEALTH_PORT || 4012;
@@ -158,6 +146,8 @@ async function connectQueue() {
                     switch (template_uuid) {
                         case "00000000000000000000000000000020":  //20, for K8s services
                             resourceType = "SV";
+                            let resultPortsLength;
+                            let resultPort
                             for (var i=0; i<itemLength; i++)
                             {
                                 tempQuery = {};
@@ -1109,7 +1099,6 @@ async function connectQueue() {
                 let totalMsg = JSON.parse(msg.content.toString('utf-8'));
                 const cluster_uuid = totalMsg.cluster_uuid;
                 const service_uuid = totalMsg.service_uuid;
-                console.log(totalMsg.status)
                 if (totalMsg.status !== 4) {
                     console.log("Msg processed, nothing to update, status code: " + totalMsg.status + ", " + RABBITMQ_SERVER_QUEUE_RESOURCE_NCP + ", cluster_uuid: " + cluster_uuid + " service_uuid: " + service_uuid);
                     channel.ack(msg);
@@ -1149,7 +1138,7 @@ async function connectQueue() {
 
         await channel.consume(RABBITMQ_SERVER_QUEUE_METRIC_NCP, (msg) => {
             try {
-                totalMsg = JSON.parse(msg.content.toString('utf-8'));
+                let totalMsg = JSON.parse(msg.content.toString('utf-8'));
                 const rabbitmq_message_size = (Buffer.byteLength(msg.content.toString()))/1024/1024;
                 const cluster_uuid = totalMsg.cluster_uuid;
                 const service_uuid = totalMsg.service_uuid;
@@ -1404,44 +1393,44 @@ async function callVM (metricReceivedMassFeed, clusterUuid) {
     return result;
 }
 
-async function getResourceQuery(totalMsg, clusterUuid) {
-    let resourceType;
-    let query = {};
-    let mergedQuery = {};
-    let tempQuery = {};
-    let resultLength = 0
-
-    let result = totalMsg.result
-    switch (totalMsg.template_uuid) {
-        case "70000000000000000000000000000001":
-            resourceType = "RG";
-            resultLength = result.getRegionListResponse?.regionList?.length
-            for (let i = 0; i < resultLength; i ++) {
-                query['resource_Type'] = resourceType;
-                query['resource_Spec'] = result.getRegionListResponse?.regionList[i];
-                query['resource_Group_Uuid'] = clusterUuid;
-                query['resource_Name'] = result.getRegionListResponse?.regionList[i]?.regionName;
-                query['resource_Description'] = "";
-                // query['resource_Instance'] = result.servers[i].addresses;
-                query['resource_Target_Uuid'] = "";
-                query['resource_Target_Created_At'] = new Date();
-                // query['resource_Namespace'] = result.servers[i].tenant_id;
-                // query['parent_Resource_Id'] = result.servers[i]["OS-EXT-SRV-ATTR:host"];  //Openstack-Cluster
-                // query['resource_Status'] = result.servers[i].status;
-                query['resource_Level1'] = "NCP"; // Openstack
-                query['resource_Level2'] = resourceType;
-                // query['resource_Level3'] = "";
-                query['resource_Level_Type'] = "NX";  //Openstack-Cluster
-                query['resource_Rbac'] = false;
-                query['resource_Anomaly_Monitor'] = false;
-                query['resource_Active'] = true;
-                query['resource_Status_Updated_At'] = new Date();
-
-                tempQuery = formatter_resource(i, resultLength, resourceType, clusterUuid, query, mergedQuery);
-                mergedQuery = tempQuery;
-            }
-    }
-    return { message: mergedQuery, resourceType: resourceType };
-}
+// async function getResourceQuery(totalMsg, clusterUuid) {
+//     let resourceType;
+//     let query = {};
+//     let mergedQuery = {};
+//     let tempQuery = {};
+//     let resultLength = 0
+//
+//     let result = totalMsg.result
+//     switch (totalMsg.template_uuid) {
+//         case "70000000000000000000000000000001":
+//             resourceType = "RG";
+//             resultLength = result.getRegionListResponse?.regionList?.length
+//             for (let i = 0; i < resultLength; i ++) {
+//                 query['resource_Type'] = resourceType;
+//                 query['resource_Spec'] = result.getRegionListResponse?.regionList[i];
+//                 query['resource_Group_Uuid'] = clusterUuid;
+//                 query['resource_Name'] = result.getRegionListResponse?.regionList[i]?.regionName;
+//                 query['resource_Description'] = "";
+//                 // query['resource_Instance'] = result.servers[i].addresses;
+//                 query['resource_Target_Uuid'] = "";
+//                 query['resource_Target_Created_At'] = new Date();
+//                 // query['resource_Namespace'] = result.servers[i].tenant_id;
+//                 // query['parent_Resource_Id'] = result.servers[i]["OS-EXT-SRV-ATTR:host"];  //Openstack-Cluster
+//                 // query['resource_Status'] = result.servers[i].status;
+//                 query['resource_Level1'] = "NCP"; // Openstack
+//                 query['resource_Level2'] = resourceType;
+//                 // query['resource_Level3'] = "";
+//                 query['resource_Level_Type'] = "NX";  //Openstack-Cluster
+//                 query['resource_Rbac'] = false;
+//                 query['resource_Anomaly_Monitor'] = false;
+//                 query['resource_Active'] = true;
+//                 query['resource_Status_Updated_At'] = new Date();
+//
+//                 tempQuery = formatter_resource(i, resultLength, resourceType, clusterUuid, query, mergedQuery);
+//                 mergedQuery = tempQuery;
+//             }
+//     }
+//     return { message: mergedQuery, resourceType: resourceType };
+// }
 
 app.listen(MQCOMM_PORT, () => console.log("NexClipper MQCOMM Server running at port " + MQCOMM_PORT));
