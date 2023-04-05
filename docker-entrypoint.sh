@@ -7,6 +7,6 @@ if [[ -f /vault/secrets/ncmq-admin-login ]]; then
     export RABBITMQ_SERVER_PASSWORD="${RABBITMQ_SERVER_PASSWORD}"
 fi
 
-npm run start
-
+##npm run start
+pm2-runtime index.js --env production
 
