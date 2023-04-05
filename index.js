@@ -47,7 +47,7 @@ const RABBITMQ_SERVER_PASSWORD = process.env.RABBITMQ_SERVER_PASSWORD || "cwlO0j
 const RABBITMQ_SERVER_VIRTUAL_HOST = process.env.RABBITMQ_SERVER_VIRTUAL_HOST || "/";
 const RabbitOpt = RABBITMQ_PROTOCOL_HOST + RABBITMQ_SERVER_USER + ":" + RABBITMQ_SERVER_PASSWORD + "@";
 
-var channel, connection;
+let channel, connection;
 const connect_string = RabbitOpt + RABBITMQ_SERVER_URL + ":" + RABBITMQ_SERVER_PORT + "/" + RABBITMQ_SERVER_VIRTUAL_HOST + "?heartbeat=180";
 const API_RESOURCE_URL = API_SERVER_RESOURCE_URL+":"+API_SERVER_RESOURCE_PORT + API_NAME_RESOURCE_POST;
 const API_RESOURCE_EVENT_URL = API_SERVER_RESOURCE_EVENT_URL+":"+API_SERVER_RESOURCE_EVENT_PORT + API_NAME_RESOURCE_EVENT_POST;
@@ -82,7 +82,7 @@ connectQueue()
 
 async function connectQueue() {
     try {
-        var result = "";
+        let result = "";
         connection = await amqp.connect(connect_string);
         channel = await connection.createChannel();
         // connect to RABBITMQ_SERVER_QUEUE_NAME, create one if doesnot exist already
@@ -109,11 +109,11 @@ async function connectQueue() {
 
         await channel.consume(RABBITMQ_SERVER_QUEUE_RESOURCE, (msg) => {
             try {
-                var resourceType;
-                var query = {};
-                var mergedQuery = {};
-                var tempQuery = {};
-                var API_MSG = {};
+                let resourceType;
+                let query = {};
+                let mergedQuery = {};
+                let tempQuery = {};
+                let API_MSG = {};
                 let TotalMsg = JSON.parse(msg.content.toString('utf8'));
                 const cluster_uuid =  TotalMsg.cluster_uuid;
                 const template_uuid = TotalMsg.template_uuid;
@@ -147,13 +147,13 @@ async function connectQueue() {
                         case "00000000000000000000000000000020":  //20, for K8s services
                             resourceType = "SV";
                             let resultPortsLength;
-                            let resultPort
-                            for (var i=0; i<itemLength; i++)
+                            let resultPort = 0
+                            for (let i=0; i<itemLength; i++)
                             {
                                 tempQuery = {};
-                                // get port number from port array and assign to resultPort variable.
+                                // get port number from port array and assign to resultPort letiable.
                                 resultPortsLength = result.items[i].spec.ports.length
-                                for (var j=0; j<resultPortsLength; j++)
+                                for (let j=0; j<resultPortsLength; j++)
                                 {
                                     if (result.items[i].spec.ports[j].key = 'port')
                                     {
@@ -190,12 +190,12 @@ async function connectQueue() {
 
                         case "00000000000000000000000000000010":  //10, for K8s nodes
                             resourceType = "ND";
-                            for (var i=0; i<itemLength; i++)
+                            for (let i=0; i<itemLength; i++)
                             {
-                                // get internal IP address from addresses array and assign to InternalIP variable.
+                                // get internal IP address from addresses array and assign to InternalIP letiable.
                                 let internalIpLength = result.items[i].status.addresses.length
                                 let internalIp = "";
-                                for (var j=0; j<internalIpLength; j++)
+                                for (let j=0; j<internalIpLength; j++)
                                 {
                                     if (result.items[i].status.addresses[j].type == 'InternalIP')
                                     {
@@ -234,7 +234,7 @@ async function connectQueue() {
 
                         case "00000000000000000000000000000004":  //04, for K8s namespaces
                             resourceType = "NS";
-                            for (var i=0; i<itemLength; i++)
+                            for (let i=0; i<itemLength; i++)
                             {
                                 query['resource_Type'] = resourceType ;
                                 query['resource_Group_Uuid'] = cluster_uuid ;
@@ -262,7 +262,7 @@ async function connectQueue() {
 
                         case "00000000000000000000000000000002":  //02, for K8s pods
                             resourceType = "PD";
-                            for (var i=0; i<itemLength; i++)
+                            for (let i=0; i<itemLength; i++)
                             {
                                 query['resource_Type'] = resourceType ;
                                 query['resource_Spec'] = result.items[i].spec;
@@ -298,7 +298,7 @@ async function connectQueue() {
 
                         case "00000000000000000000000000001002":  //1002, for K8s deployment
                             resourceType = "DP";
-                            for (var i=0; i<itemLength; i++)
+                            for (let i=0; i<itemLength; i++)
                             {
                                 query['resource_Type'] = resourceType ;
                                 query['resource_Spec'] = result.items[i].spec;
@@ -331,7 +331,7 @@ async function connectQueue() {
 
                         case "00000000000000000000000000001004":  //1004, for K8s statefulset
                             resourceType = "SS";
-                            for (var i=0; i<itemLength; i++)
+                            for (let i=0; i<itemLength; i++)
                             {
                                 query['resource_Type'] = resourceType ;
                                 query['resource_Spec'] = result.items[i].spec;
@@ -367,7 +367,7 @@ async function connectQueue() {
 
                         case "00000000000000000000000000001006":  //1006, for K8s daemonset
                             resourceType = "DS";
-                            for (var i=0; i<itemLength; i++)
+                            for (let i=0; i<itemLength; i++)
                             {
                                 query['resource_Type'] = resourceType ;
                                 query['resource_Spec'] = result.items[i].spec;
@@ -400,7 +400,7 @@ async function connectQueue() {
                         case "00000000000000000000000000001008":  //1008, for K8s replicaset
 
                             resourceType = "RS";
-                            for (var i=0; i<itemLength; i++)
+                            for (let i=0; i<itemLength; i++)
                             {
                                 query['resource_Type'] = resourceType ;
                                 query['resource_Spec'] = result.items[i].spec;
@@ -434,7 +434,7 @@ async function connectQueue() {
                         case "00000000000000000000000000000018":  //18, for K8s pvc
 
                             resourceType = "PC";
-                            for (var i=0; i<itemLength; i++)
+                            for (let i=0; i<itemLength; i++)
                             {
                                 query['resource_Type'] = resourceType ;
                                 query['resource_Spec'] = result.items[i].spec;
@@ -469,7 +469,7 @@ async function connectQueue() {
 
                         case "00000000000000000000000000000014":  //14, for K8s secret
                             resourceType = "SE";
-                            for (var i=0; i<itemLength; i++)
+                            for (let i=0; i<itemLength; i++)
                             {
                                 query['resource_Type'] = resourceType ;
                                 query['resource_Spec'] = result.items[i].spec;
@@ -498,7 +498,7 @@ async function connectQueue() {
 
                         case "00000000000000000000000000000016":  //16, for K8s endpoint
                             resourceType = "EP";
-                            for (var i=0; i<itemLength; i++)
+                            for (let i=0; i<itemLength; i++)
                             {
                                 query['resource_Type'] = resourceType ;
                                 query['resource_Spec'] = result.items[i].spec;
@@ -528,8 +528,8 @@ async function connectQueue() {
                             break;
 
                         case "00000000000000000000000000000006":  //06, for K8s configmap
-                            var resourceType = "CM";
-                            for (var i=0; i<itemLength; i++)
+                            resourceType = "CM";
+                            for (let i=0; i<itemLength; i++)
                             {
                                 query['resource_Type'] = resourceType ;
                                 query['resource_Spec'] = result.items[i].spec;
@@ -561,8 +561,8 @@ async function connectQueue() {
                             break;
 
                         case "00000000000000000000000000002002":  //2002, for K8s ingress
-                            var resourceType = "IG";
-                            for (var i=0; i<itemLength; i++)
+                            resourceType = "IG";
+                            for (let i=0; i<itemLength; i++)
                             {
                                 query['resource_Type'] = resourceType ;
                                 query['resource_Spec'] = result.items[i].spec;
@@ -597,7 +597,7 @@ async function connectQueue() {
                         case "00000000000000000000000000000012":  //12, for K8s PV
 
                             resourceType = "PV";
-                            for (var i=0; i<itemLength; i++)
+                            for (let i=0; i<itemLength; i++)
                             {
                                 query['resource_Type'] = resourceType ;
                                 query['resource_Spec'] = result.items[i].spec;
@@ -634,7 +634,7 @@ async function connectQueue() {
                         case "00000000000000000000000000003002":  //3002, for K8s storage class
                             resourceType = "SC";
 
-                            for (var i=0; i<itemLength; i++)
+                            for (let i=0; i<itemLength; i++)
                             {
                                 query['resource_Type'] = resourceType ;
                                 query['resource_Spec'] = result.items[i].spec;
@@ -669,7 +669,7 @@ async function connectQueue() {
 
                         case "00000000000000000000000000000008":  // 8 for K8s events, EV
                             resourceType = "EV";
-                            for (var i=0; i<itemLength; i++)
+                            for (let i=0; i<itemLength; i++)
                             {
                                 query['resource_Type'] = resourceType ;
                                 query['resource_Spec'] = result.items[i].spec;
@@ -711,7 +711,7 @@ async function connectQueue() {
 
                         case "00000000000000000000000000005002":  // 5002, for K8s Job
                             resourceType = "JO";
-                            for (var i=0; i<itemLength; i++)
+                            for (let i=0; i<itemLength; i++)
                             {
                                 query['resource_Type'] = resourceType ;
                                 query['resource_Spec'] = result.items[i].spec;
@@ -743,7 +743,7 @@ async function connectQueue() {
 
                         case "00000000000000000000000000005003":  // 5003, for K8s CronJob
                             resourceType = "CJ";
-                            for (var i=0; i<itemLength; i++)
+                            for (let i=0; i<itemLength; i++)
                             {
                                 query['resource_Type'] = resourceType ;
                                 query['resource_Spec'] = result.items[i].spec;
@@ -783,7 +783,7 @@ async function connectQueue() {
                         //     }
                         //     resourceType = "HV";
                         //
-                        //     for (var i=0; i<length; i++)
+                        //     for (let i=0; i<length; i++)
                         //     {
                         //         query['resource_Type'] = resourceType;
                         //         query['resource_Spec'] = result.hypervisors[i];
@@ -828,7 +828,7 @@ async function connectQueue() {
                         //     API_MSG = JSON.parse(tempQuery);
                         // case "PMLIST-TEMPLATE-UUID":  //TODO insert Openstack PM template uuid
                         //     length = result.projects.length
-                        //     for (var i=0; i<length; i++)
+                        //     for (let i=0; i<length; i++)
                         //     {
                         //         query['resource_Type'] = resourceType ;
                         //         query['resource_Spec'] = result.items[i].spec;
@@ -858,7 +858,7 @@ async function connectQueue() {
                             }
                             resourceType = "PJ";
 
-                            for (var i=0; i<length; i++)
+                            for (let i=0; i<length; i++)
                             {
                                 query['resource_Type'] = resourceType;
                                 query['resource_Spec'] = result.projects[i];
@@ -897,7 +897,7 @@ async function connectQueue() {
                             }
                             resourceType = "VM";
 
-                            for (var i=0; i<length; i++)
+                            for (let i=0; i<length; i++)
                             {
                                 query['resource_Type'] = resourceType;
                                 query['resource_Spec'] = result.servers[i];
