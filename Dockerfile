@@ -14,7 +14,8 @@ COPY ./package-lock.json  ${WORKDIR}
 
 COPY docker-entrypoint.sh ${WORKDIR}
 
-RUN chmod +x  ${WORKDIR}docker-entrypoint.sh 
+RUN chmod +x  ${WORKDIR}docker-entrypoint.sh
+RUN npm install --global pm2
 
 RUN npm ci
 
