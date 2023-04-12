@@ -51,7 +51,7 @@ const API_NAME_RESOURCE_EVENT_POST = process.env.API_NAME_RESOURCE_EVENT_POST ||
 
 const API_SERVER_METRIC_URL = process.env.API_SERVER_METRIC_URL || "http://olly-dev-connect.claion.io";
 const API_SERVER_METRIC_PORT = process.env.API_SERVER_METRIC_PORT || "8081";
-const API_NAME_METRIC_POST = process.env.API_NAME_METRIC_POST || "/metricMetaMass";
+const API_NAME_METRIC_POST = process.env.API_NAME_METRIC_POST || "/service/metric_meta";
 
 const API_SERVER_ALERT_URL = process.env.API_SERVER_ALERT_URL || "http://olly-dev-connect.claion.io";
 const API_SERVER_ALERT_PORT = process.env.API_SERVER_ALERT_PORT || "8081";

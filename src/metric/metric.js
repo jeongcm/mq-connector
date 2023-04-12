@@ -1,7 +1,7 @@
 import axios from "axios";
 import {getQueryDataMultipleForServerVPC} from "./ncp/server/server.js";
 
-const API_SERVER_RESOURCE_URL = process.env.API_SERVER_RESOURCE_URL || "http://olly-dev-api.claion.io";
+const API_SERVER_RESOURCE_URL = process.env.API_SERVER_RESOURCE_URL || "http://localhost";
 const API_SERVER_RESOURCE_PORT = process.env.API_SERVER_RESOURCE_PORT || 5001;
 const API_NAME_CUSTOMER_ACCOUNT_GET =process.env.API_NAME_CUSTOMER_ACCOUNT_GET || "/customerAccount/resourceGroup";
 const API_CUSTOMER_ACCOUNT_GET_URL = API_SERVER_RESOURCE_URL+":"+API_SERVER_RESOURCE_PORT + API_NAME_CUSTOMER_ACCOUNT_GET;
