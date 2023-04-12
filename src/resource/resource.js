@@ -1,5 +1,5 @@
 import {v1}  from 'uuid';
-import {getRegionListQuery} from "./region/region.js";
+import {getRegionListQuery} from "./ncp/region/region.js";
 
 export async function getResourceQuery(totalMsg, clusterUuid) {
     let queryResult = {};
