@@ -1162,7 +1162,7 @@ async function connectQueue() {
                         }
                     )
             } catch (err) {
-                console.error(err);
+                console.log(err);
                 channel.nack(msg, false, false);
             }
         });
@@ -1201,7 +1201,7 @@ async function connectQueue() {
                 }; // end of else
 
             } catch (err) {
-                console.error(err);
+                console.log(err);
                 channel.nack(msg, false, false);
             }
 
