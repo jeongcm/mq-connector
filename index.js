@@ -44,7 +44,6 @@ const API_SERVER_RESOURCE_URL = process.env.API_SERVER_RESOURCE_URL || "http://o
 //const API_SERVER_RESOURCE_URL = process.env.API_SERVER_RESOURCE_URL || "http://localhost";
 const API_SERVER_RESOURCE_PORT = process.env.API_SERVER_RESOURCE_PORT || 5001;
 const API_NAME_RESOURCE_POST = process.env.API_NAME_RESOURCE_POST || "/resourceMass";
-const API_NAME_CUSTOMER_ACCOUNT_GET =process.env.API_NAME_CUSTOMER_ACCOUNT_GET || "/customerAccount/resourceGroup";
 
 const API_SERVER_RESOURCE_EVENT_URL = process.env.API_SERVER_RESOURCE_EVENT_URL || "http://olly-dev-api.claion.io";
 const API_SERVER_RESOURCE_EVENT_PORT = process.env.API_SERVER_RESOURCE_EVENT_PORT || 5001;
@@ -63,11 +62,12 @@ const connect_string = RabbitOpt + RABBITMQ_SERVER_URL + ":" + RABBITMQ_SERVER_P
 const API_RESOURCE_URL = API_SERVER_RESOURCE_URL+":"+API_SERVER_RESOURCE_PORT + API_NAME_RESOURCE_POST;
 const API_RESOURCE_EVENT_URL = API_SERVER_RESOURCE_EVENT_URL+":"+API_SERVER_RESOURCE_EVENT_PORT + API_NAME_RESOURCE_EVENT_POST;
 const API_METRIC_URL = API_SERVER_METRIC_URL+":"+API_SERVER_METRIC_PORT + API_NAME_METRIC_POST;
-const API_CUSTOMER_ACCOUNT_GET_URL = API_SERVER_RESOURCE_URL+":"+API_SERVER_RESOURCE_PORT + API_NAME_CUSTOMER_ACCOUNT_GET;
 const API_ALERT_URL = API_SERVER_ALERT_URL+":"+API_SERVER_ALERT_PORT + API_NAME_ALERT_POST;
-const vm_Url = process.env.VM_URL || 'http://olly-dev-vm.claion.io:8428/api/v1/import?extra_label=clusterUuid=';
-const VM_MULTI_AUTH_URL = process.env.VM_MULTI_AUTH_URL || 'http://covmauth-victoria-metrics-auth.covm.svc.cluster.local:8427/api/v1/import?extra_label=clusterUuid=';
-const VM_OPTION = process.env.VM_OPTION || "MULTI"; //BOTH - both / SINGLE - single-tenant / MULTI - multi-tenant
+
+// const API_RESOURCE_URL = API_SERVER_RESOURCE_URL+ API_NAME_RESOURCE_POST;
+// const API_RESOURCE_EVENT_URL = API_SERVER_RESOURCE_EVENT_URL+ API_NAME_RESOURCE_EVENT_POST;
+// const API_METRIC_URL = API_SERVER_METRIC_URL + API_NAME_METRIC_POST;
+// const API_ALERT_URL = API_SERVER_ALERT_URL + API_NAME_ALERT_POST;
 
 process.stdin.resume();//so the program will not close instantly
 function exitHandler(options, exitCode) {
@@ -113,10 +113,10 @@ async function connectQueue() {
             console.log('[AMQP] closed');
             // Channel 닫기
             channel.close(function (err) {
-                console.log('[AMQP] channel closed');
+                console.log('[AMQP] channel closed', err);
                 // 연결 닫기
                 connection.close(function (err) {
-                    console.log('[AMQP] connection closed');
+                    console.log('[AMQP] connection closed', err);
                 });
             });
         });
@@ -978,15 +978,15 @@ async function connectQueue() {
                             (
                                 (response) => {
                                     channel.ack(msg);
-                                    console.log("MQ message acknowleged:" + resourceType + ",cluster_uuid:" + cluster_uuid + ", " + RABBITMQ_SERVER_QUEUE_RESOURCE );
+                                    console.log("MQ message acknowledged:" + resourceType + ",cluster_uuid:" + cluster_uuid + ", " + RABBITMQ_SERVER_QUEUE_RESOURCE );
                                 },
                                 (error) => {
-                                    console.log("MQ message un-acknowleged: " + RABBITMQ_SERVER_QUEUE_RESOURCE + ", cluster_uuid: " + cluster_uuid);
+                                    console.log("MQ message un-acknowledged: " + RABBITMQ_SERVER_QUEUE_RESOURCE + ", cluster_uuid: " + cluster_uuid);
                                     //throw error;
                                 }).catch
                         (
                             (error)=> {
-                                console.log("MQ message un-acknowleged2: " + RABBITMQ_SERVER_QUEUE_RESOURCE + ", cluster_uuid: " + cluster_uuid);
+                                console.log("MQ message un-acknowledged2: " + RABBITMQ_SERVER_QUEUE_RESOURCE + ", cluster_uuid: " + cluster_uuid);
                                 //throw error;
                             }
                         )
@@ -997,15 +997,15 @@ async function connectQueue() {
                             (
                                 (response) => {
                                     channel.ack(msg);
-                                    console.log("MQ message acknowleged: " + resourceType + ", " + RABBITMQ_SERVER_QUEUE_RESOURCE + ", cluster_uuid: " + cluster_uuid );
+                                    console.log("MQ message acknowledged: " + resourceType + ", " + RABBITMQ_SERVER_QUEUE_RESOURCE + ", cluster_uuid: " + cluster_uuid );
                                 },
                                 (error) => {
-                                    console.log("MQ message un-acknowleged: " + RABBITMQ_SERVER_QUEUE_RESOURCE + ", cluster_uuid: " + cluster_uuid);
+                                    console.log("MQ message un-acknowledged: " + RABBITMQ_SERVER_QUEUE_RESOURCE + ", cluster_uuid: " + cluster_uuid);
                                     //throw error;
                                 }).catch
                         (
                             (error)=> {
-                                console.log("MQ message un-acknowleged2: " + RABBITMQ_SERVER_QUEUE_RESOURCE + ", cluster_uuid: " + cluster_uuid);
+                                console.log("MQ message un-acknowledged2: " + RABBITMQ_SERVER_QUEUE_RESOURCE + ", cluster_uuid: " + cluster_uuid);
                                 //throw error;
                             }
                         )
@@ -1040,10 +1040,10 @@ async function connectQueue() {
                         (
                             (response) => {
                                 channel.ack(msg);
-                                console.log("MQ message acknowleged: " + RABBITMQ_SERVER_QUEUE_ALERT + ", cluster_uuid: " + cluster_uuid );
+                                console.log("MQ message acknowledged: " + RABBITMQ_SERVER_QUEUE_ALERT + ", cluster_uuid: " + cluster_uuid );
                             },
                             (error) => {
-                                console.log("MQ message un-acknowleged: ",RABBITMQ_SERVER_QUEUE_ALERT + ", cluster_uuid: " + cluster_uuid);
+                                console.log("MQ message un-acknowledged: ",RABBITMQ_SERVER_QUEUE_ALERT + ", cluster_uuid: " + cluster_uuid);
                                 console.log(error);
                             })
                 };
@@ -1073,10 +1073,10 @@ async function connectQueue() {
                         (
                             (response) => {
                                 channel.ack(msg);
-                                console.log("MQ message acknowleged: " + RABBITMQ_SERVER_QUEUE_METRIC + ", cluster_uuid: " + cluster_uuid );
+                                console.log("MQ message acknowledged: " + RABBITMQ_SERVER_QUEUE_METRIC + ", cluster_uuid: " + cluster_uuid );
                             },
                             (error) => {
-                                console.log("MQ message un-acknowleged: ",RABBITMQ_SERVER_QUEUE_METRIC + ", cluster_uuid: " + cluster_uuid);
+                                console.log("MQ message un-acknowledged: ",RABBITMQ_SERVER_QUEUE_METRIC + ", cluster_uuid: " + cluster_uuid);
                                 console.log(error);
                             })
                 };
@@ -1108,11 +1108,11 @@ async function connectQueue() {
                             (response) => {
                                 channel.ack(msg);
                                 result = "";
-                                console.log("4. MQ message acknowleged: " + RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid + ", Msg Size (MB): " + rabbitmq_message_size + " service_name: " + name);
+                                console.log("4. MQ message acknowledged: " + RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid + ", Msg Size (MB): " + rabbitmq_message_size + " service_name: " + name);
                             },
                             (error) => {
                                 channel.ack(msg);
-                                console.log("4. MQ message un-acknowleged: ",RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid + ", Msg Size (MB): " + rabbitmq_message_size + " service_name: " + name);
+                                console.log("4. MQ message un-acknowledged: ",RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid + ", Msg Size (MB): " + rabbitmq_message_size + " service_name: " + name);
                                 result = "";
                                 console.log(error);
                             })
@@ -1149,15 +1149,15 @@ async function connectQueue() {
                     (
                         (response) => {
                             channel.ack(msg);
-                            console.log("MQ message acknowleged: " + result.resourceType + ", " + RABBITMQ_SERVER_QUEUE_NCP_RESOURCE + ", cluster_uuid: " + cluster_uuid);
+                            console.log("MQ message acknowledged: " + result.resourceType + ", " + RABBITMQ_SERVER_QUEUE_NCP_RESOURCE + ", cluster_uuid: " + cluster_uuid);
                         },
                         (error) => {
-                            console.log("MQ message un-acknowleged: " + RABBITMQ_SERVER_QUEUE_NCP_RESOURCE + ", cluster_uuid: " + cluster_uuid);
+                            console.log("MQ message un-acknowledged: " + RABBITMQ_SERVER_QUEUE_NCP_RESOURCE + ", cluster_uuid: " + cluster_uuid);
                             //throw error;
                         }).catch
                     (
                         (error) => {
-                            console.log("MQ message un-acknowleged2: " + RABBITMQ_SERVER_QUEUE_NCP_RESOURCE + ", cluster_uuid: " + cluster_uuid);
+                            console.log("MQ message un-acknowledged2: " + RABBITMQ_SERVER_QUEUE_NCP_RESOURCE + ", cluster_uuid: " + cluster_uuid);
                             //throw error;
                         }
                     )
@@ -1189,11 +1189,11 @@ async function connectQueue() {
                             (response) => {
                                 channel.ack(msg);
                                 totalMsg = "";
-                                console.log("4. MQ message acknowleged: " + RABBITMQ_SERVER_QUEUE_NCP_METRIC + ", cluster_uuid: " + cluster_uuid + ", Msg Size (MB): " + rabbitmq_message_size + " service_name: " + name);
+                                console.log("4. MQ message acknowledged: " + RABBITMQ_SERVER_QUEUE_NCP_METRIC + ", cluster_uuid: " + cluster_uuid + ", Msg Size (MB): " + rabbitmq_message_size + " service_name: " + name);
                             },
                             (error) => {
                                 channel.ack(msg);
-                                console.log("4. MQ message un-acknowleged: ",RABBITMQ_SERVER_QUEUE_NCP_METRIC + ", cluster_uuid: " + cluster_uuid + ", Msg Size (MB): " + rabbitmq_message_size + " service_name: " + name);
+                                console.log("4. MQ message un-acknowledged: ",RABBITMQ_SERVER_QUEUE_NCP_METRIC + ", cluster_uuid: " + cluster_uuid + ", Msg Size (MB): " + rabbitmq_message_size + " service_name: " + name);
                                 totalMsg = "";
                                 console.log(error);
                             })
@@ -1221,7 +1221,7 @@ async function callAPI(apiURL, apiMsg , resourceType, cluster_uuid) {
         console.log("API called: ", resourceType, " ", cluster_uuid, " ", apiURL, " ", responseStatus);
       },
       (error) => {
-        console.log("API error due to unexpoected error: ", resourceType, " ", cluster_uuid, " ", apiURL, " ", error);
+        console.log("API error due to unexpected error: ", resourceType, " ", cluster_uuid, " ", apiURL, " ", error);
       })
 }
 
@@ -1243,7 +1243,7 @@ function formatter_resource(i, itemLength, resourceType, cluster_uuid, query, me
             }
         }
     } catch (error) {
-        console.log("error due to unexpoected error: ", error.response);
+        console.log("error due to unexpected error: ", error.response);
     }
     return interimQuery;
 }

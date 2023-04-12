@@ -1,15 +1,15 @@
 import axios from "axios";
 import {getQueryDataMultipleForServerVPC} from "./ncp/server/server.js";
 
-const API_SERVER_RESOURCE_URL = process.env.API_SERVER_RESOURCE_URL || "http://localhost";
+const API_SERVER_RESOURCE_URL = process.env.API_SERVER_RESOURCE_URL || "http://olly-dev-api.claion.io";
 const API_SERVER_RESOURCE_PORT = process.env.API_SERVER_RESOURCE_PORT || 5001;
 const API_NAME_CUSTOMER_ACCOUNT_GET =process.env.API_NAME_CUSTOMER_ACCOUNT_GET || "/customerAccount/resourceGroup";
 const API_CUSTOMER_ACCOUNT_GET_URL = API_SERVER_RESOURCE_URL+":"+API_SERVER_RESOURCE_PORT + API_NAME_CUSTOMER_ACCOUNT_GET;
 const VM_URL = process.env.VM_URL || 'http://olly-dev-vm.claion.io:8428/api/v1/import?extra_label=clusterUuid=';
-const VM_MULTI_AUTH_URL = process.env.VM_MULTI_AUTH_URL || 'http://covmauth-victoria-metrics-auth.covm.svc.cluster.local:8427/api/v1/import?extra_label=clusterUuid=';
+const VM_MULTI_AUTH_URL = process.env.VM_MULTI_AUTH_URL || 'http://olly-dev-vmauth.claion.io:8427/api/v1/import?extra_label=clusterUuid=';
 const VM_OPTION = process.env.VM_OPTION || "MULTI"; //BOTH - both / SINGLE - single-tenant / MULTI - multi-tenant
 
-export async function massUploadMetricReceived(metricReceivedMassFeed, clusterUuid){
+export async function massUploadMetricReceived(metricReceivedMassFeed, clusterUuid) {
 
     try {
         //let receivedData = JSON.parse(metricReceivedMassFeed.result);
@@ -74,7 +74,7 @@ export async function massUploadMetricReceived(metricReceivedMassFeed, clusterUu
             massFeedResult= null;
         } //end of else
     } catch (error) {
-        console.log (`error on metricRecieved - clusterUuid: ${clusterUuid}`, error);
+        console.log (`error on metricReceived - clusterUuid: ${clusterUuid}`, error);
         //throw error;
     }
 }
@@ -101,7 +101,7 @@ async function callVM (metricReceivedMassFeed, clusterUuid) {
         } catch (error){
             console.log("error on calling vm api");
             //throw error;
-        };
+        }
     } else if (VM_OPTION === "MULTI") {
         const urlCa = API_CUSTOMER_ACCOUNT_GET_URL + "/" + clusterUuid;
         let password;
@@ -113,14 +113,14 @@ async function callVM (metricReceivedMassFeed, clusterUuid) {
         } catch (error){
             console.log("error on confirming cluster information for metric feed");
             throw error;
-        };
+        }
         const urlMulti = VM_MULTI_AUTH_URL + clusterUuid;
         try {
             result = await axios.post (urlMulti, metricReceivedMassFeed, {maxContentLength:Infinity, maxBodyLength: Infinity, auth:{username: username, password: password}})
         } catch (error){
             console.log("error on calling vm api");
             throw error;
-        };
+        }
     } else { // BOTH
         const url = VM_URL + clusterUuid;
         console.log (`2-1, calling vm interface: ${url}`);
@@ -132,7 +132,7 @@ async function callVM (metricReceivedMassFeed, clusterUuid) {
             console.log("error on calling vm api", error);
             console.log(metricReceivedMassFeed);
             throw error;
-        };
+        }
         const urlCa = API_CUSTOMER_ACCOUNT_GET_URL + "/" + clusterUuid;
         let password;
         let username;
@@ -143,7 +143,7 @@ async function callVM (metricReceivedMassFeed, clusterUuid) {
         } catch (error){
             console.log("error on confirming cluster information for metric feed");
             throw error;
-        };
+        }
         const urlMulti = VM_MULTI_AUTH_URL + clusterUuid;
         console.log (`2-2, calling vm multi - interface: ${urlMulti}`);
         try {
@@ -152,7 +152,7 @@ async function callVM (metricReceivedMassFeed, clusterUuid) {
         } catch (error){
             console.log("error on calling vm api");
             throw error;
-        };
+        }
     }
     return result;
 }
