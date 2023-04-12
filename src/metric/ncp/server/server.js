@@ -1,5 +1,3 @@
-import {query} from "winston";
-
 export async function getQueryDataMultipleForServerVPC(totalMsg, clusterUuid) {
     // initialize result
     let queryResult = {}

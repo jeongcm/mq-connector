@@ -6,7 +6,7 @@ import compression from 'compression';
 import axios from "axios";
 import express from "express";
 import {getResourceQuery} from "./src/resource/resource.js";
-import {getMetricQuery, massUploadMetricReceived} from "./src/metric/metric";
+import {getMetricQuery, massUploadMetricReceived} from "./src/metric/metric.js";
 
 const MAX_API_BODY_SIZE = process.env.MAX_API_BODY_SIZE || "500mb";
 const app = express()
@@ -23,8 +23,8 @@ const MQCOMM_PORT = process.env.MQCOMM_PORT || 4001;
 const NODE_EXPORTER_PORT = process.env.NODE_EXPORTER_PORT || 9100 ;
 
 const RABBITMQ_PROTOCOL_HOST = process.env.RABBITMQ_PROTOCOL_HOST || "amqp://"
-// const RABBITMQ_SERVER_URL = process.env.RABBITMQ_SERVER_URL || "olly-dev-mq.claion.io";
-const RABBITMQ_SERVER_URL = process.env.RABBITMQ_SERVER_URL || "localhost";
+const RABBITMQ_SERVER_URL = process.env.RABBITMQ_SERVER_URL || "olly-dev-mq.claion.io";
+// const RABBITMQ_SERVER_URL = process.env.RABBITMQ_SERVER_URL || "localhost";
 const RABBITMQ_SERVER_PORT = process.env.RABBITMQ_SERVER_PORT || 5672;
 const RABBITMQ_SERVER_QUEUE_RESOURCE = process.env.RABBITMQ_SERVER_QUEUE_RESOURCE || "co_resource";
 const RABBITMQ_SERVER_QUEUE_ALERT = process.env.RABBITMQ_SERVER_QUEUE_ALERT || "co_alert";
@@ -32,13 +32,16 @@ const RABBITMQ_SERVER_QUEUE_METRIC = process.env.RABBITMQ_SERVER_QUEUE_METRIC ||
 const RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED = process.env.RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED || "co_metric_received";
 const RABBITMQ_SERVER_QUEUE_NCP_RESOURCE = process.env.RABBITMQ_SERVER_QUEUE_NCP_RESOURCE || "ops_resource";
 const RABBITMQ_SERVER_QUEUE_NCP_METRIC = process.env.RABBITMQ_SERVER_QUEUE_NCP_METRIC || "ops_metric";
-const RABBITMQ_SERVER_USER = process.env.RABBITMQ_SERVER_USER || "user";
-const RABBITMQ_SERVER_PASSWORD = process.env.RABBITMQ_SERVER_PASSWORD || "cwlO0jDx99Io9fZQ";
-const RABBITMQ_SERVER_VIRTUAL_HOST = process.env.RABBITMQ_SERVER_VIRTUAL_HOST || "/";
+// const RABBITMQ_SERVER_USER = process.env.RABBITMQ_SERVER_USER || "user";
+// const RABBITMQ_SERVER_PASSWORD = process.env.RABBITMQ_SERVER_PASSWORD || "cwlO0jDx99Io9fZQ";
+// const RABBITMQ_SERVER_VIRTUAL_HOST = process.env.RABBITMQ_SERVER_VIRTUAL_HOST || "/";
+const RABBITMQ_SERVER_USER = process.env.RABBITMQ_SERVER_USER || "claion";
+const RABBITMQ_SERVER_PASSWORD = process.env.RABBITMQ_SERVER_PASSWORD || "claion";
+const RABBITMQ_SERVER_VIRTUAL_HOST = process.env.RABBITMQ_SERVER_VIRTUAL_HOST || "claion";
 const RabbitOpt = RABBITMQ_PROTOCOL_HOST + RABBITMQ_SERVER_USER + ":" + RABBITMQ_SERVER_PASSWORD + "@";
 
-// const API_SERVER_RESOURCE_URL = process.env.API_SERVER_RESOURCE_URL || "http://olly-dev-api.claion.io";
-const API_SERVER_RESOURCE_URL = process.env.API_SERVER_RESOURCE_URL || "http://localhost";
+const API_SERVER_RESOURCE_URL = process.env.API_SERVER_RESOURCE_URL || "http://olly-dev-api.claion.io";
+//const API_SERVER_RESOURCE_URL = process.env.API_SERVER_RESOURCE_URL || "http://localhost";
 const API_SERVER_RESOURCE_PORT = process.env.API_SERVER_RESOURCE_PORT || 5001;
 const API_NAME_RESOURCE_POST = process.env.API_NAME_RESOURCE_POST || "/resourceMass";
 const API_NAME_CUSTOMER_ACCOUNT_GET =process.env.API_NAME_CUSTOMER_ACCOUNT_GET || "/customerAccount/resourceGroup";
