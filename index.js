@@ -1015,7 +1015,18 @@ async function connectQueue() {
                     // ...
 
                     // Heap 정보를 로그에 출력합니다.
-                    console.log(`Heap usage: ${memUsage.heapUsed} bytes`);
+                    console.log(`resource mem usage: ${memUsage.heapUsed/1024/1024} mega bytes`);
+                    const startTime = process.hrtime();
+                    const startUsage = process.cpuUsage();
+
+// ... 프로세스 실행 ...
+
+                    const [seconds, nanoseconds] = process.hrtime(startTime);
+                    const elapsedNanoseconds = seconds * 1e9 + nanoseconds;
+                    const elapsedUsage = process.cpuUsage(startUsage);
+
+                    const usage = 100 * (elapsedUsage.user + elapsedUsage.system) / elapsedNanoseconds;
+                    console.log(`resource CPU Usage: ${usage}%`);
                 }
                 else {
                     channel.ack(msg);
@@ -1053,6 +1064,18 @@ async function connectQueue() {
                                 console.log(error);
                                 channel.ack(msg);
                             })
+                    console.log(`alert mem usage: ${memUsage.heapUsed/1024/1024} mega bytes`);
+                    const startTime = process.hrtime();
+                    const startUsage = process.cpuUsage();
+
+// ... 프로세스 실행 ...
+
+                    const [seconds, nanoseconds] = process.hrtime(startTime);
+                    const elapsedNanoseconds = seconds * 1e9 + nanoseconds;
+                    const elapsedUsage = process.cpuUsage(startUsage);
+
+                    const usage = 100 * (elapsedUsage.user + elapsedUsage.system) / elapsedNanoseconds;
+                    console.log(`alert CPU Usage: ${usage}%`);
                 };
             } catch (error) {
                 console.log(error)
@@ -1087,6 +1110,18 @@ async function connectQueue() {
                                 console.log(error);
                                 channel.ack(msg);
                             })
+                    console.log(`metric meta  mem usage: ${memUsage.heapUsed/1024/1024} mega bytes`);
+                    const startTime = process.hrtime();
+                    const startUsage = process.cpuUsage();
+
+// ... 프로세스 실행 ...
+
+                    const [seconds, nanoseconds] = process.hrtime(startTime);
+                    const elapsedNanoseconds = seconds * 1e9 + nanoseconds;
+                    const elapsedUsage = process.cpuUsage(startUsage);
+
+                    const usage = 100 * (elapsedUsage.user + elapsedUsage.system) / elapsedNanoseconds;
+                    console.log(`metric meta  CPU Usage: ${usage}%`);
                 };
             } catch (error) {
                 console.log(error)
@@ -1134,7 +1169,18 @@ async function connectQueue() {
                     // ...
 
                     // Heap 정보를 로그에 출력합니다.
-                    console.log(`Heap usage: ${memUsage.heapUsed} bytes`);
+                    console.log(`metric received usage: ${memUsage.heapUsed/1024/1024} mega bytes`);
+                    const startTime = process.hrtime();
+                    const startUsage = process.cpuUsage();
+
+// ... 프로세스 실행 ...
+
+                    const [seconds, nanoseconds] = process.hrtime(startTime);
+                    const elapsedNanoseconds = seconds * 1e9 + nanoseconds;
+                    const elapsedUsage = process.cpuUsage(startUsage);
+
+                    const usage = 100 * (elapsedUsage.user + elapsedUsage.system) / elapsedNanoseconds;
+                    console.log(`metric received CPU Usage: ${usage}%`);
 
                 }; // end of else
 
