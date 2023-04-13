@@ -1108,16 +1108,18 @@ async function connectQueue() {
                 else {
                     const name = result.service_name;
                     console.log("1. calling metric received mass upload API : " + RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid + " service_uuid: " + service_uuid + " rabbitmq_message_size(mb): " + rabbitmq_message_size + " service_name: " + name  );
-                    await massUploadMetricReceived(result, cluster_uuid)
+                    let receivedResult = await massUploadMetricReceived(result, cluster_uuid)
                         .then
                         (
                             (response) => {
                                 channel.ack(msg);
+                                receivedResult = null
                                 result = "";
                                 console.log("4. MQ message acknowledged: " + RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid + ", Msg Size (MB): " + rabbitmq_message_size + " service_name: " + name);
                             },
                             (error) => {
                                 channel.ack(msg);
+                                receivedResult = null
                                 console.log("4. MQ message un-acknowledged: ",RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid + ", Msg Size (MB): " + rabbitmq_message_size + " service_name: " + name);
                                 result = "";
                                 console.log(error);
@@ -1219,7 +1221,7 @@ async function connectQueue() {
 }
 
 async function callAPI(apiURL, apiMsg , resourceType, cluster_uuid) {
-    axios.post(apiURL,apiMsg, {maxContentLength:Infinity, maxBodyLength: Infinity})
+    await axios.post(apiURL,apiMsg, {maxContentLength:Infinity, maxBodyLength: Infinity})
     .then
     (
       (response) => {
@@ -1229,6 +1231,7 @@ async function callAPI(apiURL, apiMsg , resourceType, cluster_uuid) {
       (error) => {
         console.log("API error due to unexpected error: ", resourceType, " ", cluster_uuid, " ", apiURL, " ", error);
       })
+
 }
 
 function formatter_resource(i, itemLength, resourceType, cluster_uuid, query, mergedQuery) {

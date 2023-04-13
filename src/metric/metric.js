@@ -9,6 +9,16 @@ const VM_URL = process.env.VM_URL || 'http://olly-dev-vm.claion.io:8428/api/v1/i
 const VM_MULTI_AUTH_URL = process.env.VM_MULTI_AUTH_URL || 'http://olly-dev-vmauth.claion.io:8427/api/v1/import?extra_label=clusterUuid=';
 const VM_OPTION = process.env.VM_OPTION || "MULTI"; //BOTH - both / SINGLE - single-tenant / MULTI - multi-tenant
 
+export async function getMetricQuery(totalMsg, clusterUuid) {
+    let queryResult = {};
+    switch (totalMsg.template_uuid) {
+        case "queryMultipleDataForServer":
+            queryResult = await getQueryDataMultipleForServerVPC(totalMsg, clusterUuid)
+            break;
+    }
+
+    return queryResult;
+}
 export async function massUploadMetricReceived(metricReceivedMassFeed, clusterUuid) {
 
     try {
@@ -41,6 +51,7 @@ export async function massUploadMetricReceived(metricReceivedMassFeed, clusterUu
             console.log(`3-1. massFeedResult 1/2: ${massFeedResult1?.status}, clusterUuid: ${clusterUuid}, name: ${name}`);
             finalResult1=null;
             massFeedResult1= null;
+
             let newResultMap2 = [];
             secondHalf.map((data)=>{
                 const{metric, value} = data;
@@ -70,24 +81,14 @@ export async function massUploadMetricReceived(metricReceivedMassFeed, clusterUu
             if (!massFeedResult || (massFeedResult?.status !== 204)) {
                 // console.log("Data Issue -----------------", finalResult);
             }
+
             finalResult = null;
             massFeedResult= null;
         } //end of else
     } catch (error) {
         console.log (`error on metricReceived - clusterUuid: ${clusterUuid}`, error);
-        //throw error;
+        throw error;
     }
-}
-
-export async function getMetricQuery(totalMsg, clusterUuid) {
-    let queryResult = {};
-    switch (totalMsg.template_uuid) {
-        case "queryMultipleDataForServer":
-            queryResult = await getQueryDataMultipleForServerVPC(totalMsg, clusterUuid)
-            break;
-    }
-
-    return queryResult;
 }
 
 async function callVM (metricReceivedMassFeed, clusterUuid) {
