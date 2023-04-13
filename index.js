@@ -1064,6 +1064,8 @@ async function connectQueue() {
                                 console.log(error);
                                 channel.ack(msg);
                             })
+                    const memUsage = process.memoryUsage();
+
                     console.log(`alert mem usage: ${memUsage.heapUsed/1024/1024} mega bytes`);
                     const startTime = process.hrtime();
                     const startUsage = process.cpuUsage();
@@ -1110,6 +1112,8 @@ async function connectQueue() {
                                 console.log(error);
                                 channel.ack(msg);
                             })
+                    const memUsage = process.memoryUsage();
+
                     console.log(`metric meta  mem usage: ${memUsage.heapUsed/1024/1024} mega bytes`);
                     const startTime = process.hrtime();
                     const startUsage = process.cpuUsage();
