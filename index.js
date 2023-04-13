@@ -1094,6 +1094,7 @@ async function connectQueue() {
         }); // end of msg consume
 
         await channel.consume(RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED, async (msg) => {
+            let receivedResult = null
             try {
                 result = JSON.parse(msg.content.toString('utf-8'));
                 const rabbitmq_message_size = (Buffer.byteLength(msg.content.toString()))/1024/1024;
@@ -1108,7 +1109,7 @@ async function connectQueue() {
                 else {
                     const name = result.service_name;
                     console.log("1. calling metric received mass upload API : " + RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid + " service_uuid: " + service_uuid + " rabbitmq_message_size(mb): " + rabbitmq_message_size + " service_name: " + name  );
-                    let receivedResult = await massUploadMetricReceived(result, cluster_uuid)
+                    receivedResult = await massUploadMetricReceived(result, cluster_uuid)
                         .then
                         (
                             (response) => {
