@@ -7,7 +7,7 @@ import axios from "axios";
 import express from "express";
 
 import {getResourceQuery} from "./src/resource/resource.js";
-// import {getMetricQuery, massUploadMetricReceived} from "./src/metric/metric.js";
+import {getMetricQuery} from "./src/metric/metric.js";
 
 const MAX_API_BODY_SIZE = process.env.MAX_API_BODY_SIZE || "500mb";
 const app = express()
@@ -1091,9 +1091,7 @@ async function connectQueue() {
         }); // end of msg consume
 
         await channel.consume(RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED, async (msg) => {
-            let receivedResult = null
             try {
-
                 result = JSON.parse(msg.content.toString('utf-8'));
                 const rabbitmq_message_size = (Buffer.byteLength(msg.content.toString()))/1024/1024;
                 const cluster_uuid = result.cluster_uuid;
@@ -1105,19 +1103,16 @@ async function connectQueue() {
                     //console.log (result);
                 }
                 else {
-
                     const name = result.service_name;
                     console.log("1. calling metric received mass upload API : " + RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid + " service_uuid: " + service_uuid + " rabbitmq_message_size(mb): " + rabbitmq_message_size + " service_name: " + name  );
-                    receivedResult = await massUploadMetricReceived(result, cluster_uuid)
+                    await massUploadMetricReceived(result, cluster_uuid)
                         .then((response) => {
                             channel.ack(msg);
-                            receivedResult = null
                             result = null
                             console.log("4. MQ message acknowledged: " + RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid + ", Msg Size (MB): " + rabbitmq_message_size + " service_name: " + name);
                         })
                         .catch((error) => {
                             channel.ack(msg);
-                            receivedResult = null
                             result = null
                             console.log("4. MQ message un-acknowledged: ",RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid + ", Msg Size (MB): " + rabbitmq_message_size + " service_name: " + name);
                             console.log(error)
@@ -1182,19 +1177,16 @@ async function connectQueue() {
                 }
 
                 const name = totalMsg.service_name;
-                let receivedResult
                 let queryResult = await getMetricQuery(totalMsg, cluster_uuid)
                 console.log("1. calling metric received mass upload API : " + RABBITMQ_SERVER_QUEUE_NCP_METRIC + ", cluster_uuid: " + cluster_uuid + " service_uuid: " + service_uuid + " rabbitmq_message_size(mb): " + rabbitmq_message_size + " service_name: " + name  );
-                receivedResult = await massUploadMetricReceived(queryResult, cluster_uuid)
+                await massUploadMetricReceived(queryResult, cluster_uuid)
                     .then((response) => {
                         channel.ack(msg);
-                        receivedResult = null
                         queryResult = null
                         console.log("4. MQ message acknowledged: " + RABBITMQ_SERVER_QUEUE_NCP_METRIC + ", cluster_uuid: " + cluster_uuid + ", Msg Size (MB): " + rabbitmq_message_size + " service_name: " + name);
                     })
                     .catch((error) => {
                         channel.ack(msg);
-                        receivedResult = null
                         queryResult = null
                         console.log("4. MQ message un-acknowledged: ",RABBITMQ_SERVER_QUEUE_NCP_METRIC + ", cluster_uuid: " + cluster_uuid + ", Msg Size (MB): " + rabbitmq_message_size + " service_name: " + name);
                         console.log(error)
@@ -1213,17 +1205,15 @@ async function connectQueue() {
 }
 
 async function callAPI(apiURL, apiMsg , resourceType, cluster_uuid) {
-    await axios.post(apiURL,apiMsg, {maxContentLength:Infinity, maxBodyLength: Infinity})
-    .then
-    (
-      (response) => {
-        const responseStatus = "status code: " + response.status;
-        console.log("API called: ", resourceType, " ", cluster_uuid, " ", apiURL, " ", responseStatus);
-      },
-      (error) => {
-        console.log("API error due to unexpected error: ", resourceType, " ", cluster_uuid, " ", apiURL, " ", error);
-      })
-
+    axios.post(apiURL,apiMsg, {maxContentLength:Infinity, maxBodyLength: Infinity})
+        .then((response) => {
+            const responseStatus = "status code: " + response.status;
+            console.log("API called: ", resourceType, " ", cluster_uuid, " ", apiURL, " ", responseStatus);
+        })
+        .catch((error) => {
+            console.log("API error due to unexpected error: ", resourceType, " ", cluster_uuid, " ", apiURL, " ", error);
+            console.log(error)
+        })
 }
 
 function formatter_resource(i, itemLength, resourceType, cluster_uuid, query, mergedQuery) {
