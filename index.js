@@ -988,14 +988,10 @@ async function connectQueue() {
                                 },
                                 (error) => {
                                     console.log("MQ message un-acknowledged: " + RABBITMQ_SERVER_QUEUE_RESOURCE + ", cluster_uuid: " + cluster_uuid);
+                                    console.log(error)
+                                    channel.ack(msg);
                                     //throw error;
-                                }).catch
-                        (
-                            (error)=> {
-                                console.log("MQ message un-acknowledged2: " + RABBITMQ_SERVER_QUEUE_RESOURCE + ", cluster_uuid: " + cluster_uuid);
-                                //throw error;
-                            }
-                        )
+                                })
                     } //end of resource_type = ev
                     else {
                         await callAPI(API_RESOURCE_URL, API_MSG, resourceType, cluster_uuid)
@@ -1006,16 +1002,20 @@ async function connectQueue() {
                                     console.log("MQ message acknowledged: " + resourceType + ", " + RABBITMQ_SERVER_QUEUE_RESOURCE + ", cluster_uuid: " + cluster_uuid );
                                 },
                                 (error) => {
+                                    channel.ack(msg);
                                     console.log("MQ message un-acknowledged: " + RABBITMQ_SERVER_QUEUE_RESOURCE + ", cluster_uuid: " + cluster_uuid);
+                                    console.log(error)
                                     //throw error;
-                                }).catch
-                        (
-                            (error)=> {
-                                console.log("MQ message un-acknowledged2: " + RABBITMQ_SERVER_QUEUE_RESOURCE + ", cluster_uuid: " + cluster_uuid);
-                                //throw error;
-                            }
-                        )
+                                })
                     } // end of resource_type - non ev
+
+                    const memUsage = process.memoryUsage();
+
+                    // 메시지 처리 로직을 수행합니다.
+                    // ...
+
+                    // Heap 정보를 로그에 출력합니다.
+                    console.log(`Heap usage: ${memUsage.heapUsed} bytes`);
                 }
                 else {
                     channel.ack(msg);
@@ -1051,6 +1051,7 @@ async function connectQueue() {
                             (error) => {
                                 console.log("MQ message un-acknowledged: ",RABBITMQ_SERVER_QUEUE_ALERT + ", cluster_uuid: " + cluster_uuid);
                                 console.log(error);
+                                channel.ack(msg);
                             })
                 };
             } catch (error) {
@@ -1084,6 +1085,7 @@ async function connectQueue() {
                             (error) => {
                                 console.log("MQ message un-acknowledged: ",RABBITMQ_SERVER_QUEUE_METRIC + ", cluster_uuid: " + cluster_uuid);
                                 console.log(error);
+                                channel.ack(msg);
                             })
                 };
             } catch (error) {
@@ -1096,6 +1098,7 @@ async function connectQueue() {
         await channel.consume(RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED, async (msg) => {
             let receivedResult = null
             try {
+
                 result = JSON.parse(msg.content.toString('utf-8'));
                 const rabbitmq_message_size = (Buffer.byteLength(msg.content.toString()))/1024/1024;
                 const cluster_uuid = result.cluster_uuid;
@@ -1107,6 +1110,7 @@ async function connectQueue() {
                     //console.log (result);
                 }
                 else {
+
                     const name = result.service_name;
                     console.log("1. calling metric received mass upload API : " + RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid + " service_uuid: " + service_uuid + " rabbitmq_message_size(mb): " + rabbitmq_message_size + " service_name: " + name  );
                     receivedResult = await massUploadMetricReceived(result, cluster_uuid)
@@ -1125,6 +1129,12 @@ async function connectQueue() {
                                 result = "";
                                 console.log(error);
                             })
+                    const memUsage = process.memoryUsage();
+                    // 메시지 처리 로직을 수행합니다.
+                    // ...
+
+                    // Heap 정보를 로그에 출력합니다.
+                    console.log(`Heap usage: ${memUsage.heapUsed} bytes`);
 
                 }; // end of else
 
