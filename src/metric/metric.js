@@ -85,6 +85,8 @@ export async function massUploadMetricReceived(metricReceivedMassFeed, clusterUu
             finalResult = null;
             massFeedResult= null;
         } //end of else
+
+        receivedMetrics = null
     } catch (error) {
         console.log (`error on metricReceived - clusterUuid: ${clusterUuid}`, error);
         throw error;
@@ -155,5 +157,7 @@ async function callVM (metricReceivedMassFeed, clusterUuid) {
             throw error;
         }
     }
+
+    metricReceivedMassFeed = null
     return result;
 }

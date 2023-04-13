@@ -1009,6 +1009,7 @@ async function connectQueue() {
                                 })
                     } // end of resource_type - non ev
 
+                    API_MSG = null
                     const memUsage = process.memoryUsage();
 
                     // 메시지 처리 로직을 수행합니다.
@@ -1079,6 +1080,7 @@ async function connectQueue() {
                     const usage = 100 * (elapsedUsage.user + elapsedUsage.system) / elapsedNanoseconds;
                     console.log(`alert CPU Usage: ${usage}%`);
                 };
+                result = null
             } catch (error) {
                 console.log(error)
                 channel.nack(msg, false, false);
@@ -1127,6 +1129,7 @@ async function connectQueue() {
                     const usage = 100 * (elapsedUsage.user + elapsedUsage.system) / elapsedNanoseconds;
                     console.log(`metric meta  CPU Usage: ${usage}%`);
                 };
+                result = null
             } catch (error) {
                 console.log(error)
                 channel.nack(msg, false, false);
@@ -1187,7 +1190,7 @@ async function connectQueue() {
                     console.log(`metric received CPU Usage: ${usage}%`);
 
                 }; // end of else
-
+                result = null
             } catch (error) {
                 console.log(error)
                 channel.nack(msg, false, false);
@@ -1222,14 +1225,10 @@ async function connectQueue() {
                         },
                         (error) => {
                             console.log("MQ message un-acknowledged: " + RABBITMQ_SERVER_QUEUE_NCP_RESOURCE + ", cluster_uuid: " + cluster_uuid);
+                            console.log(error)
                             //throw error;
-                        }).catch
-                    (
-                        (error) => {
-                            console.log("MQ message un-acknowledged2: " + RABBITMQ_SERVER_QUEUE_NCP_RESOURCE + ", cluster_uuid: " + cluster_uuid);
-                            //throw error;
-                        }
-                    )
+                        })
+                totalMsg = null
             } catch (err) {
                 console.log(err);
                 channel.nack(msg, false, false);
