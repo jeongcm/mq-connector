@@ -982,36 +982,34 @@ async function connectQueue() {
                     if (template_uuid === "00000000000000000000000000000008")
                     {
                         await callAPI(API_RESOURCE_EVENT_URL, API_MSG, resourceType, cluster_uuid)
-                            .then
-                            (
-                                (response) => {
-                                    channel.ack(msg);
-                                    console.log("MQ message acknowledged:" + resourceType + ",cluster_uuid:" + cluster_uuid + ", " + RABBITMQ_SERVER_QUEUE_RESOURCE );
-                                },
-                                (error) => {
-                                    console.log("MQ message un-acknowledged: " + RABBITMQ_SERVER_QUEUE_RESOURCE + ", cluster_uuid: " + cluster_uuid);
-                                    console.log(error)
-                                    channel.ack(msg);
-                                    //throw error;
-                                })
+                            .then((response) => {
+                                channel.ack(msg);
+                                API_MSG = null
+                                console.log("MQ message acknowledged:" + resourceType + ",cluster_uuid:" + cluster_uuid + ", " + RABBITMQ_SERVER_QUEUE_RESOURCE );
+                            })
+                            .catch((error) => {
+                                channel.ack(msg);
+                                API_MSG = null
+                                console.log("MQ message un-acknowledged: " + RABBITMQ_SERVER_QUEUE_RESOURCE + ", cluster_uuid: " + cluster_uuid);
+                                console.log(error)
+                            })
+
                     } //end of resource_type = ev
                     else {
                         await callAPI(API_RESOURCE_URL, API_MSG, resourceType, cluster_uuid)
-                            .then
-                            (
-                                (response) => {
-                                    channel.ack(msg);
-                                    console.log("MQ message acknowledged: " + resourceType + ", " + RABBITMQ_SERVER_QUEUE_RESOURCE + ", cluster_uuid: " + cluster_uuid );
-                                },
-                                (error) => {
-                                    channel.ack(msg);
-                                    console.log("MQ message un-acknowledged: " + RABBITMQ_SERVER_QUEUE_RESOURCE + ", cluster_uuid: " + cluster_uuid);
-                                    console.log(error)
-                                    //throw error;
-                                })
+                            .then((response) => {
+                                channel.ack(msg);
+                                API_MSG = null
+                                console.log("MQ message acknowledged:" + resourceType + ",cluster_uuid:" + cluster_uuid + ", " + RABBITMQ_SERVER_QUEUE_RESOURCE );
+                            })
+                            .catch((error) => {
+                                channel.ack(msg);
+                                API_MSG = null
+                                console.log("MQ message un-acknowledged: " + RABBITMQ_SERVER_QUEUE_RESOURCE + ", cluster_uuid: " + cluster_uuid);
+                                console.log(error)
+                            })
                     } // end of resource_type - non ev
 
-                    API_MSG = null
                 }
                 else {
                     channel.ack(msg);
@@ -1038,19 +1036,18 @@ async function connectQueue() {
                 else {
                     console.log("calling alert interface API : " + RABBITMQ_SERVER_QUEUE_ALERT + ", cluster_uuid: " + cluster_uuid );
                     await callAPI(API_ALERT_URL, result, "alerts", cluster_uuid)
-                        .then
-                        (
-                            (response) => {
-                                channel.ack(msg);
-                                console.log("MQ message acknowledged: " + RABBITMQ_SERVER_QUEUE_ALERT + ", cluster_uuid: " + cluster_uuid );
-                            },
-                            (error) => {
-                                console.log("MQ message un-acknowledged: ",RABBITMQ_SERVER_QUEUE_ALERT + ", cluster_uuid: " + cluster_uuid);
-                                console.log(error);
-                                channel.ack(msg);
-                            })
+                        .then((response) => {
+                            channel.ack(msg);
+                            result = null
+                            console.log("MQ message acknowledged: " + RABBITMQ_SERVER_QUEUE_ALERT + ", cluster_uuid: " + cluster_uuid );
+                        })
+                        .catch((error) => {
+                            channel.ack(msg);
+                            result = null
+                            console.log("MQ message un-acknowledged: ",RABBITMQ_SERVER_QUEUE_ALERT + ", cluster_uuid: " + cluster_uuid);
+                            console.log(error)
+                        })
                 };
-                result = null
             } catch (error) {
                 console.log(error)
                 channel.nack(msg, false, false);
@@ -1073,19 +1070,19 @@ async function connectQueue() {
                     console.log("calling metric meta interface API : " + RABBITMQ_SERVER_QUEUE_METRIC + ", cluster_uuid: " + cluster_uuid );
                     //console.log (result);
                     await callAPI(API_METRIC_URL, result, "metric", cluster_uuid)
-                        .then
-                        (
-                            (response) => {
-                                channel.ack(msg);
-                                console.log("MQ message acknowledged: " + RABBITMQ_SERVER_QUEUE_METRIC + ", cluster_uuid: " + cluster_uuid );
-                            },
-                            (error) => {
-                                console.log("MQ message un-acknowledged: ",RABBITMQ_SERVER_QUEUE_METRIC + ", cluster_uuid: " + cluster_uuid);
-                                console.log(error);
-                                channel.ack(msg);
-                            })
+                        .then((response) => {
+                            channel.ack(msg);
+                            result = null
+                            console.log("MQ message acknowledged: " + RABBITMQ_SERVER_QUEUE_METRIC + ", cluster_uuid: " + cluster_uuid );
+                        })
+                        .catch((error) => {
+                            channel.ack(msg);
+                            result = null
+                            console.log("MQ message un-acknowledged: ",RABBITMQ_SERVER_QUEUE_METRIC + ", cluster_uuid: " + cluster_uuid);
+                            console.log(error)
+                        })
+
                 };
-                result = null
             } catch (error) {
                 console.log(error)
                 channel.nack(msg, false, false);
@@ -1112,23 +1109,21 @@ async function connectQueue() {
                     const name = result.service_name;
                     console.log("1. calling metric received mass upload API : " + RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid + " service_uuid: " + service_uuid + " rabbitmq_message_size(mb): " + rabbitmq_message_size + " service_name: " + name  );
                     receivedResult = await massUploadMetricReceived(result, cluster_uuid)
-                        .then
-                        (
-                            (response) => {
-                                channel.ack(msg);
-                                receivedResult = null
-                                result = "";
-                                console.log("4. MQ message acknowledged: " + RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid + ", Msg Size (MB): " + rabbitmq_message_size + " service_name: " + name);
-                            },
-                            (error) => {
-                                channel.ack(msg);
-                                receivedResult = null
-                                console.log("4. MQ message un-acknowledged: ",RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid + ", Msg Size (MB): " + rabbitmq_message_size + " service_name: " + name);
-                                result = "";
-                                console.log(error);
-                            })
+                        .then((response) => {
+                            channel.ack(msg);
+                            receivedResult = null
+                            result = null
+                            console.log("4. MQ message acknowledged: " + RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid + ", Msg Size (MB): " + rabbitmq_message_size + " service_name: " + name);
+                        })
+                        .catch((error) => {
+                            channel.ack(msg);
+                            receivedResult = null
+                            result = null
+                            console.log("4. MQ message un-acknowledged: ",RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid + ", Msg Size (MB): " + rabbitmq_message_size + " service_name: " + name);
+                            console.log(error)
+                        })
+
                 }; // end of else
-                result = null
             } catch (error) {
                 console.log(error)
                 channel.nack(msg, false, false);
@@ -1155,63 +1150,62 @@ async function connectQueue() {
 
                 let result = await getResourceQuery(totalMsg, cluster_uuid)
                 await callAPI(API_RESOURCE_URL, JSON.parse(result.message), result.resourceType, cluster_uuid)
-                    .then
-                    (
-                        (response) => {
-                            channel.ack(msg);
-                            console.log("MQ message acknowledged: " + result.resourceType + ", " + RABBITMQ_SERVER_QUEUE_NCP_RESOURCE + ", cluster_uuid: " + cluster_uuid);
-                        },
-                        (error) => {
-                            console.log("MQ message un-acknowledged: " + RABBITMQ_SERVER_QUEUE_NCP_RESOURCE + ", cluster_uuid: " + cluster_uuid);
-                            console.log(error)
-                            //throw error;
-                        })
-                totalMsg = null
+                    .then((response) => {
+                        channel.ack(msg);
+                        result = null
+                        console.log("MQ message acknowledged: " + result.resourceType + ", " + RABBITMQ_SERVER_QUEUE_NCP_RESOURCE + ", cluster_uuid: " + cluster_uuid);
+                    })
+                    .catch((error) => {
+                        channel.ack(msg);
+                        result = null
+                        console.log("MQ message un-acknowledged: " + RABBITMQ_SERVER_QUEUE_NCP_RESOURCE + ", cluster_uuid: " + cluster_uuid);
+                        console.log(error)
+                    })
+
             } catch (err) {
                 console.log(err);
                 channel.nack(msg, false, false);
             }
         });
 
-        // await channel.consume(RABBITMQ_SERVER_QUEUE_NCP_METRIC, async (msg) => {
-        //     try {
-        //         let totalMsg = JSON.parse(msg.content.toString('utf-8'));
-        //         const rabbitmq_message_size = (Buffer.byteLength(msg.content.toString()))/1024/1024;
-        //         const cluster_uuid = totalMsg.cluster_uuid;
-        //         const service_uuid = totalMsg.service_uuid;
-        //
-        //         if (totalMsg.status !== 4) {
-        //             //console.log("Msg processed, nothing to update, status code: " + result.status + ", " + RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid + " service_uuid: " + service_uuid);
-        //             channel.ack(msg);
-        //             //console.log (result);
-        //         }
-        //         else {
-        //             const name = totalMsg.service_name;
-        //             // const queryResult = await getMetricQuery(totalMsg, cluster_uuid)
-        //             // console.log("1. calling metric received mass upload API : " + RABBITMQ_SERVER_QUEUE_NCP_METRIC + ", cluster_uuid: " + cluster_uuid + " service_uuid: " + service_uuid + " rabbitmq_message_size(mb): " + rabbitmq_message_size + " service_name: " + name  );
-        //             // await massUploadMetricReceived(queryResult, cluster_uuid)
-        //             //     .then
-        //             //     (
-        //             //         (response) => {
-        //             //             channel.ack(msg);
-        //             //             totalMsg = "";
-        //             //             console.log("4. MQ message acknowledged: " + RABBITMQ_SERVER_QUEUE_NCP_METRIC + ", cluster_uuid: " + cluster_uuid + ", Msg Size (MB): " + rabbitmq_message_size + " service_name: " + name);
-        //             //         },
-        //             //         (error) => {
-        //             //             channel.ack(msg);
-        //             //             console.log("4. MQ message un-acknowledged: ",RABBITMQ_SERVER_QUEUE_NCP_METRIC + ", cluster_uuid: " + cluster_uuid + ", Msg Size (MB): " + rabbitmq_message_size + " service_name: " + name);
-        //             //             totalMsg = "";
-        //             //             console.log(error);
-        //             //         })
-        //
-        //         }; // end of else
-        //
-        //     } catch (err) {
-        //         console.log(err);
-        //         channel.nack(msg, false, false);
-        //     }
-        //
-        // }); // end of msg consume
+        await channel.consume(RABBITMQ_SERVER_QUEUE_NCP_METRIC, async (msg) => {
+            try {
+                let totalMsg = JSON.parse(msg.content.toString('utf-8'));
+                const rabbitmq_message_size = (Buffer.byteLength(msg.content.toString()))/1024/1024;
+                const cluster_uuid = totalMsg.cluster_uuid;
+                const service_uuid = totalMsg.service_uuid;
+
+                if (totalMsg.status !== 4) {
+                    console.log("Msg processed, nothing to update, status code: " + totalMsg.status + ", " + RABBITMQ_SERVER_QUEUE_NCP_METRIC + ", cluster_uuid: " + cluster_uuid + " service_uuid: " + service_uuid);
+                    channel.ack(msg);
+                    return
+                }
+
+                const name = totalMsg.service_name;
+                let receivedResult
+                let queryResult = await getMetricQuery(totalMsg, cluster_uuid)
+                console.log("1. calling metric received mass upload API : " + RABBITMQ_SERVER_QUEUE_NCP_METRIC + ", cluster_uuid: " + cluster_uuid + " service_uuid: " + service_uuid + " rabbitmq_message_size(mb): " + rabbitmq_message_size + " service_name: " + name  );
+                receivedResult = await massUploadMetricReceived(queryResult, cluster_uuid)
+                    .then((response) => {
+                        channel.ack(msg);
+                        receivedResult = null
+                        queryResult = null
+                        console.log("4. MQ message acknowledged: " + RABBITMQ_SERVER_QUEUE_NCP_METRIC + ", cluster_uuid: " + cluster_uuid + ", Msg Size (MB): " + rabbitmq_message_size + " service_name: " + name);
+                    })
+                    .catch((error) => {
+                        channel.ack(msg);
+                        receivedResult = null
+                        queryResult = null
+                        console.log("4. MQ message un-acknowledged: ",RABBITMQ_SERVER_QUEUE_NCP_METRIC + ", cluster_uuid: " + cluster_uuid + ", Msg Size (MB): " + rabbitmq_message_size + " service_name: " + name);
+                        console.log(error)
+                    })
+
+            } catch (err) {
+                console.log(err);
+                channel.nack(msg, false, false);
+            }
+
+        }); // end of msg consume
     } catch (error) {
         console.log ("error", error)
         throw error;
