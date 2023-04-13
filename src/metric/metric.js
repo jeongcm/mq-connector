@@ -1,15 +1,7 @@
 import axios from "axios";
 import {getQueryDataMultipleForServerVPC} from "./ncp/server/server.js";
 
-const API_SERVER_RESOURCE_URL = process.env.API_SERVER_RESOURCE_URL || "http://localhost";
-const API_SERVER_RESOURCE_PORT = process.env.API_SERVER_RESOURCE_PORT || 5001;
-const API_NAME_CUSTOMER_ACCOUNT_GET =process.env.API_NAME_CUSTOMER_ACCOUNT_GET || "/customerAccount/resourceGroup";
-const API_CUSTOMER_ACCOUNT_GET_URL = API_SERVER_RESOURCE_URL+":"+API_SERVER_RESOURCE_PORT + API_NAME_CUSTOMER_ACCOUNT_GET;
-const VM_URL = process.env.VM_URL || 'http://olly-dev-vm.claion.io:8428/api/v1/import?extra_label=clusterUuid=';
-const VM_MULTI_AUTH_URL = process.env.VM_MULTI_AUTH_URL || 'http://olly-dev-vmauth.claion.io:8427/api/v1/import?extra_label=clusterUuid=';
-const VM_OPTION = process.env.VM_OPTION || "MULTI"; //BOTH - both / SINGLE - single-tenant / MULTI - multi-tenant
-
-export async function getMetricQuery(totalMsg, clusterUuid) {
+async function getMetricQuery(totalMsg, clusterUuid) {
     let queryResult = {};
     switch (totalMsg.template_uuid) {
         case "queryMultipleDataForServer":
@@ -19,10 +11,9 @@ export async function getMetricQuery(totalMsg, clusterUuid) {
 
     return queryResult;
 }
-export async function massUploadMetricReceived(metricReceivedMassFeed, clusterUuid) {
+async function massUploadMetricReceived(metricReceivedMassFeed, clusterUuid) {
 
     try {
-        //let receivedData = JSON.parse(metricReceivedMassFeed.result);
         let receivedData = metricReceivedMassFeed.result;
         const clusterUuid = metricReceivedMassFeed.cluster_uuid;
         const name = metricReceivedMassFeed.service_name;
@@ -94,9 +85,19 @@ export async function massUploadMetricReceived(metricReceivedMassFeed, clusterUu
 }
 
 async function callVM (metricReceivedMassFeed, clusterUuid) {
+    const apiUrl = process.env.API_SERVER_RESOURCE_URL || "http://olly-dev-api.claion.io";
+    const apiPort = process.env.API_SERVER_RESOURCE_PORT || 5001;
+    const apiCustomerAccountGetPath =process.env.API_NAME_CUSTOMER_ACCOUNT_GET || "/customerAccount/resourceGroup";
+    const apiCustomerAccountGetUrl = apiUrl+":"+apiPort + apiCustomerAccountGetPath;
+    const vmUrl = process.env.VM_URL || 'http://olly-dev-vm.claion.io:8428/api/v1/import?extra_label=clusterUuid=';
+    const vmMultiUrl = process.env.VM_MULTI_AUTH_URL || 'http://olly-dev-vmauth.claion.io:8427/api/v1/import?extra_label=clusterUuid=';
+    const vmOption = process.env.VM_OPTION || "MULTI"; //BOTH - both / SINGLE - single-tenant / MULTI - multi-tenant
+//just for local
+//     const apiCustomerAccountGetUrl = apiUrl+ apiCustomerAccountGetPath;
+
     let result;
-    if (VM_OPTION === "SINGLE") {
-        const url = VM_URL + clusterUuid;
+    if (vmOption === "SINGLE") {
+        const url = vmUrl + clusterUuid;
         console.log (`2-1, calling vm interface: ${url}`);
         try {
             result = await axios.post (url, metricReceivedMassFeed, {maxContentLength:Infinity, maxBodyLength: Infinity})
@@ -105,8 +106,8 @@ async function callVM (metricReceivedMassFeed, clusterUuid) {
             console.log("error on calling vm api");
             //throw error;
         }
-    } else if (VM_OPTION === "MULTI") {
-        const urlCa = API_CUSTOMER_ACCOUNT_GET_URL + "/" + clusterUuid;
+    } else if (vmOption === "MULTI") {
+        const urlCa = apiCustomerAccountGetUrl + "/" + clusterUuid;
         let password;
         let username;
         try {
@@ -117,7 +118,7 @@ async function callVM (metricReceivedMassFeed, clusterUuid) {
             console.log("error on confirming cluster information for metric feed");
             throw error;
         }
-        const urlMulti = VM_MULTI_AUTH_URL + clusterUuid;
+        const urlMulti = vmMultiUrl + clusterUuid;
         try {
             result = await axios.post (urlMulti, metricReceivedMassFeed, {maxContentLength:Infinity, maxBodyLength: Infinity, auth:{username: username, password: password}})
         } catch (error){
@@ -125,7 +126,7 @@ async function callVM (metricReceivedMassFeed, clusterUuid) {
             throw error;
         }
     } else { // BOTH
-        const url = VM_URL + clusterUuid;
+        const url = vmUrl + clusterUuid;
         console.log (`2-1, calling vm interface: ${url}`);
         try {
             result = await axios.post (url, metricReceivedMassFeed, {maxContentLength:Infinity, maxBodyLength: Infinity})
@@ -136,7 +137,7 @@ async function callVM (metricReceivedMassFeed, clusterUuid) {
             console.log(metricReceivedMassFeed);
             throw error;
         }
-        const urlCa = API_CUSTOMER_ACCOUNT_GET_URL + "/" + clusterUuid;
+        const urlCa = apiCustomerAccountGetUrl + "/" + clusterUuid;
         let password;
         let username;
         try {
@@ -147,7 +148,7 @@ async function callVM (metricReceivedMassFeed, clusterUuid) {
             console.log("error on confirming cluster information for metric feed");
             throw error;
         }
-        const urlMulti = VM_MULTI_AUTH_URL + clusterUuid;
+        const urlMulti = vmMultiUrl + clusterUuid;
         console.log (`2-2, calling vm multi - interface: ${urlMulti}`);
         try {
             result = await axios.post (urlMulti, metricReceivedMassFeed, {maxContentLength:Infinity, maxBodyLength: Infinity, auth:{username: username, password: password}})
@@ -161,3 +162,6 @@ async function callVM (metricReceivedMassFeed, clusterUuid) {
     metricReceivedMassFeed = null
     return result;
 }
+
+exports.getMetricQuery = getMetricQuery
+exports.massUploadMetricReceived = massUploadMetricReceived
