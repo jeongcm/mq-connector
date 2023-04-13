@@ -1,7 +1,7 @@
 import axios from "axios";
 import {getQueryDataMultipleForServerVPC} from "./ncp/server/server.js";
 
-async function getMetricQuery(totalMsg, clusterUuid) {
+export async function getMetricQuery(totalMsg, clusterUuid) {
     let queryResult = {};
     switch (totalMsg.template_uuid) {
         case "queryMultipleDataForServer":
@@ -163,5 +163,3 @@ async function getMetricQuery(totalMsg, clusterUuid) {
 //     return result;
 // }
 
-exports.getMetricQuery = getMetricQuery
-// exports.massUploadMetricReceived = massUploadMetricReceived
