@@ -1176,36 +1176,36 @@ async function connectQueue() {
 
         await channel.consume(RABBITMQ_SERVER_QUEUE_NCP_METRIC, async (msg) => {
             try {
-                let totalMsg = JSON.parse(msg.content.toString('utf-8'));
-                const rabbitmq_message_size = (Buffer.byteLength(msg.content.toString()))/1024/1024;
-                const cluster_uuid = totalMsg.cluster_uuid;
-                const service_uuid = totalMsg.service_uuid;
-
-                if (totalMsg.status !== 4) {
-                    //console.log("Msg processed, nothing to update, status code: " + result.status + ", " + RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid + " service_uuid: " + service_uuid);
-                    channel.ack(msg);
-                    //console.log (result);
-                }
-                else {
-                    const name = totalMsg.service_name;
-                    const queryResult = await getMetricQuery(totalMsg, cluster_uuid)
-                    console.log("1. calling metric received mass upload API : " + RABBITMQ_SERVER_QUEUE_NCP_METRIC + ", cluster_uuid: " + cluster_uuid + " service_uuid: " + service_uuid + " rabbitmq_message_size(mb): " + rabbitmq_message_size + " service_name: " + name  );
-                    await massUploadMetricReceived(queryResult, cluster_uuid)
-                        .then
-                        (
-                            (response) => {
-                                channel.ack(msg);
-                                totalMsg = "";
-                                console.log("4. MQ message acknowledged: " + RABBITMQ_SERVER_QUEUE_NCP_METRIC + ", cluster_uuid: " + cluster_uuid + ", Msg Size (MB): " + rabbitmq_message_size + " service_name: " + name);
-                            },
-                            (error) => {
-                                channel.ack(msg);
-                                console.log("4. MQ message un-acknowledged: ",RABBITMQ_SERVER_QUEUE_NCP_METRIC + ", cluster_uuid: " + cluster_uuid + ", Msg Size (MB): " + rabbitmq_message_size + " service_name: " + name);
-                                totalMsg = "";
-                                console.log(error);
-                            })
-
-                }; // end of else
+                // let totalMsg = JSON.parse(msg.content.toString('utf-8'));
+                // const rabbitmq_message_size = (Buffer.byteLength(msg.content.toString()))/1024/1024;
+                // const cluster_uuid = totalMsg.cluster_uuid;
+                // const service_uuid = totalMsg.service_uuid;
+                //
+                // if (totalMsg.status !== 4) {
+                //     //console.log("Msg processed, nothing to update, status code: " + result.status + ", " + RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED + ", cluster_uuid: " + cluster_uuid + " service_uuid: " + service_uuid);
+                //     channel.ack(msg);
+                //     //console.log (result);
+                // }
+                // else {
+                //     const name = totalMsg.service_name;
+                //     const queryResult = await getMetricQuery(totalMsg, cluster_uuid)
+                //     console.log("1. calling metric received mass upload API : " + RABBITMQ_SERVER_QUEUE_NCP_METRIC + ", cluster_uuid: " + cluster_uuid + " service_uuid: " + service_uuid + " rabbitmq_message_size(mb): " + rabbitmq_message_size + " service_name: " + name  );
+                //     await massUploadMetricReceived(queryResult, cluster_uuid)
+                //         .then
+                //         (
+                //             (response) => {
+                //                 channel.ack(msg);
+                //                 totalMsg = "";
+                //                 console.log("4. MQ message acknowledged: " + RABBITMQ_SERVER_QUEUE_NCP_METRIC + ", cluster_uuid: " + cluster_uuid + ", Msg Size (MB): " + rabbitmq_message_size + " service_name: " + name);
+                //             },
+                //             (error) => {
+                //                 channel.ack(msg);
+                //                 console.log("4. MQ message un-acknowledged: ",RABBITMQ_SERVER_QUEUE_NCP_METRIC + ", cluster_uuid: " + cluster_uuid + ", Msg Size (MB): " + rabbitmq_message_size + " service_name: " + name);
+                //                 totalMsg = "";
+                //                 console.log(error);
+                //             })
+                //
+                // }; // end of else
 
             } catch (err) {
                 console.log(err);
