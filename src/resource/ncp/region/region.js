@@ -1,4 +1,4 @@
-import {formatter_resource} from "../resource.js";
+import {formatter_resource} from "../../resource.js";
 
 export async function getRegionListQuery(result, clusterUuid) {
     let query = {};
