@@ -82,7 +82,7 @@ connectQueue()
 
 async function connectQueue() {
     try {
-        var result = "";
+        let result = "";
         connection = await amqp.connect(connect_string);
         channel = await connection.createChannel();
         // connect to RABBITMQ_SERVER_QUEUE_NAME, create one if doesnot exist already
@@ -959,7 +959,7 @@ async function connectQueue() {
                     result = "";
                     if (template_uuid === "00000000000000000000000000000008")
                     {
-                        await callAPI(API_RESOURCE_EVENT_URL, API_MSG, resourceType, cluster_uuid)
+                        await callAPI(aggregatorResourceUrl, API_MSG)
                             .then
                             (
                                 (response) => {
@@ -978,7 +978,7 @@ async function connectQueue() {
                         )
                     } //end of resource_type = ev
                     else {
-                        await callAPI(API_RESOURCE_URL, API_MSG, resourceType, cluster_uuid)
+                        await callAPI(aggregatorResourceUrl, API_MSG)
                             .then
                             (
                                 (response) => {
@@ -1037,10 +1037,11 @@ async function connectQueue() {
                 console.log(error)
                 channel.nack(msg, false, false);
             }
-            callAPI(aggregatorAlertUrl, totalMsg.result)
+            await callAPI(aggregatorAlertUrl, totalMsg)
+            channel.ack(msg);
         }); // end of msg consume
 
-        await channel.consume(RABBITMQ_SERVER_QUEUE_METRIC, (msg) => {
+        await channel.consume(RABBITMQ_SERVER_QUEUE_METRIC, async (msg) => {
             let totalMsg = JSON.parse(msg.content.toString('utf-8'));
             if (totalMsg.status !== 4) {
                 console.log("Message ignored, No result in the message in resource channel metric meta");
@@ -1048,10 +1049,11 @@ async function connectQueue() {
                 return
             }
 
-            callAPI(aggregatorMetricMetaUrl, totalMsg.result)
+            await callAPI(aggregatorMetricMetaUrl, totalMsg)
+            channel.ack(msg);
         }); // end of msg consume
 
-        await channel.consume(RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED, (msg) => {
+        await channel.consume(RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED, async (msg) => {
             let totalMsg = JSON.parse(msg.content.toString('utf-8'));
             if (totalMsg.status !== 4) {
                 console.log("Message ignored, No result in the message in resource channel alert");
@@ -1059,7 +1061,8 @@ async function connectQueue() {
                 return
                 //console.log (result);
             }
-            callAPI(aggregatorMetricReceivedUrl, totalMsg.result)
+            await callAPI(aggregatorMetricReceivedUrl, totalMsg)
+            channel.ack(msg);
         });
 
         await channel.consume(RABBITMQ_SERVER_QUEUE_RESOURCE_OPS, async (msg) => {
@@ -1072,6 +1075,7 @@ async function connectQueue() {
                     //console.log (result);
                 }
                 await callAPI(aggregatorResourceUrl, totalMsg)
+                channel.ack(msg);
             } catch (err) {
                 console.error(err);
                 channel.nack(msg, false, false);
@@ -1085,7 +1089,7 @@ async function connectQueue() {
 }
 
 async function callAPI(apiURL, apiMsg) {
-    axios.post(apiURL,apiMsg, {maxContentLength:Infinity, maxBodyLength: Infinity})
+    await axios.post(apiURL,apiMsg, {maxContentLength:Infinity, maxBodyLength: Infinity})
     .then
     (
       (response) => {
