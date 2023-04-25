@@ -29,16 +29,14 @@ const RABBITMQ_SERVER_QUEUE_RESOURCE = process.env.RABBITMQ_SERVER_QUEUE_RESOURC
 const RABBITMQ_SERVER_QUEUE_ALERT = process.env.RABBITMQ_SERVER_QUEUE_ALERT || "co_alert";
 const RABBITMQ_SERVER_QUEUE_METRIC = process.env.RABBITMQ_SERVER_QUEUE_METRIC || "co_metric";
 const RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED = process.env.RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED || "co_metric_received";
-const RABBITMQ_SERVER_QUEUE_RESOURCE_OPS = process.env.RABBITMQ_SERVER_QUEUE_RESOURCE_OPS || "ops_resource";
-const RABBITMQ_SERVER_QUEUE_METRIC_OPS = process.env.RABBITMQ_SERVER_QUEUE_METRIC_OPS || "ops_metric";
-// const RABBITMQ_SERVER_USER = process.env.RABBITMQ_SERVER_USER || "claion";
-// const RABBITMQ_SERVER_PASSWORD = process.env.RABBITMQ_SERVER_PASSWORD || "claion";
-// const RABBITMQ_SERVER_VIRTUAL_HOST = process.env.RABBITMQ_SERVER_VIRTUAL_HOST || "claion";
-
-const RABBITMQ_SERVER_USER = process.env.RABBITMQ_SERVER_USER || "user";
-const RABBITMQ_SERVER_PASSWORD = process.env.RABBITMQ_SERVER_PASSWORD || "cwlO0jDx99Io9fZQ";
-const RABBITMQ_SERVER_VIRTUAL_HOST = process.env.RABBITMQ_SERVER_VIRTUAL_HOST || "/";
-
+const RABBITMQ_SERVER_QUEUE_NCP_RESOURCE = process.env.RABBITMQ_SERVER_QUEUE_NCP_RESOURCE || "ops_resource";
+const RABBITMQ_SERVER_QUEUE_NCP_METRIC = process.env.RABBITMQ_SERVER_QUEUE_NCP_METRIC || "ops_metric";
+// const RABBITMQ_SERVER_USER = process.env.RABBITMQ_SERVER_USER || "user";
+// const RABBITMQ_SERVER_PASSWORD = process.env.RABBITMQ_SERVER_PASSWORD || "cwlO0jDx99Io9fZQ";
+// const RABBITMQ_SERVER_VIRTUAL_HOST = process.env.RABBITMQ_SERVER_VIRTUAL_HOST || "/";
+const RABBITMQ_SERVER_USER = process.env.RABBITMQ_SERVER_USER || "claion";
+const RABBITMQ_SERVER_PASSWORD = process.env.RABBITMQ_SERVER_PASSWORD || "claion";
+const RABBITMQ_SERVER_VIRTUAL_HOST = process.env.RABBITMQ_SERVER_VIRTUAL_HOST || "claion";
 const RabbitOpt = RABBITMQ_PROTOCOL_HOST + RABBITMQ_SERVER_USER + ":" + RABBITMQ_SERVER_PASSWORD + "@";
 
 const AGGREGATOR_URL = process.env.AGGREGATOR_URL || "http://localhost";
@@ -91,8 +89,8 @@ async function connectQueue() {
         await channel.assertQueue(RABBITMQ_SERVER_QUEUE_ALERT);
         await channel.assertQueue(RABBITMQ_SERVER_QUEUE_METRIC);
         await channel.assertQueue(RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED);
-        await channel.assertQueue(RABBITMQ_SERVER_QUEUE_RESOURCE_OPS);
-        await channel.assertQueue(RABBITMQ_SERVER_QUEUE_METRIC_OPS);
+        await channel.assertQueue(RABBITMQ_SERVER_QUEUE_NCP_RESOURCE);
+        await channel.assertQueue(RABBITMQ_SERVER_QUEUE_NCP_METRIC);
         connection.on('error', function(err) {
             console.error('[AMQP] error', err.message);
         });
@@ -100,10 +98,10 @@ async function connectQueue() {
             console.log('[AMQP] closed');
             // Channel 닫기
             channel.close(function (err) {
-                console.log('[AMQP] channel closed');
+                console.log('[AMQP] channel closed', err);
                 // 연결 닫기
                 connection.close(function (err) {
-                    console.log('[AMQP] connection closed');
+                    console.log('[AMQP] connection closed', err);
                 });
             });
         });
@@ -961,42 +959,34 @@ async function connectQueue() {
                     if (template_uuid === "00000000000000000000000000000008")
                     {
                         await callAPI(aggregatorResourceUrl, API_MSG)
-                            .then
-                            (
-                                (response) => {
-                                    channel.ack(msg);
-                                    console.log("MQ message acknowleged:" + resourceType + ",cluster_uuid:" + cluster_uuid + ", " + RABBITMQ_SERVER_QUEUE_RESOURCE );
-                                },
-                                (error) => {
-                                    console.log("MQ message un-acknowleged: " + RABBITMQ_SERVER_QUEUE_RESOURCE + ", cluster_uuid: " + cluster_uuid);
-                                    //throw error;
-                                }).catch
-                        (
-                            (error)=> {
-                                console.log("MQ message un-acknowleged2: " + RABBITMQ_SERVER_QUEUE_RESOURCE + ", cluster_uuid: " + cluster_uuid);
-                                //throw error;
-                            }
-                        )
+                            .then((response) => {
+                                channel.ack(msg);
+                                console.log("MQ message acknowledged:" + resourceType + ",cluster_uuid:" + cluster_uuid + ", " + RABBITMQ_SERVER_QUEUE_RESOURCE );
+                                API_MSG = null
+                            })
+                            .catch((error) => {
+                                channel.ack(msg);
+                                console.log("MQ message un-acknowledged: " + RABBITMQ_SERVER_QUEUE_RESOURCE + ", cluster_uuid: " + cluster_uuid);
+                                console.log(error)
+                                API_MSG = null
+                            })
+
                     } //end of resource_type = ev
                     else {
                         await callAPI(aggregatorResourceUrl, API_MSG)
-                            .then
-                            (
-                                (response) => {
-                                    channel.ack(msg);
-                                    console.log("MQ message acknowleged: " + resourceType + ", " + RABBITMQ_SERVER_QUEUE_RESOURCE + ", cluster_uuid: " + cluster_uuid );
-                                },
-                                (error) => {
-                                    console.log("MQ message un-acknowleged: " + RABBITMQ_SERVER_QUEUE_RESOURCE + ", cluster_uuid: " + cluster_uuid);
-                                    //throw error;
-                                }).catch
-                        (
-                            (error)=> {
-                                console.log("MQ message un-acknowleged2: " + RABBITMQ_SERVER_QUEUE_RESOURCE + ", cluster_uuid: " + cluster_uuid);
-                                //throw error;
-                            }
-                        )
+                            .then((response) => {
+                                channel.ack(msg);
+                                console.log("MQ message acknowledged:" + resourceType + ",cluster_uuid:" + cluster_uuid + ", " + RABBITMQ_SERVER_QUEUE_RESOURCE );
+                                API_MSG = null
+                            })
+                            .catch((error) => {
+                                channel.ack(msg);
+                                console.log("MQ message un-acknowledged: " + RABBITMQ_SERVER_QUEUE_RESOURCE + ", cluster_uuid: " + cluster_uuid);
+                                console.log(error)
+                                API_MSG = null
+                            })
                     } // end of resource_type - non ev
+
                 }
                 else {
                     channel.ack(msg);
@@ -1071,7 +1061,7 @@ async function connectQueue() {
             }
         });
 
-        await channel.consume(RABBITMQ_SERVER_QUEUE_RESOURCE_OPS, async (msg) => {
+        await channel.consume(RABBITMQ_SERVER_QUEUE_NCP_RESOURCE, async (msg) => {
             try {
                 let totalMsg = JSON.parse(msg.content.toString('utf-8'));
                 const cluster_uuid = result.cluster_uuid;
@@ -1091,7 +1081,7 @@ async function connectQueue() {
             }
         });
 
-        await channel.consume(RABBITMQ_SERVER_QUEUE_METRIC_OPS, async (msg) => {
+        await channel.consume(RABBITMQ_SERVER_QUEUE_NCP_METRIC, async (msg) => {
             try {
                 let totalMsg = JSON.parse(msg.content.toString('utf-8'));
                 const cluster_uuid = result.cluster_uuid;
