@@ -1,5 +1,6 @@
 import {v1}  from 'uuid';
 import {getRegionListQuery} from "./ncp/region/region.js";
+import {getServerInstanceListQuery} from "./ncp/serverInstance/serverInstance.js";
 
 export async function getResourceQuery(totalMsg, clusterUuid) {
     let queryResult = {};
@@ -7,6 +8,9 @@ export async function getResourceQuery(totalMsg, clusterUuid) {
     switch (totalMsg.template_uuid) {
         case "70000000000000000000000000000001":
             queryResult = await getRegionListQuery(result, clusterUuid)
+            break;
+        case "70000000000000000000000000000004":
+            queryResult = await getServerInstanceListQuery(result, clusterUuid)
         break;
     }
 
