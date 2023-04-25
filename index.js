@@ -1,28 +1,29 @@
-const dontenv = require('dotenv');
-dontenv.config();
-const amqp= require("amqplib");
-const compression = require('compression');
-const bodyParser = require('body-parser');
-const axios = require('axios');
-const express = require("express");
-const MAX_API_BODY_SIZE = process.env.MAX_API_BODY_SIZE || "500mb"; 
+import dotenv from 'dotenv';
+dotenv.config();
+import amqp from 'amqplib';
+import bodyParser from "body-parser";
+import compression from 'compression';
+import axios from "axios";
+import express from "express";
+import {getResourceQuery} from "./src/resource/ncp/resource.js";
 
-require( 'console-stamp' )( console, {
-    format: '(console).yellow :date().green.underline :label(7)'
-  } );
+const MAX_API_BODY_SIZE = process.env.MAX_API_BODY_SIZE || "500mb";
+const app = express()
 
-const app = express();
 app.use(bodyParser.json( {limit: MAX_API_BODY_SIZE} ));
-app.use(bodyParser.urlencoded( {limit: MAX_API_BODY_SIZE} ));
+app.use(bodyParser.urlencoded( {limit: MAX_API_BODY_SIZE, extended: true} ));
 app.use(compression());
 app.get('/health', (req, res)=>{
     res.send ("health check passed");
 });
 
+const MQCOMM_PORT = process.env.MQCOMM_PORT || 4001;
+//const MQCOMM_HEALTH_PORT = process.env.MQCOMM_HEALTH_PORT || 4012;
+const NODE_EXPORTER_PORT = process.env.NODE_EXPORTER_PORT || 9100 ;
 
-const MQCOMM_PORT = process.env.MQCOMM_PORT || 5001;
 const RABBITMQ_PROTOCOL_HOST = process.env.RABBITMQ_PROTOCOL_HOST || "amqp://"
-const RABBITMQ_SERVER_URL = process.env.RABBITMQ_SERVER_URL || "localhost";
+const RABBITMQ_SERVER_URL = process.env.RABBITMQ_SERVER_URL || "olly-dev-mq.claion.io";
+// const RABBITMQ_SERVER_URL = process.env.RABBITMQ_SERVER_URL || "localhost";
 const RABBITMQ_SERVER_PORT = process.env.RABBITMQ_SERVER_PORT || 5672;
 const RABBITMQ_SERVER_QUEUE_RESOURCE = process.env.RABBITMQ_SERVER_QUEUE_RESOURCE || "co_resource";
 const RABBITMQ_SERVER_QUEUE_ALERT = process.env.RABBITMQ_SERVER_QUEUE_ALERT || "co_alert";
@@ -64,10 +65,10 @@ function exitHandler(options, exitCode) {
         channel.close()
         connection.close()
         process.exit(0)
-    };
+    }
 }
 //do something when app is closing
-process.on('exit', exitHandler.bind(null,{cleanup:true}));
+process.on('exit', exitHandler.bind(null,{cleanup:true, exit:true}));
 //catches ctrl+c event
 process.on('SIGINT', exitHandler.bind(null, {exit:true}));
 // catches "kill pid" (for example: nodemon restart)
@@ -1010,66 +1011,94 @@ async function connectQueue() {
 
         await channel.consume(RABBITMQ_SERVER_QUEUE_ALERT, async (msg) => {
             try {
-                result = JSON.parse(msg.content.toString('utf-8'));
+                let totalMsg = JSON.parse(msg.content.toString('utf-8'));
                 const cluster_uuid = result.cluster_uuid;
                 let service_uuid = result.service_uuid;
 
-                if (result.status != 4) {
-                    //console.log("Msg processed, nothing to update, status code: " + result.status + ", " + RABBITMQ_SERVER_QUEUE_ALERT + ", cluster_uuid: " + cluster_uuid + " service_uuid: " + service_uuid  );
+                if (totalMsg.status !== 4) {
+                    console.log(`Message ignored, No result in the message in resource channel alert. cluster_uuid: ${cluster_uuid}, service_uuid: ${service_uuid}`);
                     channel.ack(msg);
-                    //console.log (result);
+                    channel.ack(msg);
+                    return
                 }
-                else {
-                    console.log("calling alert interface API : " + RABBITMQ_SERVER_QUEUE_ALERT + ", cluster_uuid: " + cluster_uuid );
-                    await callAPI(API_ALERT_URL, result, "alerts", cluster_uuid)
-                        .then
-                        (
-                            (response) => {
-                                channel.ack(msg);
-                                console.log("MQ message acknowleged: " + RABBITMQ_SERVER_QUEUE_ALERT + ", cluster_uuid: " + cluster_uuid );
-                            },
-                            (error) => {
-                                console.log("MQ message un-acknowleged: ",RABBITMQ_SERVER_QUEUE_ALERT + ", cluster_uuid: " + cluster_uuid);
-                                console.log(error);
-                            })
-                };
-            } catch (error) {
-                console.log(error)
+
+                await callAPI(aggregatorAlertUrl, totalMsg)
+                channel.ack(msg);
+            } catch (err) {
+                console.error(err);
                 channel.nack(msg, false, false);
             }
-            await callAPI(aggregatorAlertUrl, totalMsg)
-            channel.ack(msg);
+
         }); // end of msg consume
 
         await channel.consume(RABBITMQ_SERVER_QUEUE_METRIC, async (msg) => {
-            let totalMsg = JSON.parse(msg.content.toString('utf-8'));
-            if (totalMsg.status !== 4) {
-                console.log("Message ignored, No result in the message in resource channel metric meta");
-                channel.ack(msg);
-                return
-            }
+            try {
+                let totalMsg = JSON.parse(msg.content.toString('utf-8'));
+                const cluster_uuid = result.cluster_uuid;
+                let service_uuid = result.service_uuid;
 
-            await callAPI(aggregatorMetricMetaUrl, totalMsg)
-            channel.ack(msg);
+                if (totalMsg.status !== 4) {
+                    console.log(`Message ignored, No result in the message in channel metric meta. cluster_uuid: ${cluster_uuid}, service_uuid: ${service_uuid}`);
+                    channel.ack(msg);
+                    return
+                }
+
+                await callAPI(aggregatorMetricMetaUrl, totalMsg)
+                channel.ack(msg);
+            } catch (err) {
+                console.error(err);
+                channel.nack(msg, false, false);
+            }
         }); // end of msg consume
 
         await channel.consume(RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED, async (msg) => {
-            let totalMsg = JSON.parse(msg.content.toString('utf-8'));
-            if (totalMsg.status !== 4) {
-                console.log("Message ignored, No result in the message in resource channel alert");
+            try {
+                let totalMsg = JSON.parse(msg.content.toString('utf-8'));
+                const cluster_uuid = result.cluster_uuid;
+                let service_uuid = result.service_uuid;
+
+                if (totalMsg.status !== 4) {
+                    console.log(`Message ignored, No result in the message in metric received. cluster_uuid: ${cluster_uuid}, service_uuid: ${service_uuid}`);
+                    channel.ack(msg);
+                    return
+                    //console.log (result);
+                }
+                await callAPI(aggregatorMetricReceivedUrl, totalMsg)
                 channel.ack(msg);
-                return
-                //console.log (result);
+            } catch (err) {
+                console.error(err);
+                channel.nack(msg, false, false);
             }
-            await callAPI(aggregatorMetricReceivedUrl, totalMsg)
-            channel.ack(msg);
         });
 
         await channel.consume(RABBITMQ_SERVER_QUEUE_RESOURCE_OPS, async (msg) => {
             try {
                 let totalMsg = JSON.parse(msg.content.toString('utf-8'));
+                const cluster_uuid = result.cluster_uuid;
+                let service_uuid = result.service_uuid;
+
                 if (totalMsg.status !== 4) {
-                    console.log("Message ignored, No result in the message in resource channel alert");
+                    console.log(`Message ignored, No result in the message in resource. cluster_uuid: ${cluster_uuid}, service_uuid: ${service_uuid}`);
+                    channel.ack(msg);
+                    return
+                    //console.log (result);
+                }
+                await callAPI(aggregatorResourceUrl, totalMsg)
+                channel.ack(msg);
+            } catch (err) {
+                console.error(err);
+                channel.nack(msg, false, false);
+            }
+        });
+
+        await channel.consume(RABBITMQ_SERVER_QUEUE_METRIC_OPS, async (msg) => {
+            try {
+                let totalMsg = JSON.parse(msg.content.toString('utf-8'));
+                const cluster_uuid = result.cluster_uuid;
+                let service_uuid = result.service_uuid;
+
+                if (totalMsg.status !== 4) {
+                    console.log(`Message ignored, No result in the message in resource channel alert. cluster_uuid: ${cluster_uuid}, service_uuid: ${service_uuid}`);
                     channel.ack(msg);
                     return
                     //console.log (result);
@@ -1094,11 +1123,11 @@ async function callAPI(apiURL, apiMsg) {
     (
       (response) => {
         const responseStatus = "status code: " + response.status;
-        console.log("API called: ", apiURL, " ", responseStatus);
+        console.log(`succeed to call ${apiURL}. responseStatus:  ${responseStatus}`);
       },
       (error) => {
-        console.log("API error due to unexpoected error: ", apiURL, " ", error);
+        console.log(`failed to call ${apiURL}. cause: ${error}`);
       })
 }
 
-app.listen(MQCOMM_PORT, () => console.log("NexClipper MQCOMM Server running at port " + MQCOMM_PORT));
+app.listen(MQCOMM_PORT, () => console.log("Claion MQCOMM Server running at port " + MQCOMM_PORT));
