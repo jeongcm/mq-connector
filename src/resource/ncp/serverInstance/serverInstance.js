@@ -20,8 +20,8 @@ export async function getServerInstanceListQuery(result, clusterUuid) {
         // query['parent_Resource_Id'] =
         query['resource_Status'] = result.getServerInstanceListResponse?.serverInstanceList[i]?.serverInstanceStatus;
         query['resource_Level1'] = "NCP";
-        query['resource_Level2'] = "VPC";
-        query['resource_Level3'] = "RG";
+        query['resource_Level2'] = "RG";
+        query['resource_Level3'] = "VPC";
         query['resource_Level4'] = "SBN";
         query['resource_Level5'] = resourceType;
         query['resource_Level_Type'] = "NX";
