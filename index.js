@@ -955,7 +955,7 @@ async function connectQueue() {
                             query['resource_Target_Created_At'] = result.server.created;
                             query['resource_Namespace'] = result.server.tenant_id;
                             query['parent_Resource_Id'] = result.server["OS-EXT-SRV-ATTR:host"];  //Openstack-Cluster
-                            // query['resource_Status'] = result.server.status;
+                            // query['resource_Status'] = result.serverInstance.status;
                             query['resource_Level1'] = "OS"; // Openstack
                             query['resource_Level2'] = "PJ";
                             query['resource_Level3'] = resourceType;
