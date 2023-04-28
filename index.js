@@ -1093,7 +1093,7 @@ async function connectQueue() {
                     return
                     //console.log (result);
                 }
-                await callAPI(aggregatorResourceUrl, totalMsg)
+                await callAPI(aggregatorMetricReceivedUrl, totalMsg)
                 channel.ack(msg);
             } catch (err) {
                 console.error(err);
