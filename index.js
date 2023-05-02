@@ -119,26 +119,26 @@ async function connectQueue() {
             });
         });
 
-        // await channel.consume(RABBITMQ_SERVER_QUEUE_RESOURCE, async (msg) => {
-        //     try {
-        //         let totalMsg = JSON.parse(msg.content.toString('utf8'));
-        //         const cluster_uuid =  totalMsg.cluster_uuid;
-        //         const service_uuid = totalMsg.service_uuid;
-        //
-        //         if (totalMsg.status !== 4) {
-        //             console.log(`Message ignored, No result in the message in resource channel resource. cluster_uuid: ${cluster_uuid}, service_uuid: ${service_uuid}`);
-        //             channel.ack(msg);
-        //             return
-        //         }
-        //
-        //         await callAPI(aggregatorResourceUrl, totalMsg)
-        //         channel.ack(msg);
-        //     } catch (err) {
-        //         console.log(err);
-        //         channel.nack(msg, false, false);
-        //     }
-        //
-        // })
+        await channel.consume(RABBITMQ_SERVER_QUEUE_RESOURCE, async (msg) => {
+            try {
+                let totalMsg = JSON.parse(msg.content.toString('utf8'));
+                const cluster_uuid =  totalMsg.cluster_uuid;
+                const service_uuid = totalMsg.service_uuid;
+
+                if (totalMsg.status !== 4) {
+                    console.log(`Message ignored, No result in the message in resource channel resource. cluster_uuid: ${cluster_uuid}, service_uuid: ${service_uuid}`);
+                    channel.ack(msg);
+                    return
+                }
+
+                await callAPI(aggregatorResourceUrl, totalMsg)
+                channel.ack(msg);
+            } catch (err) {
+                console.log(err);
+                channel.nack(msg, false, false);
+            }
+
+        })
 
         await channel.consume(RABBITMQ_SERVER_QUEUE_ALERT, async (msg) => {
             try {
@@ -181,65 +181,65 @@ async function connectQueue() {
             }
         }); // end of msg consume
 
-        // await channel.consume(RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED, async (msg) => {
-        //     try {
-        //         let totalMsg = JSON.parse(msg.content.toString('utf-8'));
-        //         const cluster_uuid = result.cluster_uuid;
-        //         let service_uuid = result.service_uuid;
-        //
-        //         if (totalMsg.status !== 4) {
-        //             console.log(`Message ignored, No result in the message in metric received. cluster_uuid: ${cluster_uuid}, service_uuid: ${service_uuid}`);
-        //             channel.ack(msg);
-        //             return
-        //             //console.log (result);
-        //         }
-        //         await callAPI(aggregatorMetricReceivedUrl, totalMsg)
-        //         channel.ack(msg);
-        //     } catch (err) {
-        //         console.error(err);
-        //         channel.nack(msg, false, false);
-        //     }
-        // });
-        //
-        // await channel.consume(RABBITMQ_SERVER_QUEUE_NCP_RESOURCE, async (msg) => {
-        //     try {
-        //         let totalMsg = JSON.parse(msg.content.toString('utf-8'));
-        //         const cluster_uuid = result.cluster_uuid;
-        //         let service_uuid = result.service_uuid;
-        //
-        //         if (totalMsg.status !== 4) {
-        //             console.log(`Message ignored, No result in the message in resource. cluster_uuid: ${cluster_uuid}, service_uuid: ${service_uuid}`);
-        //             channel.ack(msg);
-        //             return
-        //             //console.log (result);
-        //         }
-        //         await callAPI(aggregatorResourceUrl, totalMsg)
-        //         channel.ack(msg);
-        //     } catch (err) {
-        //         console.error(err);
-        //         channel.nack(msg, false, false);
-        //     }
-        // });
-        //
-        // await channel.consume(RABBITMQ_SERVER_QUEUE_NCP_METRIC, async (msg) => {
-        //     try {
-        //         let totalMsg = JSON.parse(msg.content.toString('utf-8'));
-        //         const cluster_uuid = result.cluster_uuid;
-        //         let service_uuid = result.service_uuid;
-        //
-        //         if (totalMsg.status !== 4) {
-        //             console.log(`Message ignored, No result in the message in resource channel alert. cluster_uuid: ${cluster_uuid}, service_uuid: ${service_uuid}`);
-        //             channel.ack(msg);
-        //             return
-        //             //console.log (result);
-        //         }
-        //         await callAPI(aggregatorMetricReceivedUrl, totalMsg)
-        //         channel.ack(msg);
-        //     } catch (err) {
-        //         console.error(err);
-        //         channel.nack(msg, false, false);
-        //     }
-        // });
+        await channel.consume(RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED, async (msg) => {
+            try {
+                let totalMsg = JSON.parse(msg.content.toString('utf-8'));
+                const cluster_uuid = result.cluster_uuid;
+                let service_uuid = result.service_uuid;
+
+                if (totalMsg.status !== 4) {
+                    console.log(`Message ignored, No result in the message in metric received. cluster_uuid: ${cluster_uuid}, service_uuid: ${service_uuid}`);
+                    channel.ack(msg);
+                    return
+                    //console.log (result);
+                }
+                await callAPI(aggregatorMetricReceivedUrl, totalMsg)
+                channel.ack(msg);
+            } catch (err) {
+                console.error(err);
+                channel.nack(msg, false, false);
+            }
+        });
+
+        await channel.consume(RABBITMQ_SERVER_QUEUE_NCP_RESOURCE, async (msg) => {
+            try {
+                let totalMsg = JSON.parse(msg.content.toString('utf-8'));
+                const cluster_uuid = result.cluster_uuid;
+                let service_uuid = result.service_uuid;
+
+                if (totalMsg.status !== 4) {
+                    console.log(`Message ignored, No result in the message in resource. cluster_uuid: ${cluster_uuid}, service_uuid: ${service_uuid}`);
+                    channel.ack(msg);
+                    return
+                    //console.log (result);
+                }
+                await callAPI(aggregatorResourceUrl, totalMsg)
+                channel.ack(msg);
+            } catch (err) {
+                console.error(err);
+                channel.nack(msg, false, false);
+            }
+        });
+
+        await channel.consume(RABBITMQ_SERVER_QUEUE_NCP_METRIC, async (msg) => {
+            try {
+                let totalMsg = JSON.parse(msg.content.toString('utf-8'));
+                const cluster_uuid = result.cluster_uuid;
+                let service_uuid = result.service_uuid;
+
+                if (totalMsg.status !== 4) {
+                    console.log(`Message ignored, No result in the message in resource channel alert. cluster_uuid: ${cluster_uuid}, service_uuid: ${service_uuid}`);
+                    channel.ack(msg);
+                    return
+                    //console.log (result);
+                }
+                await callAPI(aggregatorMetricReceivedUrl, totalMsg)
+                channel.ack(msg);
+            } catch (err) {
+                console.error(err);
+                channel.nack(msg, false, false);
+            }
+        });
 
     } catch (error) {
         console.log ("error", error)
