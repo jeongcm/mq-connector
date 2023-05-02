@@ -46,10 +46,23 @@ const AGGREGATOR_ALERT_URL = process.env.AGGREGATOR_ALERT_URL || "/alert";
 const AGGREGATOR_METRIC_META_URL = process.env.AGGREGATOR_METRIC_URL || "/metricMeta";
 const AGGREGATOR_METRIC_RECEIVED_URL = process.env.AGGREGATOR_METRIC_RECEIVED_URL || "/metricReceived";
 
+
+// 임시 connect 활용
+const API_SERVER_METRIC_URL = process.env.API_SERVER_METRIC_URL || "http://olly-dev-connect.claion.io";
+const API_SERVER_METRIC_PORT = process.env.API_SERVER_METRIC_PORT || "8081";
+const API_NAME_METRIC_POST = process.env.API_NAME_METRIC_POST || "/service/metric_meta";
+
+const API_SERVER_ALERT_URL = process.env.API_SERVER_ALERT_URL || "http://olly-dev-connect.claion.io";
+const API_SERVER_ALERT_PORT = process.env.API_SERVER_ALERT_PORT || "8081";
+const API_NAME_ALERT_POST = process.env.API_NAME_ALERT_POST || "/service/alert_rule";
+
 const aggregatorResourceUrl = AGGREGATOR_URL + ':' + AGGREGATOR_PORT + AGGREGATOR_RESOURCE_URL
-const aggregatorAlertUrl = AGGREGATOR_URL + ':' + AGGREGATOR_PORT + AGGREGATOR_ALERT_URL
-const aggregatorMetricMetaUrl = AGGREGATOR_URL + ':' + AGGREGATOR_PORT + AGGREGATOR_METRIC_META_URL
+// const aggregatorAlertUrl = AGGREGATOR_URL + ':' + AGGREGATOR_PORT + AGGREGATOR_ALERT_URL
+// const aggregatorMetricMetaUrl = AGGREGATOR_URL + ':' + AGGREGATOR_PORT + AGGREGATOR_METRIC_META_URL
+const aggregatorAlertUrl = API_SERVER_ALERT_URL + ':' + API_SERVER_ALERT_PORT + API_NAME_ALERT_POST
+const aggregatorMetricMetaUrl = API_SERVER_METRIC_URL + ':' + API_SERVER_METRIC_PORT + API_NAME_METRIC_POST
 const aggregatorMetricReceivedUrl = AGGREGATOR_URL + ':' + AGGREGATOR_PORT + AGGREGATOR_METRIC_RECEIVED_URL
+
 
 var channel, connection;
 const connect_string = RabbitOpt + RABBITMQ_SERVER_URL + ":" + RABBITMQ_SERVER_PORT + "/" + RABBITMQ_SERVER_VIRTUAL_HOST + "?heartbeat=180";
