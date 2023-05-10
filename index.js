@@ -45,6 +45,7 @@ const AGGREGATOR_RESOURCE_URL = process.env.AGGREGATOR_RESOURCE_URL || "/resourc
 const AGGREGATOR_ALERT_URL = process.env.AGGREGATOR_ALERT_URL || "/alert";
 const AGGREGATOR_METRIC_META_URL = process.env.AGGREGATOR_METRIC_URL || "/metricMeta";
 const AGGREGATOR_METRIC_RECEIVED_URL = process.env.AGGREGATOR_METRIC_RECEIVED_URL || "/metricReceived";
+const AGGREGATOR_NCP_METRIC_RECEIVED_URL = process.env.AGGREGATOR_NCP_METRIC_RECEIVED_URL || "/metricReceived/ncp";
 
 
 // 임시 connect 활용
@@ -62,6 +63,7 @@ const aggregatorResourceUrl = AGGREGATOR_URL + ':' + AGGREGATOR_PORT + AGGREGATO
 const aggregatorAlertUrl = API_SERVER_ALERT_URL + ':' + API_SERVER_ALERT_PORT + API_NAME_ALERT_POST
 const aggregatorMetricMetaUrl = API_SERVER_METRIC_URL + ':' + API_SERVER_METRIC_PORT + API_NAME_METRIC_POST
 const aggregatorMetricReceivedUrl = AGGREGATOR_URL + ':' + AGGREGATOR_PORT + AGGREGATOR_METRIC_RECEIVED_URL
+const aggregatorNcpMetricReceivedUrl = AGGREGATOR_URL + ':' + AGGREGATOR_PORT + AGGREGATOR_NCP_METRIC_RECEIVED_URL
 
 
 var channel, connection;
@@ -227,12 +229,12 @@ async function connectQueue() {
                 let service_uuid = totalMsg.service_uuid;
 
                 if (totalMsg.status !== 4) {
-                    console.log(`Message ignored, No result in the message in resource channel alert. cluster_uuid: ${cluster_uuid}, service_uuid: ${service_uuid}`);
+                    console.log(`Message ignored, No result in the message in resource channel ncp metric. cluster_uuid: ${cluster_uuid}, service_uuid: ${service_uuid}`);
                     channel.ack(msg);
                     return
                     //console.log (result);
                 }
-                await callAPI(aggregatorMetricReceivedUrl, totalMsg)
+                await callAPI(aggregatorNcpMetricReceivedUrl, totalMsg)
                 channel.ack(msg);
             } catch (err) {
                 console.error(err);
