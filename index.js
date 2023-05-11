@@ -98,12 +98,12 @@ async function connectQueue() {
     try {
         connection = await amqp.connect(connect_string);
         channel = await connection.createChannel();
-        const resourceExchange = `ex-${RABBITMQ_SERVER_QUEUE_RESOURCE}`
-        const alertExchange = `ex-${RABBITMQ_SERVER_QUEUE_ALERT}`
-        const metricExchange = `ex-${RABBITMQ_SERVER_QUEUE_METRIC}`
-        const metricReceivedExchange = `ex-${RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED}`
-        const ncpResourceExchange = `ex-${RABBITMQ_SERVER_QUEUE_NCP_RESOURCE}`
-        const ncpMetricExchange = `ex-${RABBITMQ_SERVER_QUEUE_NCP_METRIC}`
+        const resourceExchange = `ex_${RABBITMQ_SERVER_QUEUE_RESOURCE}`
+        const alertExchange = `ex_${RABBITMQ_SERVER_QUEUE_ALERT}`
+        const metricExchange = `ex_${RABBITMQ_SERVER_QUEUE_METRIC}`
+        const metricReceivedExchange = `ex_${RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED}`
+        const ncpResourceExchange = `ex_${RABBITMQ_SERVER_QUEUE_NCP_RESOURCE}`
+        const ncpMetricExchange = `ex_${RABBITMQ_SERVER_QUEUE_NCP_METRIC}`
 
         await channel.assertExchange(resourceExchange, 'fanout', { durable: false });
         await channel.assertExchange(alertExchange, 'fanout', { durable: false });
