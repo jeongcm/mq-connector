@@ -105,12 +105,12 @@ async function connectQueue() {
         const ncpResourceExchange = `ex_${RABBITMQ_SERVER_QUEUE_NCP_RESOURCE}`
         const ncpMetricExchange = `ex_${RABBITMQ_SERVER_QUEUE_NCP_METRIC}`
 
-        await channel.assertExchange(resourceExchange, 'fanout', { durable: false });
-        await channel.assertExchange(alertExchange, 'fanout', { durable: false });
-        await channel.assertExchange(metricExchange, 'fanout', { durable: false });
-        await channel.assertExchange(metricReceivedExchange, 'fanout', { durable: false });
-        await channel.assertExchange(ncpResourceExchange, 'fanout', { durable: false });
-        await channel.assertExchange(ncpMetricExchange, 'fanout', { durable: false });
+        await channel.assertExchange(RABBITMQ_SERVER_QUEUE_RESOURCE, 'fanout', { durable: false });
+        await channel.assertExchange(RABBITMQ_SERVER_QUEUE_ALERT, 'fanout', { durable: false });
+        await channel.assertExchange(RABBITMQ_SERVER_QUEUE_METRIC, 'fanout', { durable: false });
+        await channel.assertExchange(RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED, 'fanout', { durable: false });
+        await channel.assertExchange(RABBITMQ_SERVER_QUEUE_NCP_RESOURCE, 'fanout', { durable: false });
+        await channel.assertExchange(RABBITMQ_SERVER_QUEUE_NCP_METRIC, 'fanout', { durable: false });
 
         // connect to RABBITMQ_SERVER_QUEUE_NAME, create one if doesnot exist already
         await channel.assertQueue(RABBITMQ_SERVER_QUEUE_RESOURCE);
@@ -120,12 +120,12 @@ async function connectQueue() {
         await channel.assertQueue(RABBITMQ_SERVER_QUEUE_NCP_RESOURCE);
         await channel.assertQueue(RABBITMQ_SERVER_QUEUE_NCP_METRIC);
 
-        await channel.bindQueue(RABBITMQ_SERVER_QUEUE_RESOURCE, resourceExchange, '');
-        await channel.bindQueue(RABBITMQ_SERVER_QUEUE_ALERT, alertExchange, '');
-        await channel.bindQueue(RABBITMQ_SERVER_QUEUE_METRIC, metricExchange, '');
-        await channel.bindQueue(RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED, metricReceivedExchange, '');
-        await channel.bindQueue(RABBITMQ_SERVER_QUEUE_NCP_RESOURCE, ncpResourceExchange, '');
-        await channel.bindQueue(RABBITMQ_SERVER_QUEUE_NCP_METRIC, ncpMetricExchange, '');
+        await channel.bindQueue(RABBITMQ_SERVER_QUEUE_RESOURCE, RABBITMQ_SERVER_QUEUE_RESOURCE, '');
+        await channel.bindQueue(RABBITMQ_SERVER_QUEUE_ALERT, RABBITMQ_SERVER_QUEUE_ALERT, '');
+        await channel.bindQueue(RABBITMQ_SERVER_QUEUE_METRIC, RABBITMQ_SERVER_QUEUE_METRIC, '');
+        await channel.bindQueue(RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED, RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED, '');
+        await channel.bindQueue(RABBITMQ_SERVER_QUEUE_NCP_RESOURCE, RABBITMQ_SERVER_QUEUE_NCP_RESOURCE, '');
+        await channel.bindQueue(RABBITMQ_SERVER_QUEUE_NCP_METRIC, RABBITMQ_SERVER_QUEUE_NCP_METRIC, '');
 
         connection.on('error', function(err) {
             console.error('[AMQP] error', err.message);
