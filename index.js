@@ -237,7 +237,7 @@ async function connectQueue() {
                     //console.log (result);
                 }
 
-                if (totalMsg.template_uuid === '') {
+                if (totalMsg.template_uuid === '70000000000000000000000000000033') {
                     await callAPI(aggregatorResourceEventUrl, totalMsg)
                 } else {
                     await callAPI(aggregatorResourceUrl, totalMsg)
