@@ -22,8 +22,8 @@ const MQCOMM_PORT = process.env.MQCOMM_PORT || 4001;
 const NODE_EXPORTER_PORT = process.env.NODE_EXPORTER_PORT || 9100 ;
 
 const RABBITMQ_PROTOCOL_HOST = process.env.RABBITMQ_PROTOCOL_HOST || "amqp://"
-const RABBITMQ_SERVER_URL = process.env.RABBITMQ_SERVER_URL || "olly-dev-mq.claion.io";
-// const RABBITMQ_SERVER_URL = process.env.RABBITMQ_SERVER_URL || "localhost";
+// const RABBITMQ_SERVER_URL = process.env.RABBITMQ_SERVER_URL || "olly-dev-comq.claion.io";
+const RABBITMQ_SERVER_URL = process.env.RABBITMQ_SERVER_URL || "localhost";
 const RABBITMQ_SERVER_PORT = process.env.RABBITMQ_SERVER_PORT || 5672;
 const RABBITMQ_SERVER_QUEUE_RESOURCE = process.env.RABBITMQ_SERVER_QUEUE_RESOURCE || "co_resource";
 const RABBITMQ_SERVER_QUEUE_ALERT = process.env.RABBITMQ_SERVER_QUEUE_ALERT || "co_alert";
@@ -31,12 +31,12 @@ const RABBITMQ_SERVER_QUEUE_METRIC = process.env.RABBITMQ_SERVER_QUEUE_METRIC ||
 const RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED = process.env.RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED || "co_metric_received";
 const RABBITMQ_SERVER_QUEUE_NCP_RESOURCE = process.env.RABBITMQ_SERVER_QUEUE_NCP_RESOURCE || "ops_resource";
 const RABBITMQ_SERVER_QUEUE_NCP_METRIC = process.env.RABBITMQ_SERVER_QUEUE_NCP_METRIC || "ops_metric";
-// const RABBITMQ_SERVER_USER = process.env.RABBITMQ_SERVER_USER || "user";
-// const RABBITMQ_SERVER_PASSWORD = process.env.RABBITMQ_SERVER_PASSWORD || "cwlO0jDx99Io9fZQ";
-// const RABBITMQ_SERVER_VIRTUAL_HOST = process.env.RABBITMQ_SERVER_VIRTUAL_HOST || "/";
-const RABBITMQ_SERVER_USER = process.env.RABBITMQ_SERVER_USER || "claion";
-const RABBITMQ_SERVER_PASSWORD = process.env.RABBITMQ_SERVER_PASSWORD || "claion";
-const RABBITMQ_SERVER_VIRTUAL_HOST = process.env.RABBITMQ_SERVER_VIRTUAL_HOST || "claion";
+const RABBITMQ_SERVER_USER = process.env.RABBITMQ_SERVER_USER || "user";
+const RABBITMQ_SERVER_PASSWORD = process.env.RABBITMQ_SERVER_PASSWORD || "PnXbXtsqwzDlFEEd";
+const RABBITMQ_SERVER_VIRTUAL_HOST = process.env.RABBITMQ_SERVER_VIRTUAL_HOST || "/";
+// const RABBITMQ_SERVER_USER = process.env.RABBITMQ_SERVER_USER || "claion";
+// const RABBITMQ_SERVER_PASSWORD = process.env.RABBITMQ_SERVER_PASSWORD || "claion";
+// const RABBITMQ_SERVER_VIRTUAL_HOST = process.env.RABBITMQ_SERVER_VIRTUAL_HOST || "claion";
 const RabbitOpt = RABBITMQ_PROTOCOL_HOST + RABBITMQ_SERVER_USER + ":" + RABBITMQ_SERVER_PASSWORD + "@";
 
 const AGGREGATOR_URL = process.env.AGGREGATOR_URL || "http://localhost";
@@ -229,14 +229,19 @@ async function connectQueue() {
                 let totalMsg = JSON.parse(msg.content.toString('utf-8'));
                 const cluster_uuid = totalMsg.cluster_uuid;
                 let service_uuid = totalMsg.service_uuid;
-
+                let aggregatorResourceEventUrl = aggregatorResourceUrl + '/event'
                 if (totalMsg.status !== 4) {
                     console.log(`Message ignored, No result in the message in resource. cluster_uuid: ${cluster_uuid}, service_uuid: ${service_uuid}`);
                     channel.ack(msg);
                     return
                     //console.log (result);
                 }
-                await callAPI(aggregatorResourceUrl, totalMsg)
+
+                if (totalMsg.template_uuid === '') {
+                    await callAPI(aggregatorResourceEventUrl, totalMsg)
+                } else {
+                    await callAPI(aggregatorResourceUrl, totalMsg)
+                }
                 channel.ack(msg);
             } catch (err) {
                 console.error(err);
