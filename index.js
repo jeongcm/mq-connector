@@ -256,7 +256,7 @@ async function connectQueue() {
                 let service_uuid = totalMsg.service_uuid;
 
                 if (totalMsg.status !== 4) {
-                    console.log(`Message ignored, No result in the message in resource channel ncp metric. cluster_uuid: ${cluster_uuid}, service_uuid: ${service_uuid}`);
+                    console.log(`Message ignored, No result in the message in resource channel ncp metric. status: ${totalMsg.status}, cluster_uuid: ${cluster_uuid}, service_uuid: ${service_uuid}`);
                     // check error check and post Slack message
                     if (totalMsg.status === 8) {
                         let slackUrl = 'https://hooks.slack.com/services/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'
