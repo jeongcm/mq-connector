@@ -192,21 +192,6 @@ async function connectQueue() {
 
                 if (totalMsg.status !== 4) {
                     console.log(`Message ignored, No result in the message in channel metric meta. cluster_uuid: ${cluster_uuid}, service_uuid: ${service_uuid}`);
-                    // check error check and post Slack message
-                    if (totalMsg.status === 8) {
-                        let slackUrl = 'https://hooks.slack.com/services/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'
-                        await axios.post(slackUrl,totalMsg, {maxContentLength:Infinity, maxBodyLength: Infinity, headers: { 'Content-Type': 'application/json'}})
-                            .then
-                            (
-                                (response) => {
-                                    const responseStatus = "status code: " + response.status;
-                                    console.log(`succeed to call ${apiURL}. responseStatus:  ${responseStatus}`);
-                                },
-                                (error) => {
-                                    console.log(`failed to call ${apiURL}. cause: ${error}`);
-                                }
-                            )
-                    }
                     channel.ack(msg);
                     return
                 }
@@ -272,6 +257,21 @@ async function connectQueue() {
 
                 if (totalMsg.status !== 4) {
                     console.log(`Message ignored, No result in the message in resource channel ncp metric. cluster_uuid: ${cluster_uuid}, service_uuid: ${service_uuid}`);
+                    // check error check and post Slack message
+                    if (totalMsg.status === 8) {
+                        let slackUrl = 'https://hooks.slack.com/services/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'
+                        await axios.post(slackUrl,totalMsg, {maxContentLength:Infinity, maxBodyLength: Infinity, headers: { 'Content-Type': 'application/json'}})
+                            .then
+                            (
+                                (response) => {
+                                    const responseStatus = "status code: " + response.status;
+                                    console.log(`succeed to call ${apiURL}. responseStatus:  ${responseStatus}`);
+                                },
+                                (error) => {
+                                    console.log(`failed to call ${apiURL}. cause: ${error}`);
+                                }
+                            )
+                    }
                     channel.ack(msg);
                     return
                     //console.log (result);
