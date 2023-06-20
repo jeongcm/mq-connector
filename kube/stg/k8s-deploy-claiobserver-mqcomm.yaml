@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name:  nc
+  name: co
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -10,13 +10,21 @@ metadata:
   labels:
     app: ${APP_IMAGE_NAME} 
 data:
-  API_SERVER_ALERT_URL: "http://nexclipper-connect.nc.svc.cluster.local"
+  API_SERVER_ALERT_URL: "http://claiobserver-connect.co.svc.cluster.local"
   API_SERVER_ALERT_PORT: "8081"
   API_NAME_ALERT_POST: "/service/alert_rule"
-  API_SERVER_METRIC_URL: "http://nexclipper-connect.nc.svc.cluster.local"
+  API_SERVER_METRIC_URL: "http://claiobserver-connect.co.svc.cluster.local"
   API_SERVER_METRIC_PORT: "8081"
   API_NAME_METRIC_POST: "/service/metric_meta"
-
+  API_SERVER_METRIC_RECEIVED_URL: "http://claiobserver-api.co.svc.cluster.local"
+  API_SERVER_METRIC_RECEIVED_PORT: "5001"
+  API_NAME_METRIC_RECEIVED_POST: "/metricReceivedMassVm"
+  API_SERVER_RESOURCE_URL: "http://claiobserver-api.co.svc.cluster.local"
+  API_SERVER_RESOURCE_PORT: "5001"
+  API_NAME_RESOURCE_POST: "/resourceMass"
+  API_SERVER_RESOURCE_EVENT_URL: "http://claiobserver-api.co.svc.cluster.local"
+  API_SERVER_RESOURCE_EVENT_PORT: "5001"
+  API_NAME_RESOURCE_EVENT_POST: "/resourceEventMass"
   MQCOMM_PORT: "4001"
   NODE_EXPORTER_PORT: "9100"
   RABBITMQ_SERVER_PORT: "5672"
@@ -24,27 +32,19 @@ data:
   RABBITMQ_SERVER_QUEUE_METRIC: "co_metric"
   RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED: "co_metric_received"
   RABBITMQ_SERVER_QUEUE_RESOURCE: "co_resource"
-  RABBITMQ_SERVER_QUEUE_NCP_RESOURCE: "ops_ncp_resource"
-  RABBITMQ_SERVER_QUEUE_NCP_METRIC: "ops_ncp_metric"
-  RABBITMQ_SERVER_QUEUE_NCP_COST: "ops_npc_cost"
   RABBITMQ_SERVER_QUEUE_VIRTUAL_HOST: "claion"
-  RABBITMQ_SERVER_URL: "ncmq-rabbitmq.rabbitmq.svc.cluster.local"
+  RABBITMQ_SERVER_URL: "comq-rabbitmq.comq.svc.cluster.local"
   RABBITMQ_SERVER_USER: "claion"
-  RABBITMQ_SERVER_PASSWORD: "claion"
   MQCOMM_RESOURCE_TARGET_DB: "MARIADB"
   MAX_API_BODY_SIZE: 500mb
   NODE_OPTIONS: "--max-old-space-size=8192"
-  VM_URL: "http://vm-victoria-metrics-single-server.vm.svc.cluster.local:8428/api/v1/import?extra_label=clusterUuid="
-  VM_MULTI_AUTH_URL: "http://vm-auth-victoria-metrics-auth.vm-multi-tenant.svc.cluster.local:8427/api/v1/import?extra_label=clusterUuid="
+  VM_URL: "http://covm-victoria-metrics-single-server.covm.svc.cluster.local:8428/api/v1/import?extra_label=clusterUuid="
+  VM_MULTI_AUTH_URL: "http://covm-auth-victoria-metrics-auth.covm-multi-tenant.svc.cluster.local:8427/api/v1/import?extra_label=clusterUuid="
   API_NAME_CUSTOMER_ACCOUNT_GET: "/customerAccount/resourceGroup"
   VM_OPTION: "SINGLE"
-  AGGREGATOR_URL: "http://localhost"
-  AGGREGATOR_PORT: "6001"
-  AGGREGATOR_RESOURCE_URL: "/resource"
-  AGGREGATOR_ALERT_URL: "/alert"
-  AGGREGATOR_METRIC_META_URL: "/metricMeta"
-  AGGREGATOR_METRIC_RECEIVED_URL: "/metricReceived"
-  AGGREGATOR_METRIC_RECEIVED_NCP_URL: "/metricReceived/ncp"
+
+  
+
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -72,7 +72,7 @@ spec:
           - name: RABBITMQ_SERVER_PASSWORD
             valueFrom:
               secretKeyRef:
-                name: ncmq-rabbitmq
+                name: comq-rabbitmq
                 key: rabbitmq-password
         ports:
         - containerPort: 4001
