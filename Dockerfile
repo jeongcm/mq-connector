@@ -2,10 +2,10 @@
 FROM node:16-alpine as common-build-stage
 
 ENV WORKDIR=/usr/src/app/ \
-    NAME=nexclipper-mqcomm \
-    USER=nexclipperuser \
+    NAME=claiobserver-mqcomm \
+    USER=ollyuser \
     USER_ID=1002 \
-    GROUP=nexclipper 
+    GROUP=olly
 
 WORKDIR ${WORKDIR}
 
@@ -14,7 +14,8 @@ COPY ./package-lock.json  ${WORKDIR}
 
 COPY docker-entrypoint.sh ${WORKDIR}
 
-RUN chmod +x  ${WORKDIR}docker-entrypoint.sh 
+RUN chmod +x  ${WORKDIR}docker-entrypoint.sh
+RUN npm install --global pm2
 
 RUN npm ci
 
