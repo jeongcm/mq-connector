@@ -39,12 +39,12 @@ data:
   API_NAME_CUSTOMER_ACCOUNT_GET: "/customerAccount/resourceGroup"
   VM_OPTION: "SINGLE"
   AGGREGATOR_URL: "http://localhost"
-  AGGREGATOR_PORT: 6001
+  AGGREGATOR_PORT: "6001"
   AGGREGATOR_RESOURCE_URL: "/resource"
-  AGGREGATOR_ALERT_URL: "/alert";
-  AGGREGATOR_METRIC_META_URL: "/metricMeta";
-  AGGREGATOR_METRIC_RECEIVED_URL: "/metricReceived";
-  AGGREGATOR_METRIC_RECEIVED_NCP_URL: "/metricReceived/ncp";
+  AGGREGATOR_ALERT_URL: "/alert"
+  AGGREGATOR_METRIC_META_URL: "/metricMeta"
+  AGGREGATOR_METRIC_RECEIVED_URL: "/metricReceived"
+  AGGREGATOR_METRIC_RECEIVED_NCP_URL: "/metricReceived/ncp"
 ---
 apiVersion: apps/v1
 kind: Deployment
