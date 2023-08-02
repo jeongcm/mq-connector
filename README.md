@@ -1,4 +1,5 @@
 
+=======
 # mqcomm
 
 This is a RabbitMQ connector between RabbitMQ and services - to populate K8s resources, P8s alert rules and metrics to the database. it requires the configurations of RabbitMQ queues for alert, resource, metrics as well as APIs for these.
