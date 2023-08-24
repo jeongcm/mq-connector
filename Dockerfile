@@ -2,10 +2,10 @@
 FROM node:16-alpine as common-build-stage
 
 ENV WORKDIR=/usr/src/app/ \
-    NAME=nexclipper-mqcomm \
-    USER=nexclipperuser \
+    NAME=mq-connector \
+    USER=carrot \
     USER_ID=1002 \
-    GROUP=nexclipper 
+    GROUP=carrot
 
 WORKDIR ${WORKDIR}
 

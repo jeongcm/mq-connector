@@ -22,51 +22,42 @@ const MQCOMM_PORT = process.env.MQCOMM_PORT || 4001;
 const NODE_EXPORTER_PORT = process.env.NODE_EXPORTER_PORT || 9100 ;
 
 const RABBITMQ_PROTOCOL_HOST = process.env.RABBITMQ_PROTOCOL_HOST || "amqp://"
-const RABBITMQ_SERVER_URL = process.env.RABBITMQ_SERVER_URL || "olly-dev-comq.claion.io";
+const RABBITMQ_SERVER_URL = process.env.RABBITMQ_SERVER_URL || "localhost";
 // const RABBITMQ_SERVER_URL = process.env.RABBITMQ_SERVER_URL || "localhost";
 const RABBITMQ_SERVER_PORT = process.env.RABBITMQ_SERVER_PORT || 5672;
-const RABBITMQ_SERVER_QUEUE_RESOURCE = process.env.RABBITMQ_SERVER_QUEUE_RESOURCE || "co_resource";
-const RABBITMQ_SERVER_QUEUE_ALERT = process.env.RABBITMQ_SERVER_QUEUE_ALERT || "co_alert";
-const RABBITMQ_SERVER_QUEUE_METRIC = process.env.RABBITMQ_SERVER_QUEUE_METRIC || "co_metric";
-const RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED = process.env.RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED || "co_metric_received";
-const RABBITMQ_SERVER_QUEUE_NCP_RESOURCE = process.env.RABBITMQ_SERVER_QUEUE_NCP_RESOURCE || "ops_ncp_resource";
-const RABBITMQ_SERVER_QUEUE_NCP_METRIC = process.env.RABBITMQ_SERVER_QUEUE_NCP_METRIC || "ops_ncp_metric";
-const RABBITMQ_SERVER_QUEUE_NCP_COST = process.env.RABBITMQ_SERVER_QUEUE_NCP_COST || "ops_ncp_cost";
+const RABBITMQ_SERVER_QUEUE_RESOURCE = process.env.RABBITMQ_SERVER_QUEUE_RESOURCE || "";
+const RABBITMQ_SERVER_QUEUE_ALERT = process.env.RABBITMQ_SERVER_QUEUE_ALERT || "";
+const RABBITMQ_SERVER_QUEUE_METRIC = process.env.RABBITMQ_SERVER_QUEUE_METRIC || "";
+const RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED = process.env.RABBITMQ_SERVER_QUEUE_METRIC_RECEIVED || "";
+const RABBITMQ_SERVER_QUEUE_NCP_RESOURCE = process.env.RABBITMQ_SERVER_QUEUE_NCP_RESOURCE || "";
+const RABBITMQ_SERVER_QUEUE_NCP_METRIC = process.env.RABBITMQ_SERVER_QUEUE_NCP_METRIC || "";
+const RABBITMQ_SERVER_QUEUE_NCP_COST = process.env.RABBITMQ_SERVER_QUEUE_NCP_COST || "";
 // const RABBITMQ_SERVER_USER = process.env.RABBITMQ_SERVER_USER || "user";
 // const RABBITMQ_SERVER_PASSWORD = process.env.RABBITMQ_SERVER_PASSWORD || "PnXbXtsqwzDlFEEd";
 // const RABBITMQ_SERVER_VIRTUAL_HOST = process.env.RABBITMQ_SERVER_VIRTUAL_HOST || "/";
-const RABBITMQ_SERVER_USER = process.env.RABBITMQ_SERVER_USER || "claion";
-const RABBITMQ_SERVER_PASSWORD = process.env.RABBITMQ_SERVER_PASSWORD || "claion";
-const RABBITMQ_SERVER_VIRTUAL_HOST = process.env.RABBITMQ_SERVER_VIRTUAL_HOST || "claion";
+const RABBITMQ_SERVER_USER = process.env.RABBITMQ_SERVER_USER || "carrot";
+const RABBITMQ_SERVER_PASSWORD = process.env.RABBITMQ_SERVER_PASSWORD || "carrot";
+const RABBITMQ_SERVER_VIRTUAL_HOST = process.env.RABBITMQ_SERVER_VIRTUAL_HOST || "carrot";
 const RabbitOpt = RABBITMQ_PROTOCOL_HOST + RABBITMQ_SERVER_USER + ":" + RABBITMQ_SERVER_PASSWORD + "@";
 
-const AGGREGATOR_URL = process.env.AGGREGATOR_URL || "http://localhost";
-const AGGREGATOR_PORT = process.env.AGGREGATOR_PORT || 6001;
-const AGGREGATOR_RESOURCE_URL = process.env.AGGREGATOR_RESOURCE_URL || "/resource";
-const AGGREGATOR_ALERT_URL = process.env.AGGREGATOR_ALERT_URL || "/alertRule";
-const AGGREGATOR_METRIC_META_URL = process.env.AGGREGATOR_METRIC_URL || "/metricMeta";
-const AGGREGATOR_METRIC_RECEIVED_URL = process.env.AGGREGATOR_METRIC_RECEIVED_URL || "/metricReceived";
-const AGGREGATOR_NCP_METRIC_RECEIVED_URL = process.env.AGGREGATOR_NCP_METRIC_RECEIVED_URL || "/metricReceived/ncp";
-const AGGREGATOR_NCP_COST_URL = process.env.AGGREGATOR_NCP_COST_URL || "/ncp/cost";
+const EXPORTER_URL = process.env.EXPORTER_URL || "http://localhost";
+const EXPORTER_PORT = process.env.EXPORTER_PORT || 6001;
+const EXPORTER_RESOURCE_URL = process.env.EXPORTER_RESOURCE_URL || "/resource";
+const EXPORTER_ALERT_URL = process.env.EXPORTER_ALERT_URL || "/alertRule";
+const EXPORTER_METRIC_META_URL = process.env.EXPORTER_METRIC_URL || "/metricMeta";
+const EXPORTER_METRIC_RECEIVED_URL = process.env.EXPORTER_METRIC_RECEIVED_URL || "/metricReceived";
+const EXPORTER_NCP_METRIC_RECEIVED_URL = process.env.EXPORTER_NCP_METRIC_RECEIVED_URL || "/metricReceived/ncp";
+const EXPORTER_NCP_COST_URL = process.env.EXPORTER_NCP_COST_URL || "/ncp/cost";
 
 
 // 임시 connect 활용
-const API_SERVER_METRIC_URL = process.env.API_SERVER_METRIC_URL || "http://olly-dev-connect.claion.io";
-const API_SERVER_METRIC_PORT = process.env.API_SERVER_METRIC_PORT || "8081";
-const API_NAME_METRIC_POST = process.env.API_NAME_METRIC_POST || "/service/metric_meta";
 
-const API_SERVER_ALERT_URL = process.env.API_SERVER_ALERT_URL || "http://olly-dev-connect.claion.io";
-const API_SERVER_ALERT_PORT = process.env.API_SERVER_ALERT_PORT || "8081";
-const API_NAME_ALERT_POST = process.env.API_NAME_ALERT_POST || "/service/alert_rule";
-
-const aggregatorResourceUrl = AGGREGATOR_URL + ':' + AGGREGATOR_PORT + AGGREGATOR_RESOURCE_URL
-const aggregatorAlertUrl = AGGREGATOR_URL + ':' + AGGREGATOR_PORT + AGGREGATOR_ALERT_URL
-const aggregatorMetricMetaUrl = AGGREGATOR_URL + ':' + AGGREGATOR_PORT + AGGREGATOR_METRIC_META_URL
-// const aggregatorAlertUrl = API_SERVER_ALERT_URL + ':' + API_SERVER_ALERT_PORT + API_NAME_ALERT_POST
-// const aggregatorMetricMetaUrl = API_SERVER_METRIC_URL + ':' + API_SERVER_METRIC_PORT + API_NAME_METRIC_POST
-const aggregatorMetricReceivedUrl = AGGREGATOR_URL + ':' + AGGREGATOR_PORT + AGGREGATOR_METRIC_RECEIVED_URL
-const aggregatorNcpMetricReceivedUrl = AGGREGATOR_URL + ':' + AGGREGATOR_PORT + AGGREGATOR_NCP_METRIC_RECEIVED_URL
-const aggregatorNcpCostReceivedUrl = AGGREGATOR_URL + ':' + AGGREGATOR_PORT + AGGREGATOR_NCP_COST_URL
+const exporterResourceUrl = EXPORTER_URL + ':' + EXPORTER_PORT + EXPORTER_RESOURCE_URL
+const exporterAlertUrl = EXPORTER_URL + ':' + EXPORTER_PORT + EXPORTER_ALERT_URL
+const exporterMetricMetaUrl = EXPORTER_URL + ':' + EXPORTER_PORT + EXPORTER_METRIC_META_URL
+const exporterMetricReceivedUrl = EXPORTER_URL + ':' + EXPORTER_PORT + EXPORTER_METRIC_RECEIVED_URL
+const exporterNcpMetricReceivedUrl = EXPORTER_URL + ':' + EXPORTER_PORT + EXPORTER_NCP_METRIC_RECEIVED_URL
+const exporterNcpCostReceivedUrl = EXPORTER_URL + ':' + EXPORTER_PORT + EXPORTER_NCP_COST_URL
 
 
 var channel, connection;
@@ -158,7 +149,7 @@ async function connectQueue() {
                     return
                 }
 
-                await callAPI(aggregatorResourceUrl, totalMsg)
+                await callAPI(exporterResourceUrl, totalMsg)
                 channel.ack(msg);
             } catch (err) {
                 console.log(err);
@@ -179,7 +170,7 @@ async function connectQueue() {
                     return
                 }
 
-                await callAPI(aggregatorAlertUrl, totalMsg)
+                await callAPI(exporterAlertUrl, totalMsg)
                 channel.ack(msg);
             } catch (err) {
                 console.error(err);
@@ -200,7 +191,7 @@ async function connectQueue() {
                     return
                 }
 
-                await callAPI(aggregatorMetricMetaUrl, totalMsg)
+                await callAPI(exporterMetricMetaUrl, totalMsg)
                 channel.ack(msg);
             } catch (err) {
                 console.error(err);
@@ -220,7 +211,7 @@ async function connectQueue() {
                     return
                     //console.log (result);
                 }
-                await callAPI(aggregatorMetricReceivedUrl, totalMsg)
+                await callAPI(exporterMetricReceivedUrl, totalMsg)
                 channel.ack(msg);
             } catch (err) {
                 console.error(err);
@@ -233,7 +224,7 @@ async function connectQueue() {
                 let totalMsg = JSON.parse(msg.content.toString('utf-8'));
                 const cluster_uuid = totalMsg.cluster_uuid;
                 let service_uuid = totalMsg.service_uuid;
-                let aggregatorResourceEventUrl = aggregatorResourceUrl + '/event'
+                let aggregatorResourceEventUrl = exporterResourceUrl + '/event'
                 if (totalMsg.status !== 4) {
                     console.log(`Message ignored, No result in the message in resource. cluster_uuid: ${cluster_uuid}, service_uuid: ${service_uuid}`);
                     channel.ack(msg);
@@ -243,16 +234,16 @@ async function connectQueue() {
 
                 switch (totalMsg.template_uuid) {
                 case 'NCM00000000000000000000000000014':
-                    await callAPI(aggregatorResourceUrl + "/ncpResourceGroup", totalMsg)
+                    await callAPI(exporterResourceUrl + "/ncpResourceGroup", totalMsg)
                     break;
                 case '70000000000000000000000000000029':
-                    await callAPI(aggregatorResourceUrl + "/ncpResource", totalMsg)
+                    await callAPI(exporterResourceUrl + "/ncpResource", totalMsg)
                     break;
                 case '70000000000000000000000000000033':
                     await callAPI(aggregatorResourceEventUrl, totalMsg)
                     break;
                 default:
-                    await callAPI(aggregatorResourceUrl, totalMsg)
+                    await callAPI(exporterResourceUrl, totalMsg)
                 }
 
                 channel.ack(msg);
@@ -289,7 +280,7 @@ async function connectQueue() {
                     return
                     //console.log (result);
                 }
-                await callAPI(aggregatorNcpMetricReceivedUrl, totalMsg)
+                await callAPI(exporterNcpMetricReceivedUrl, totalMsg)
                 channel.ack(msg);
             } catch (err) {
                 console.error(err);
@@ -310,7 +301,7 @@ async function connectQueue() {
                     //console.log (result);
                 }
 
-                await callAPI(aggregatorNcpCostReceivedUrl, totalMsg)
+                await callAPI(exporterNcpCostReceivedUrl, totalMsg)
 
                 channel.ack(msg);
             } catch (err) {
